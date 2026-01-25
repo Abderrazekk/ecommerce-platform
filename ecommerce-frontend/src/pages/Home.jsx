@@ -50,3 +50,4 @@ const Home = () => {
 export default Home
 
 // --- IGNORE ---
+// ecommerce-frontend/src/services/product.service.js
