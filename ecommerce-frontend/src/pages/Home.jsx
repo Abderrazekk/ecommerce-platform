@@ -48,4 +48,3 @@ const Home = () => {
 }
 
 export default Home
-// --- IGNORE ---
