@@ -48,7 +48,3 @@ const Home = () => {
 }
 
 export default Home
-
-// --- IGNORE ---
-// ecommerce-frontend/src/services/product.service.js
-// New: Get all products for admin (includes hidden)
