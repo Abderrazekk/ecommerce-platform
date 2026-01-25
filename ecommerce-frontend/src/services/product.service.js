@@ -102,3 +102,6 @@ const productService = {
 };
 
 export default productService;
+
+
+// Note: The above code includes new methods for fetching admin products, featured products, and brands.
