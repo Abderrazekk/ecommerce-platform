@@ -348,7 +348,7 @@ const ProductDetails = () => {
                   {product.category}
                 </span>
                 {product.isFeatured && (
-                  <span className="inline-block bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full flex items-center">
+                  <span className="inline-flex bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full items-center">
                     <Star className="h-3 w-3 mr-1" />
                     Featured
                   </span>
