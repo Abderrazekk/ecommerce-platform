@@ -1,24 +1,24 @@
 const { Product, productCategories } = require("../models/Product.model");
 const cloudinary = require("../config/cloudinary");
-const asyncHandler = require('express-async-handler');
+const asyncHandler = require("express-async-handler");
 
 // Helper function to upload images to Cloudinary
 const uploadImagesToCloudinary = async (files) => {
-  const uploadPromises = files.map(file => {
+  const uploadPromises = files.map((file) => {
     return new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         { folder: "ecommerce/products" },
         (error, result) => {
           if (error) {
-            console.error('Cloudinary upload error:', error);
+            console.error("Cloudinary upload error:", error);
             reject(error);
           } else {
             resolve({
               public_id: result.public_id,
-              url: result.secure_url
+              url: result.secure_url,
             });
           }
-        }
+        },
       );
       stream.end(file.buffer);
     });
@@ -31,7 +31,7 @@ const uploadImagesToCloudinary = async (files) => {
 const deleteImagesFromCloudinary = async (images) => {
   if (!images || images.length === 0) return;
 
-  const deletePromises = images.map(image => {
+  const deletePromises = images.map((image) => {
     return cloudinary.uploader.destroy(image.public_id);
   });
 
@@ -58,20 +58,20 @@ const getProducts = asyncHandler(async (req, res) => {
 
   // Filter by brand
   if (brand) {
-    filter.brand = new RegExp(brand, 'i');
+    filter.brand = new RegExp(brand, "i");
   }
 
   // Search in name, description, and brand
   if (search) {
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
-      { brand: { $regex: search, $options: 'i' } }
+      { name: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
+      { brand: { $regex: search, $options: "i" } },
     ];
   }
 
   const products = await Product.find(filter)
-    .select('-__v')
+    .select("-__v")
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 });
@@ -111,20 +111,20 @@ const getAdminProducts = asyncHandler(async (req, res) => {
 
   // Filter by brand
   if (brand) {
-    filter.brand = new RegExp(brand, 'i');
+    filter.brand = new RegExp(brand, "i");
   }
 
   // Search in name, description, and brand
   if (search) {
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
-      { brand: { $regex: search, $options: 'i' } }
+      { name: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
+      { brand: { $regex: search, $options: "i" } },
     ];
   }
 
   const products = await Product.find(filter)
-    .select('-__v')
+    .select("-__v")
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 });
@@ -149,14 +149,14 @@ const getAdminProducts = asyncHandler(async (req, res) => {
 // @access  Public
 const getFeaturedProducts = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 8;
-  
+
   const products = await Product.find({
     isFeatured: true,
-    isVisible: true
+    isVisible: true,
   })
-  .select('-__v')
-  .limit(limit)
-  .sort({ createdAt: -1 });
+    .select("-__v")
+    .limit(limit)
+    .sort({ createdAt: -1 });
 
   res.json({
     success: true,
@@ -168,7 +168,7 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
 // @route   GET /api/products/:id
 // @access  Public
 const getProductById = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id).select('-__v');
+  const product = await Product.findById(req.params.id).select("-__v");
 
   if (!product) {
     res.status(404);
@@ -193,19 +193,22 @@ const getProductById = asyncHandler(async (req, res) => {
 const createProduct = asyncHandler(async (req, res) => {
   console.log("=== CREATE PRODUCT REQUEST ===");
   console.log("Request body:", req.body);
-  console.log("Request files:", req.files ? `${req.files.length} files received` : "No files");
-  
-  const { 
-    name, 
-    brand, 
-    description, 
-    price, 
+  console.log(
+    "Request files:",
+    req.files ? `${req.files.length} files received` : "No files",
+  );
+
+  const {
+    name,
+    brand,
+    description,
+    price,
     discountPrice,
-    category, 
-    stock, 
-    isFeatured, 
+    category,
+    stock,
+    isFeatured,
     isVisible,
-    tags 
+    tags,
   } = req.body;
 
   // Check for required images
@@ -224,7 +227,10 @@ const createProduct = asyncHandler(async (req, res) => {
   // Parse tags if provided (comma-separated string)
   let parsedTags = [];
   if (tags) {
-    parsedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    parsedTags = tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
   }
 
   try {
@@ -238,13 +244,18 @@ const createProduct = asyncHandler(async (req, res) => {
       brand,
       description,
       price,
-      discountPrice: discountPrice || undefined, // Only set if provided
+      discountPrice:
+        discountPrice !== undefined
+          ? discountPrice === "" || discountPrice === null
+            ? null
+            : Number(discountPrice)
+          : product.discountPrice, // Only set if provided
       category,
       stock,
       tags: parsedTags,
       images: uploadedImages,
-      isFeatured: isFeatured === 'true' || isFeatured === true,
-      isVisible: isVisible !== 'false', // Default to true if not specified
+      isFeatured: isFeatured === "true" || isFeatured === true,
+      isVisible: isVisible !== "false", // Default to true if not specified
     });
 
     console.log("Product created successfully:", product._id);
@@ -255,7 +266,7 @@ const createProduct = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Error in createProduct:", error);
-    
+
     // Clean up uploaded images if product creation fails
     if (req.files && req.files.length > 0) {
       try {
@@ -266,7 +277,7 @@ const createProduct = asyncHandler(async (req, res) => {
         console.error("Error cleaning up images:", cleanupError);
       }
     }
-    
+
     res.status(500);
     throw new Error("Failed to create product");
   }
@@ -283,17 +294,17 @@ const updateProduct = asyncHandler(async (req, res) => {
     throw new Error("Product not found");
   }
 
-  const { 
-    name, 
-    brand, 
-    description, 
-    price, 
+  const {
+    name,
+    brand,
+    description,
+    price,
     discountPrice,
-    category, 
-    stock, 
-    isFeatured, 
+    category,
+    stock,
+    isFeatured,
     isVisible,
-    tags 
+    tags,
   } = req.body;
 
   // Validate category if provided
@@ -305,7 +316,38 @@ const updateProduct = asyncHandler(async (req, res) => {
   // Parse tags if provided
   let parsedTags = product.tags;
   if (tags !== undefined) {
-    parsedTags = tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    parsedTags = tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+  }
+
+  // Validate discount price if provided
+  if (discountPrice !== undefined && discountPrice !== "") {
+    const priceNum = price ? parseFloat(price) : product.price;
+    const discountNum = parseFloat(discountPrice);
+
+    console.log("DEBUG: Price comparison:", {
+      price: priceNum,
+      discount: discountNum,
+      priceType: typeof priceNum,
+      discountType: typeof discountNum,
+    });
+
+    if (isNaN(discountNum)) {
+      res.status(400);
+      throw new Error("Discount price must be a valid number");
+    }
+
+    if (discountNum < 0) {
+      res.status(400);
+      throw new Error("Discount price cannot be negative");
+    }
+
+    if (discountNum >= priceNum) {
+      res.status(400);
+      throw new Error("Discount price must be less than original price");
+    }
   }
 
   // Store old images for cleanup
@@ -318,10 +360,12 @@ const updateProduct = asyncHandler(async (req, res) => {
       console.log(`Uploading ${req.files.length} new images to Cloudinary...`);
       const uploadedImages = await uploadImagesToCloudinary(req.files);
       newImages = uploadedImages; // Replace all images
-      
+
       // Delete old images from Cloudinary
       if (oldImages.length > 0) {
-        console.log(`Deleting ${oldImages.length} old images from Cloudinary...`);
+        console.log(
+          `Deleting ${oldImages.length} old images from Cloudinary...`,
+        );
         await deleteImagesFromCloudinary(oldImages);
       }
     } catch (uploadError) {
@@ -335,28 +379,33 @@ const updateProduct = asyncHandler(async (req, res) => {
     name: name || product.name,
     brand: brand || product.brand,
     description: description || product.description,
-    price: price || product.price,
-    discountPrice: discountPrice !== undefined ? (discountPrice || null) : product.discountPrice,
+    price: price ? Number(price) : product.price,
+    discountPrice:
+      discountPrice !== undefined
+        ? discountPrice === "" || discountPrice === null
+          ? null
+          : Number(discountPrice)
+        : product.discountPrice,
     category: category || product.category,
-    stock: stock !== undefined ? stock : product.stock,
+    stock: stock !== undefined ? Number(stock) : product.stock,
     tags: parsedTags,
     images: newImages,
   };
 
   // Only update boolean fields if provided
   if (isFeatured !== undefined) {
-    updateData.isFeatured = isFeatured === 'true' || isFeatured === true;
+    updateData.isFeatured = isFeatured === "true" || isFeatured === true;
   }
-  
+
   if (isVisible !== undefined) {
-    updateData.isVisible = isVisible !== 'false';
+    updateData.isVisible = isVisible !== "false";
   }
 
   const updatedProduct = await Product.findByIdAndUpdate(
     req.params.id,
     updateData,
-    { new: true, runValidators: true }
-  ).select('-__v');
+    { new: true, runValidators: true },
+  ).select("-__v");
 
   res.json({
     success: true,
@@ -402,11 +451,11 @@ const getCategories = asyncHandler(async (req, res) => {
 // @route   GET /api/products/brands
 // @access  Public
 const getBrands = asyncHandler(async (req, res) => {
-  const brands = await Product.distinct('brand', { isVisible: true });
-  
+  const brands = await Product.distinct("brand", { isVisible: true });
+
   res.json({
     success: true,
-    brands: brands.filter(brand => brand).sort(), // Remove null/undefined and sort
+    brands: brands.filter((brand) => brand).sort(), // Remove null/undefined and sort
   });
 });
 

@@ -1,5 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import PrivateRoute from "./routes/PrivateRoute";
@@ -26,11 +27,15 @@ import Orders from "./pages/admin/Orders";
 import Users from "./pages/admin/Users";
 import Hero from "./pages/admin/Hero";
 
+// Optional: Not Found page
+import NotFound from "./pages/NotFound";
+
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <div className="flex flex-col min-h-screen">
         <Navbar />
+
         <main className="flex-grow">
           <Routes>
             {/* Public Routes */}
@@ -42,7 +47,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            {/* Protected Routes (User) */}
+            {/* User Protected Routes */}
             <Route
               path="/cart"
               element={
@@ -68,7 +73,7 @@ function App() {
               }
             />
 
-            {/* Admin Routes */}
+            {/* Admin Protected Routes */}
             <Route
               path="/admin/dashboard"
               element={
@@ -109,12 +114,16 @@ function App() {
                 </AdminRoute>
               }
             />
+
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+
         <Footer />
         <Toaster position="top-right" />
       </div>
-    </Router>
+    </BrowserRouter>
   );
 }
 

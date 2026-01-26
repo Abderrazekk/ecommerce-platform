@@ -1,249 +1,311 @@
-import { useState, useEffect, useRef } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useState, useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
   fetchAdminProducts,
   deleteProduct,
   createProduct,
   updateProduct,
-} from '../../redux/slices/product.slice'
-import { formatPrice } from '../../utils/formatPrice'
-import Loader from '../../components/common/Loader'
-import { toast } from 'react-hot-toast'
-import { Edit2, Trash2, Plus, X, Upload, Star, Eye, EyeOff, X as XIcon } from 'lucide-react'
+} from "../../redux/slices/product.slice";
+import { formatPrice } from "../../utils/formatPrice";
+import Loader from "../../components/common/Loader";
+import { toast } from "react-hot-toast";
+import {
+  Edit2,
+  Trash2,
+  Plus,
+  X,
+  Upload,
+  Star,
+  Eye,
+  EyeOff,
+  X as XIcon,
+} from "lucide-react";
 
 const categories = [
-  'Electronics & Gadgets',
-  'Fashion & Apparel',
-  'Beauty & Personal Care',
-  'Home & Kitchen',
-  'Fitness & Outdoors',
-  'Baby & Kids',
-  'Pets',
-  'Automotive & Tools',
-  'Lifestyle & Hobbies',
-]
+  "Electronics & Gadgets",
+  "Fashion & Apparel",
+  "Beauty & Personal Care",
+  "Home & Kitchen",
+  "Fitness & Outdoors",
+  "Baby & Kids",
+  "Pets",
+  "Automotive & Tools",
+  "Lifestyle & Hobbies",
+];
 
 const Products = () => {
-  const dispatch = useDispatch()
-  const { products, loading } = useSelector((state) => state.products)
-  
-  const [showModal, setShowModal] = useState(false)
-  const [editingProduct, setEditingProduct] = useState(null)
+  const dispatch = useDispatch();
+  const { products, loading } = useSelector((state) => state.products);
+
+  const [showModal, setShowModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    brand: '',
-    description: '',
-    price: '',
-    discountPrice: '',
-    category: '',
-    stock: '',
-    tags: '',
+    name: "",
+    brand: "",
+    description: "",
+    price: "",
+    discountPrice: "",
+    category: "",
+    stock: "",
+    tags: "",
     isFeatured: false,
     isVisible: true,
-  })
-  const [imageFiles, setImageFiles] = useState([])
-  const [imagePreviews, setImagePreviews] = useState([])
-  const fileInputRef = useRef(null)
+  });
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const fileInputRef = useRef(null);
 
   // Fetch ALL products (including hidden) for admin
   useEffect(() => {
-    dispatch(fetchAdminProducts({ page: 1, limit: 50 }))
-  }, [dispatch])
+    dispatch(fetchAdminProducts({ page: 1, limit: 50 }));
+  }, [dispatch]);
 
   const handleOpenModal = (product = null) => {
     if (product) {
-      setEditingProduct(product)
+      setEditingProduct(product);
       setFormData({
         name: product.name,
-        brand: product.brand || '',
+        brand: product.brand || "",
         description: product.description,
         price: product.price,
-        discountPrice: product.discountPrice || '',
+        discountPrice: product.discountPrice || "",
         category: product.category,
         stock: product.stock,
-        tags: product.tags ? product.tags.join(', ') : '',
+        tags: product.tags ? product.tags.join(", ") : "",
         isFeatured: product.isFeatured || false,
         isVisible: product.isVisible !== false,
-      })
-      setImageFiles([])
-      setImagePreviews(product.images ? product.images.map(img => img.url) : [])
+      });
+      setImageFiles([]);
+      setImagePreviews(
+        product.images ? product.images.map((img) => img.url) : [],
+      );
     } else {
-      setEditingProduct(null)
+      setEditingProduct(null);
       setFormData({
-        name: '',
-        brand: '',
-        description: '',
-        price: '',
-        discountPrice: '',
-        category: '',
-        stock: '',
-        tags: '',
+        name: "",
+        brand: "",
+        description: "",
+        price: "",
+        discountPrice: "",
+        category: "",
+        stock: "",
+        tags: "",
         isFeatured: false,
         isVisible: true,
-      })
-      setImageFiles([])
-      setImagePreviews([])
+      });
+      setImageFiles([]);
+      setImagePreviews([]);
     }
-    setShowModal(true)
-  }
+    setShowModal(true);
+  };
 
   const handleCloseModal = () => {
-    setShowModal(false)
-    setEditingProduct(null)
+    setShowModal(false);
+    setEditingProduct(null);
     setFormData({
-      name: '',
-      brand: '',
-      description: '',
-      price: '',
-      discountPrice: '',
-      category: '',
-      stock: '',
-      tags: '',
+      name: "",
+      brand: "",
+      description: "",
+      price: "",
+      discountPrice: "",
+      category: "",
+      stock: "",
+      tags: "",
       isFeatured: false,
       isVisible: true,
-    })
-    setImageFiles([])
-    setImagePreviews([])
+    });
+    setImageFiles([]);
+    setImagePreviews([]);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      fileInputRef.current.value = "";
     }
-  }
+  };
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    })
-  }
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files)
-    
+    const files = Array.from(e.target.files);
+
     // Validate file count
-    const totalFiles = imageFiles.length + files.length
+    const totalFiles = imageFiles.length + files.length;
     if (totalFiles > 6) {
-      toast.error('Maximum 6 images allowed')
-      return
+      toast.error("Maximum 6 images allowed");
+      return;
     }
 
     // Validate file types
-    const validFiles = files.filter(file => {
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-      return validTypes.includes(file.type)
-    })
+    const validFiles = files.filter((file) => {
+      const validTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+      ];
+      return validTypes.includes(file.type);
+    });
 
     if (validFiles.length === 0) {
-      toast.error('Please select valid image files (JPEG, PNG, GIF, WebP)')
-      return
+      toast.error("Please select valid image files (JPEG, PNG, GIF, WebP)");
+      return;
     }
 
     // Add new files
-    setImageFiles(prev => [...prev, ...validFiles])
+    setImageFiles((prev) => [...prev, ...validFiles]);
 
     // Create previews
-    validFiles.forEach(file => {
-      const reader = new FileReader()
+    validFiles.forEach((file) => {
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreviews(prev => [...prev, reader.result])
-      }
-      reader.readAsDataURL(file)
-    })
-  }
+        setImagePreviews((prev) => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
 
   const removeImage = (index) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index))
-    setImagePreviews(prev => prev.filter((_, i) => i !== index))
-  }
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     // Validate required fields
-    const requiredFields = ['name', 'brand', 'description', 'price', 'category', 'stock']
-    const missingFields = requiredFields.filter(field => !formData[field])
-    
+    const requiredFields = [
+      "name",
+      "brand",
+      "description",
+      "price",
+      "category",
+      "stock",
+    ];
+    const missingFields = requiredFields.filter((field) => !formData[field]);
+
     if (missingFields.length > 0) {
-      toast.error(`Please fill all required fields: ${missingFields.join(', ')}`)
-      return
+      toast.error(
+        `Please fill all required fields: ${missingFields.join(", ")}`,
+      );
+      return;
     }
 
     // Validate images
     if (!editingProduct && imageFiles.length === 0) {
-      toast.error('Please upload at least one product image')
-      return
+      toast.error("Please upload at least one product image");
+      return;
     }
 
     // Validate discount price
-    if (formData.discountPrice && parseFloat(formData.discountPrice) >= parseFloat(formData.price)) {
-      toast.error('Discount price must be less than original price')
-      return
+    if (formData.discountPrice && formData.discountPrice.trim() !== "") {
+      const priceNum = parseFloat(formData.price);
+      const discountNum = parseFloat(formData.discountPrice);
+
+      // Check if discount is a valid number
+      if (isNaN(discountNum)) {
+        toast.error("Discount price must be a valid number");
+        return;
+      }
+
+      // Check if discount is positive
+      if (discountNum < 0) {
+        toast.error("Discount price cannot be negative");
+        return;
+      }
+
+      // Check if discount is less than price with a small tolerance
+      if (discountNum >= priceNum - 0.001) {
+        toast.error("Discount price must be less than original price");
+        return;
+      }
     }
 
-    const productData = new FormData()
-    productData.append('name', formData.name)
-    productData.append('brand', formData.brand)
-    productData.append('description', formData.description)
-    productData.append('price', formData.price)
-    
-    if (formData.discountPrice) {
-      productData.append('discountPrice', formData.discountPrice)
+    const productData = new FormData();
+    productData.append("name", formData.name);
+    productData.append("brand", formData.brand);
+    productData.append("description", formData.description);
+    productData.append("price", String(formData.price)); // Ensure string
+
+    // Handle discountPrice - send empty string to clear it, or the value
+    if (formData.discountPrice && formData.discountPrice.trim() !== "") {
+      const discountNum = parseFloat(formData.discountPrice);
+      if (!isNaN(discountNum) && discountNum > 0) {
+        productData.append("discountPrice", String(discountNum));
+      } else {
+        // Send empty string to clear discount
+        productData.append("discountPrice", "");
+      }
+    } else {
+      // Send empty string to clear discount
+      productData.append("discountPrice", "");
     }
-    
-    productData.append('category', formData.category)
-    productData.append('stock', formData.stock)
-    productData.append('tags', formData.tags)
-    productData.append('isFeatured', formData.isFeatured)
-    productData.append('isVisible', formData.isVisible)
-    
+
+    productData.append("category", formData.category);
+    productData.append("stock", formData.stock);
+    productData.append("tags", formData.tags);
+    productData.append("isFeatured", formData.isFeatured);
+    productData.append("isVisible", formData.isVisible);
+
     // Append images if we have new files
     imageFiles.forEach((file, index) => {
-      productData.append('images', file)
-    })
+      productData.append("images", file);
+    });
 
     try {
       if (editingProduct) {
-        await dispatch(updateProduct({ 
-          id: editingProduct._id, 
-          productData 
-        })).unwrap()
-        toast.success('Product updated successfully!')
+        await dispatch(
+          updateProduct({
+            id: editingProduct._id,
+            productData,
+          }),
+        ).unwrap();
+        toast.success("Product updated successfully!");
       } else {
-        await dispatch(createProduct(productData)).unwrap()
-        toast.success('Product created successfully!')
+        await dispatch(createProduct(productData)).unwrap();
+        toast.success("Product created successfully!");
       }
-      
-      handleCloseModal()
+
+      handleCloseModal();
     } catch (error) {
-      console.error('Error saving product:', error)
+      console.error("Error saving product:", error);
       // Error toast is already handled in the slice
     }
-  }
+  };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      await dispatch(deleteProduct(id))
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      await dispatch(deleteProduct(id));
     }
-  }
+  };
 
   // Calculate discount percentage
   const calculateDiscountPercentage = () => {
     if (formData.discountPrice && formData.price) {
-      const discount = ((formData.price - formData.discountPrice) / formData.price) * 100
-      return Math.round(discount)
+      const discount =
+        ((formData.price - formData.discountPrice) / formData.price) * 100;
+      return Math.round(discount);
     }
-    return 0
-  }
+    return 0;
+  };
 
-  if (loading) return <Loader />
+  if (loading) return <Loader />;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
-            <p className="text-gray-600">Manage your product catalog (including hidden products)</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Products Management
+            </h1>
+            <p className="text-gray-600">
+              Manage your product catalog (including hidden products)
+            </p>
           </div>
           <button
             onClick={() => handleOpenModal()}
@@ -285,7 +347,10 @@ const Products = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {products.map((product) => (
-                  <tr key={product._id} className={`hover:bg-gray-50 ${!product.isVisible ? 'bg-gray-100' : ''}`}>
+                  <tr
+                    key={product._id}
+                    className={`hover:bg-gray-50 ${!product.isVisible ? "bg-gray-100" : ""}`}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex -space-x-2">
                         {product.images?.slice(0, 3).map((img, index) => (
@@ -305,10 +370,17 @@ const Products = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div>
-                        <div className="font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">{product.brand}</div>
+                        <div className="font-medium text-gray-900">
+                          {product.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {product.brand}
+                        </div>
                         <div className="text-xs text-gray-400 truncate max-w-xs">
-                          {product.tags?.slice(0, 3).map(tag => `#${tag}`).join(' ')}
+                          {product.tags
+                            ?.slice(0, 3)
+                            .map((tag) => `#${tag}`)
+                            .join(" ")}
                         </div>
                       </div>
                     </td>
@@ -333,7 +405,12 @@ const Products = () => {
                         )}
                         {product.discountPrice && (
                           <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                            {Math.round(((product.price - product.discountPrice) / product.price) * 100)}% OFF
+                            {Math.round(
+                              ((product.price - product.discountPrice) /
+                                product.price) *
+                                100,
+                            )}
+                            % OFF
                           </span>
                         )}
                       </div>
@@ -357,11 +434,15 @@ const Products = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        product.stock > 10 ? 'bg-green-100 text-green-800' :
-                        product.stock > 0 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          product.stock > 10
+                            ? "bg-green-100 text-green-800"
+                            : product.stock > 0
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                        }`}
+                      >
                         {product.stock} units
                       </span>
                     </td>
@@ -384,10 +465,12 @@ const Products = () => {
               </tbody>
             </table>
           </div>
-          
+
           {products.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">No products found. Add your first product!</p>
+              <p className="text-gray-500">
+                No products found. Add your first product!
+              </p>
             </div>
           )}
         </div>
@@ -399,7 +482,7 @@ const Products = () => {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">
-                    {editingProduct ? 'Edit Product' : 'Add New Product'}
+                    {editingProduct ? "Edit Product" : "Add New Product"}
                   </h2>
                   <button
                     onClick={handleCloseModal}
@@ -414,12 +497,12 @@ const Products = () => {
                     {/* Product Images */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Product Images {!editingProduct && '*'}
+                        Product Images {!editingProduct && "*"}
                         <span className="ml-2 text-xs text-gray-500">
                           ({imagePreviews.length}/6 images)
                         </span>
                       </label>
-                      
+
                       {/* Image Previews */}
                       {imagePreviews.length > 0 && (
                         <div className="mb-4">
@@ -643,9 +726,14 @@ const Products = () => {
                           onChange={handleInputChange}
                           className="h-4 w-4 text-primary-600 rounded"
                         />
-                        <label htmlFor="isFeatured" className="ml-2 block text-sm text-gray-700">
+                        <label
+                          htmlFor="isFeatured"
+                          className="ml-2 block text-sm text-gray-700"
+                        >
                           <span className="font-medium">Featured Product</span>
-                          <p className="text-xs text-gray-500">Appears in homepage featured section</p>
+                          <p className="text-xs text-gray-500">
+                            Appears in homepage featured section
+                          </p>
                         </label>
                       </div>
                       <div className="flex items-center">
@@ -657,9 +745,14 @@ const Products = () => {
                           onChange={handleInputChange}
                           className="h-4 w-4 text-primary-600 rounded"
                         />
-                        <label htmlFor="isVisible" className="ml-2 block text-sm text-gray-700">
+                        <label
+                          htmlFor="isVisible"
+                          className="ml-2 block text-sm text-gray-700"
+                        >
                           <span className="font-medium">Visible in Shop</span>
-                          <p className="text-xs text-gray-500">Customers can see this product</p>
+                          <p className="text-xs text-gray-500">
+                            Customers can see this product
+                          </p>
                         </label>
                       </div>
                     </div>
@@ -678,7 +771,7 @@ const Products = () => {
                         className="btn-primary"
                         disabled={!editingProduct && imageFiles.length === 0}
                       >
-                        {editingProduct ? 'Update Product' : 'Add Product'}
+                        {editingProduct ? "Update Product" : "Add Product"}
                       </button>
                     </div>
                   </div>
@@ -689,7 +782,7 @@ const Products = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Products;
