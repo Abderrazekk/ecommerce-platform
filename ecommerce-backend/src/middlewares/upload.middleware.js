@@ -1,35 +1,35 @@
-const multer = require('multer');
-const path = require('path');
+const multer = require("multer");
+const path = require("path");
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
 
 // File filter for images and videos
 const fileFilter = (req, file, cb) => {
-  console.log('Multer file filter - Original filename:', file.originalname);
-  console.log('Multer file filter - MIME type:', file.mimetype);
-  
+  console.log("Multer file filter - Original filename:", file.originalname);
+  console.log("Multer file filter - MIME type:", file.mimetype);
+
   // Allowed image types
   const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
   // Allowed video types
   const allowedVideoTypes = /mp4|mov|avi|mkv|webm|flv|wmv/;
-  
+
   const isImage = allowedImageTypes.test(file.mimetype);
   const isVideo = allowedVideoTypes.test(file.mimetype);
-  
+
   if (isImage || isVideo) {
-    console.log('File accepted by multer:', file.mimetype);
+    console.log("File accepted by multer:", file.mimetype);
     return cb(null, true);
   } else {
-    console.log('File rejected by multer. Type:', file.mimetype);
-    cb(new Error('Only image and video files are allowed!'));
+    console.log("File rejected by multer. Type:", file.mimetype);
+    cb(new Error("Only image and video files are allowed!"));
   }
 };
 
 // Create upload middleware for multiple files
 const upload = multer({
   storage: storage,
-  limits: { 
+  limits: {
     // Image limits
     fileSize: 10 * 1024 * 1024, // 10MB per file (increased for videos)
   },
@@ -39,83 +39,83 @@ const upload = multer({
 // Custom middleware to validate file count and types (for products)
 const validateFiles = (req, res, next) => {
   const files = req.files;
-  
+
   // For create operation
-  if (req.method === 'POST') {
+  if (req.method === "POST") {
     // Check for at least one image
     if (!files?.images || files.images.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'At least one image is required'
+        message: "At least one image is required",
       });
     }
-    
+
     // Validate image count (1-6 images)
     if (files.images.length > 6) {
       return res.status(400).json({
         success: false,
-        message: 'Maximum 6 images allowed per product'
+        message: "Maximum 6 images allowed per product",
       });
     }
-    
+
     // Validate video (optional, max 1)
     if (files.video && files.video.length > 1) {
       return res.status(400).json({
         success: false,
-        message: 'Maximum 1 video allowed per product'
+        message: "Maximum 1 video allowed per product",
       });
     }
   }
-  
+
   // For update operation
-  if (req.method === 'PUT') {
+  if (req.method === "PUT") {
     // Validate image count if provided
     if (files.images && files.images.length > 6) {
       return res.status(400).json({
         success: false,
-        message: 'Maximum 6 images allowed per product'
+        message: "Maximum 6 images allowed per product",
       });
     }
-    
+
     // Validate video count if provided
     if (files.video && files.video.length > 1) {
       return res.status(400).json({
         success: false,
-        message: 'Maximum 1 video allowed per product'
+        message: "Maximum 1 video allowed per product",
       });
     }
   }
-  
+
   next();
 };
 
 // Keep the old validateImageCount for backward compatibility (used by hero routes)
 const validateImageCount = (req, res, next) => {
   // For create operation, require at least 1 image
-  if (req.method === 'POST') {
+  if (req.method === "POST") {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'At least one image is required'
+        message: "At least one image is required",
       });
     }
-    
+
     if (req.files.length > 6) {
       return res.status(400).json({
         success: false,
-        message: 'Maximum 6 images allowed per product'
+        message: "Maximum 6 images allowed per product",
       });
     }
   }
-  
+
   // For update operation, images are optional but limited to 6 if provided
-  if (req.method === 'PUT' && req.files && req.files.length > 6) {
+  if (req.method === "PUT" && req.files && req.files.length > 6) {
     return res.status(400).json({
       success: false,
-      message: 'Maximum 6 images allowed per product'
+      message: "Maximum 6 images allowed per product",
     });
   }
-  
+
   next();
 };
 
@@ -123,44 +123,44 @@ const validateImageCount = (req, res, next) => {
 const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     // A Multer error occurred when uploading
-    if (err.code === 'LIMIT_FILE_SIZE') {
+    if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
         success: false,
-        message: 'File too large. Maximum size is 10MB per file'
+        message: "File too large. Maximum size is 10MB per file",
       });
     }
-    
-    if (err.code === 'LIMIT_FILE_COUNT') {
+
+    if (err.code === "LIMIT_FILE_COUNT") {
       return res.status(400).json({
         success: false,
-        message: 'Too many files'
+        message: "Too many files",
       });
     }
-    
-    if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+
+    if (err.code === "LIMIT_UNEXPECTED_FILE") {
       return res.status(400).json({
         success: false,
-        message: 'Unexpected field. Field names must be "images" or "video"'
+        message: 'Unexpected field. Field names must be "images" or "video"',
       });
     }
-    
+
     return res.status(400).json({
       success: false,
-      message: err.message
+      message: err.message,
     });
   } else if (err) {
     // An unknown error occurred
     return res.status(400).json({
       success: false,
-      message: err.message || 'File upload error'
+      message: err.message || "File upload error",
     });
   }
   next();
 };
 
-module.exports = { 
-  upload, 
+module.exports = {
+  upload,
   validateFiles,
   validateImageCount, // Keep this for hero routes
-  handleMulterError 
+  handleMulterError,
 };

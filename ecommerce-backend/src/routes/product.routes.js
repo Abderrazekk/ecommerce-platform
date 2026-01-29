@@ -33,7 +33,7 @@ router.post(
   adminOnly,
   upload.fields([
     { name: "images", maxCount: 6 },
-    { name: "video", maxCount: 1 }
+    { name: "video", maxCount: 1 },
   ]),
   validateFiles, // Use the new validation
   handleMulterError,
@@ -46,7 +46,7 @@ router.put(
   adminOnly,
   upload.fields([
     { name: "images", maxCount: 6 },
-    { name: "video", maxCount: 1 }
+    { name: "video", maxCount: 1 },
   ]),
   validateFiles, // Use the new validation
   handleMulterError,

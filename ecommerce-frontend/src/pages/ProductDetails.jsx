@@ -29,14 +29,14 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  
+
   // Video state
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
   const [showVideo, setShowVideo] = useState(product?.video ? true : false);
   const videoRef = useRef(null);
-  
+
   // Zoom state
   const [isHovering, setIsHovering] = useState(false);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
@@ -174,7 +174,8 @@ const ProductDetails = () => {
 
   const handleVideoTimeUpdate = () => {
     if (videoRef.current) {
-      const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+      const progress =
+        (videoRef.current.currentTime / videoRef.current.duration) * 100;
       setVideoProgress(progress);
     }
   };
@@ -204,7 +205,7 @@ const ProductDetails = () => {
     if (isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   if (loading) return <Loader />;
@@ -292,7 +293,7 @@ const ProductDetails = () => {
                       onEnded={handleVideoEnded}
                       poster={product.images?.[0]?.url}
                     />
-                    
+
                     {/* Custom video controls overlay */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                       <div className="flex items-center justify-between">
@@ -306,16 +307,18 @@ const ProductDetails = () => {
                             <Play className="h-5 w-5" />
                           )}
                         </button>
-                        
+
                         <div className="flex-1 mx-4">
                           <div className="w-full bg-gray-600/50 h-1.5 rounded-full overflow-hidden">
-                            <div 
+                            <div
                               className="bg-primary-500 h-full transition-all duration-100"
                               style={{ width: `${videoProgress}%` }}
                             />
                           </div>
                           <div className="flex justify-between text-xs text-gray-300 mt-1">
-                            <span>{formatTime(videoRef.current?.currentTime || 0)}</span>
+                            <span>
+                              {formatTime(videoRef.current?.currentTime || 0)}
+                            </span>
                             <span>{formatTime(videoDuration)}</span>
                           </div>
                         </div>
@@ -370,39 +373,43 @@ const ProductDetails = () => {
                     )}
 
                     {/* Zoom Lens - Professional glass effect */}
-                    {isHovering && product.images && imageLoaded && product.images[selectedImageIndex] && (
-                      <div
-                        ref={zoomLensRef}
-                        className="absolute pointer-events-none z-10 overflow-hidden rounded-full"
-                        style={{
-                          left: `${zoomStyle.lensPosition?.x || 0}px`,
-                          top: `${zoomStyle.lensPosition?.y || 0}px`,
-                          width: "180px",
-                          height: "180px",
-                          border: "2px solid rgba(255, 255, 255, 0.9)",
-                          boxShadow: `
+                    {isHovering &&
+                      product.images &&
+                      imageLoaded &&
+                      product.images[selectedImageIndex] && (
+                        <div
+                          ref={zoomLensRef}
+                          className="absolute pointer-events-none z-10 overflow-hidden rounded-full"
+                          style={{
+                            left: `${zoomStyle.lensPosition?.x || 0}px`,
+                            top: `${zoomStyle.lensPosition?.y || 0}px`,
+                            width: "180px",
+                            height: "180px",
+                            border: "2px solid rgba(255, 255, 255, 0.9)",
+                            boxShadow: `
                             0 0 0 1px rgba(0, 0, 0, 0.1),
                             0 8px 32px rgba(0, 0, 0, 0.2),
                             inset 0 0 32px rgba(255, 255, 255, 0.2)
                           `,
-                          backgroundColor: "transparent",
-                          backdropFilter: "blur(2px)",
-                          backgroundImage: `url(${product.images[selectedImageIndex].url})`,
-                          backgroundRepeat: "no-repeat",
-                          backgroundSize: zoomStyle.backgroundSize || "auto",
-                          backgroundPosition: zoomStyle.backgroundPosition || "0px 0px",
-                          transition: "left 0.05s linear, top 0.05s linear",
-                        }}
-                      >
-                        <div
-                          className="absolute inset-0 rounded-full"
-                          style={{
-                            boxShadow: "inset 0 0 20px rgba(0, 0, 0, 0.1)",
-                            border: "1px solid rgba(255, 255, 255, 0.3)",
+                            backgroundColor: "transparent",
+                            backdropFilter: "blur(2px)",
+                            backgroundImage: `url(${product.images[selectedImageIndex].url})`,
+                            backgroundRepeat: "no-repeat",
+                            backgroundSize: zoomStyle.backgroundSize || "auto",
+                            backgroundPosition:
+                              zoomStyle.backgroundPosition || "0px 0px",
+                            transition: "left 0.05s linear, top 0.05s linear",
                           }}
-                        />
-                      </div>
-                    )}
+                        >
+                          <div
+                            className="absolute inset-0 rounded-full"
+                            style={{
+                              boxShadow: "inset 0 0 20px rgba(0, 0, 0, 0.1)",
+                              border: "1px solid rgba(255, 255, 255, 0.3)",
+                            }}
+                          />
+                        </div>
+                      )}
 
                     {/* Image Navigation Arrows */}
                     {product.images && product.images.length > 1 && (
