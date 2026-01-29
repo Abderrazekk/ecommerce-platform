@@ -1,16 +1,22 @@
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../redux/slices/cart.slice";
+import {
+  addToWishlist,
+  removeFromWishlist,
+} from "../../redux/slices/auth.slice";
 import { formatPrice } from "../../utils/formatPrice";
-import { FaShoppingCart, FaHeart, FaEye } from "react-icons/fa";
+import { FaShoppingCart, FaHeart, FaEye, FaRegHeart } from "react-icons/fa";
 import { Truck, Zap, Shield, CheckCircle } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
+  const { isAuthenticated, wishlistIds } = useSelector((state) => state.auth);
+  const isInWishlist = wishlistIds.has(product._id);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -22,14 +28,25 @@ const ProductCard = ({ product }) => {
         price: product.discountPrice || product.price,
         image: product.images?.[0]?.url || "",
         quantity: 1,
-      })
+      }),
     );
   };
 
-  const handleWishlist = (e) => {
+  const handleWishlistToggle = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+
+    if (!isAuthenticated) {
+      // Redirect to login page
+      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product._id));
+    } else {
+      dispatch(addToWishlist(product._id));
+    }
   };
 
   if (!product.isVisible) {
@@ -37,15 +54,15 @@ const ProductCard = ({ product }) => {
   }
 
   const discountPercentage = product.discountPrice
-    ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
+    ? Math.round(
+        ((product.price - product.discountPrice) / product.price) * 100,
+      )
     : 0;
 
   const hasLowStock = product.stock > 0 && product.stock <= 5;
-  const isFreeShipping = product.price >= 50;
-  const rating = product.rating || 4.5;
 
   return (
-    <div 
+    <div
       className="group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-primary-200"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -60,7 +77,7 @@ const ProductCard = ({ product }) => {
               alt={product.name}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
-            
+
             {/* Secondary Image on Hover */}
             {product.images?.[1] && (
               <img
@@ -87,18 +104,28 @@ const ProductCard = ({ product }) => {
           </div>
 
           {/* Top Right Actions */}
-          <div className={`absolute top-4 right-4 flex flex-col gap-2 transition-all duration-300 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}>
+          <div
+            className={`absolute top-4 right-4 flex flex-col gap-2 transition-all duration-300 ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
+          >
+            {/* Wishlist Button */}
             <button
-              onClick={handleWishlist}
+              onClick={handleWishlistToggle}
               className={`p-2.5 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300 ${
-                isWishlisted
+                isInWishlist
                   ? "bg-gradient-to-br from-red-500 to-red-600 text-white shadow-red-200"
                   : "bg-white/90 text-gray-700 hover:bg-red-50 hover:text-red-500"
               }`}
-              title="Add to Wishlist"
+              title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
             >
-              <FaHeart className="h-4 w-4" />
+              {/* Use FaHeart for filled, FaRegHeart for outline */}
+              {isInWishlist ? (
+                <FaHeart className="h-4 w-4 fill-white" />
+              ) : (
+                <FaRegHeart className="h-4 w-4" />
+              )}
             </button>
+
+            {/* Quick View Button */}
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -156,15 +183,13 @@ const ProductCard = ({ product }) => {
           </h3>
         </Link>
 
-        {/* Features */}
-        <div className="flex flex-wrap gap-1.5">
-          {product.features?.slice(0, 3).map((feature, index) => (
-            <div key={index} className="flex items-center gap-1 text-xs text-gray-600">
-              <CheckCircle className="h-3 w-3 text-primary-500" />
-              <span>{feature}</span>
-            </div>
-          ))}
-        </div>
+        {/* Wishlist Indicator */}
+        {isInWishlist && (
+          <div className="flex items-center gap-1 text-sm text-red-600 bg-red-50 px-3 py-1 rounded-full w-fit">
+            <FaHeart className="h-3 w-3 fill-red-500" />
+            <span className="font-medium">In Wishlist</span>
+          </div>
+        )}
 
         {/* Price Section */}
         <div className="pt-2 space-y-2">
@@ -183,19 +208,20 @@ const ProductCard = ({ product }) => {
               </>
             )}
           </div>
-          
         </div>
 
         {/* Stock & Shipping */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2">
-            <div className={`h-2 w-2 rounded-full ${product.stock === 0 ? 'bg-red-500' : product.stock <= 5 ? 'bg-orange-500' : 'bg-green-500'}`} />
+            <div
+              className={`h-2 w-2 rounded-full ${product.stock === 0 ? "bg-red-500" : product.stock <= 5 ? "bg-orange-500" : "bg-green-500"}`}
+            />
             <span className="text-xs font-medium">
               {product.stock === 0
                 ? "Out of stock"
                 : product.stock <= 5
-                ? `Low stock (${product.stock})`
-                : "In stock"}
+                  ? `Low stock (${product.stock})`
+                  : "In stock"}
             </span>
           </div>
         </div>
@@ -219,10 +245,74 @@ const ProductCard = ({ product }) => {
 
       {/* Quick View Modal */}
       {showQuickView && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white rounded-2xl p-6 max-w-4xl mx-4">
-            <h3>Quick View</h3>
-            <button onClick={() => setShowQuickView(false)}>Close</button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Quick View</h3>
+              <button
+                onClick={() => setShowQuickView(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Product Images */}
+              <div>
+                <img
+                  src={product.images?.[0]?.url || ""}
+                  alt={product.name}
+                  className="w-full h-auto rounded-lg"
+                />
+              </div>
+
+              {/* Product Details */}
+              <div>
+                <h4 className="text-xl font-bold mb-2">{product.name}</h4>
+                <p className="text-gray-600 mb-4">{product.description}</p>
+
+                <div className="flex items-center gap-4 mb-4">
+                  <span className="text-2xl font-bold">
+                    {formatPrice(product.discountPrice || product.price)}
+                  </span>
+                  {product.discountPrice && (
+                    <span className="text-lg text-gray-400 line-through">
+                      {formatPrice(product.price)}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={product.stock === 0}
+                    className={`flex-1 py-3 px-6 rounded-lg font-semibold ${
+                      product.stock === 0
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-primary-600 text-white hover:bg-primary-700"
+                    }`}
+                  >
+                    Add to Cart
+                  </button>
+
+                  <button
+                    onClick={handleWishlistToggle}
+                    className={`p-3 rounded-lg ${
+                      isInWishlist
+                        ? "bg-red-100 text-red-600 border border-red-200"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {isInWishlist ? (
+                      <FaHeart className="h-5 w-5" />
+                    ) : (
+                      <FaRegHeart className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

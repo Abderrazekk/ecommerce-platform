@@ -19,6 +19,7 @@ import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import MyOrders from "./pages/MyOrders";
+import Wishlist from "./pages/Wishlist"; // NEW: Add this import
 
 // Admin Pages
 import Dashboard from "./pages/admin/Dashboard";
@@ -69,6 +70,15 @@ function App() {
               element={
                 <PrivateRoute>
                   <MyOrders />
+                </PrivateRoute>
+              }
+            />
+            {/* NEW: Wishlist Route */}
+            <Route
+              path="/wishlist"
+              element={
+                <PrivateRoute>
+                  <Wishlist />
                 </PrivateRoute>
               }
             />

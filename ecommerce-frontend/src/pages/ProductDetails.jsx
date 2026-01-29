@@ -9,6 +9,7 @@ import {
   removeComment,
 } from "../redux/slices/comment.slice";
 import { addToCart } from "../redux/slices/cart.slice";
+import { addToWishlist, removeFromWishlist } from "../redux/slices/auth.slice"; // NEW: Wishlist actions
 import { formatPrice } from "../utils/formatPrice";
 import Loader from "../components/common/Loader";
 import {
@@ -37,6 +38,8 @@ import {
   Save,
   XCircle,
   Clock,
+  Heart,
+  HeartOff,
 } from "lucide-react";
 
 const ProductDetails = () => {
@@ -47,13 +50,18 @@ const ProductDetails = () => {
   const { product, loading: productLoading } = useSelector(
     (state) => state.products,
   );
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated, wishlistIds } = useSelector(
+    (state) => state.auth,
+  );
   const {
     commentsByProduct,
     loading: commentsLoading,
     submitting,
     error,
   } = useSelector((state) => state.comments);
+
+  // NEW: Wishlist state
+  const isInWishlist = wishlistIds.has(id);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -117,12 +125,28 @@ const ProductDetails = () => {
     }
   };
 
+  // NEW: Handle wishlist toggle
+  const handleWishlistToggle = () => {
+    if (!isAuthenticated) {
+      navigate(
+        `/login?redirect=${encodeURIComponent(window.location.pathname)}`,
+      );
+      return;
+    }
+
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(id));
+    } else {
+      dispatch(addToWishlist(id));
+    }
+  };
+
   // Handle mouse move for zoom
   const handleMouseMove = (e) => {
     if (
       !imageContainerRef.current ||
       !mainImageRef.current ||
-      !product.images ||
+      !product?.images ||
       !imageLoaded
     )
       return;
@@ -147,7 +171,7 @@ const ProductDetails = () => {
 
   // Calculate zoom lens position and background
   const calculateZoomStyle = () => {
-    if (!imageContainerRef.current || !mainImageRef.current || !product.images)
+    if (!imageContainerRef.current || !mainImageRef.current || !product?.images)
       return {};
 
     const container = imageContainerRef.current;
@@ -783,6 +807,13 @@ const ProductDetails = () => {
                     {discountPercentage}% OFF
                   </span>
                 )}
+                {/* NEW: Wishlist Badge */}
+                {isInWishlist && (
+                  <span className="inline-flex bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full items-center">
+                    <FaHeart className="h-3 w-3 fill-red-500 mr-1" />
+                    In Wishlist
+                  </span>
+                )}
               </div>
 
               {/* Product Name */}
@@ -908,13 +939,37 @@ const ProductDetails = () => {
                       </div>
                     </div>
 
-                    <button
-                      onClick={handleAddToCart}
-                      className="w-full flex items-center justify-center space-x-3 bg-primary-600 hover:bg-primary-700 text-white py-4 text-lg font-bold rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
-                    >
-                      <ShoppingCart className="h-6 w-6" />
-                      <span>Add to Cart</span>
-                    </button>
+                    <div className="flex gap-3">
+                      {/* Add to Cart Button */}
+                      <button
+                        onClick={handleAddToCart}
+                        className="flex-1 flex items-center justify-center space-x-3 bg-primary-600 hover:bg-primary-700 text-white py-4 text-lg font-bold rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
+                      >
+                        <ShoppingCart className="h-6 w-6" />
+                        <span>Add to Cart</span>
+                      </button>
+
+                      {/* NEW: Wishlist Button */}
+                      <button
+                        onClick={handleWishlistToggle}
+                        className={`px-4 py-4 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                          isInWishlist
+                            ? "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+                            : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                        }`}
+                        title={
+                          isInWishlist
+                            ? "Remove from Wishlist"
+                            : "Add to Wishlist"
+                        }
+                      >
+                        {isInWishlist ? (
+                          <Heart className="h-6 w-6 fill-red-500" />
+                        ) : (
+                          <Heart className="h-6 w-6" />
+                        )}
+                      </button>
+                    </div>
 
                     {/* Quick add buttons */}
                     <div className="flex space-x-2 mt-4">
@@ -952,99 +1007,38 @@ const ProductDetails = () => {
                       </p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      // Add to wishlist or notify when back in stock
-                    }}
-                    className="w-full py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors"
-                  >
-                    Notify me when available
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleWishlistToggle}
+                      className={`flex-1 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${
+                        isInWishlist
+                          ? "bg-red-100 text-red-700 border border-red-300 hover:bg-red-200"
+                          : "border border-red-300 text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors"
+                      }`}
+                    >
+                      {isInWishlist ? (
+                        <>
+                          <Heart className="h-5 w-5 fill-red-500" />
+                          Remove from Wishlist
+                        </>
+                      ) : (
+                        <>
+                          <Heart className="h-5 w-5" />
+                          Save for Later
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        // Add to wishlist or notify when back in stock
+                      }}
+                      className="flex-1 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors"
+                    >
+                      Notify me when available
+                    </button>
+                  </div>
                 </div>
               )}
-
-              {/* Product Info Cards */}
-              <div className="mt-8 grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <div className="flex items-center mb-2">
-                    <div className="p-1.5 bg-green-100 rounded-md mr-2">
-                      <span className="text-green-600 font-bold">✓</span>
-                    </div>
-                    <h4 className="font-semibold text-gray-800">
-                      Free Shipping
-                    </h4>
-                  </div>
-                  <p className="text-sm text-gray-600">On orders over $50</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <div className="flex items-center mb-2">
-                    <div className="p-1.5 bg-blue-100 rounded-md mr-2">
-                      <span className="text-blue-600 font-bold">↻</span>
-                    </div>
-                    <h4 className="font-semibold text-gray-800">
-                      30-Day Returns
-                    </h4>
-                  </div>
-                  <p className="text-sm text-gray-600">Easy return policy</p>
-                </div>
-              </div>
-
-              {/* Additional Info */}
-              <div className="mt-8 pt-8 border-t border-gray-200">
-                <h4 className="font-semibold mb-4 text-gray-800 text-lg">
-                  Product Details
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Brand:</span>
-                    <span className="font-medium text-gray-800">
-                      {product.brand || "Not specified"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Category:</span>
-                    <span className="font-medium text-gray-800">
-                      {product.category}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Images:</span>
-                    <span className="font-medium text-gray-800">
-                      {product.images?.length || 0} photos
-                    </span>
-                  </div>
-                  {product.video && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Video:</span>
-                      <span className="font-medium text-green-800">
-                        ✅ Available
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Added:</span>
-                    <span className="font-medium text-gray-800">
-                      {new Date(product.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
-                    <span
-                      className={`font-medium ${product.isVisible ? "text-green-600" : "text-red-600"}`}
-                    >
-                      {product.isVisible
-                        ? "🟢 Visible in shop"
-                        : "🔴 Hidden from shop"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Comments:</span>
-                    <span className="font-medium text-gray-800">
-                      {commentPagination.total || 0} comments
-                    </span>
-                  </div>
-                </div>
-              </div>
 
               {/* Comments Section */}
               <div className="mt-12 pt-8 border-t border-gray-200">

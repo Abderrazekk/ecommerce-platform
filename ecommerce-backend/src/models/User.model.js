@@ -34,6 +34,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        unique: true, // Prevents duplicate products
+      },
+    ],
     createdAt: {
       type: Date,
       default: Date.now,
@@ -57,6 +64,11 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Prevent duplicate products in wishlist
+userSchema.path("wishlist").validate(function (value) {
+  return value.length === new Set(value.map(id => id.toString())).size;
+}, "Duplicate product in wishlist");
 
 // Add virtual for comments if needed
 userSchema.virtual("comments", {

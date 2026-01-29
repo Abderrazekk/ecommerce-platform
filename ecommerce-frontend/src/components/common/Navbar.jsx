@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/slices/auth.slice";
 import { clearCart } from "../../redux/slices/cart.slice";
+import { fetchWishlistCount } from "../../redux/slices/auth.slice";
 import {
   FaShoppingCart,
   FaUser,
@@ -17,7 +18,8 @@ import {
   FaUserCog,
   FaBox,
   FaSignOutAlt,
-  FaChevronRight,
+  FaHeart,
+  FaRegHeart,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -27,10 +29,17 @@ const Navbar = () => {
   const [shopDropdown, setShopDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, wishlistCount } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Fetch wishlist count on mount and when auth state changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchWishlistCount());
+    }
+  }, [isAuthenticated, dispatch]);
 
   // Shop categories
   const shopCategories = [
@@ -335,6 +344,22 @@ const Navbar = () => {
 
           {/* Right side icons */}
           <div className="flex items-center space-x-4">
+            {/* Desktop Wishlist Icon */}
+            <div className="hidden md:block">
+              <Link
+                to={isAuthenticated ? "/wishlist" : "/login"}
+                className="relative p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                title="Wishlist"
+              >
+                <FaHeart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {wishlistCount > 9 ? "9+" : wishlistCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+
             {/* Search Icon - Mobile & Desktop */}
             <button
               onClick={() => setIsSearchVisible(!isSearchVisible)}
@@ -406,12 +431,33 @@ const Navbar = () => {
                   {userDropdown && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-10">
                       <Link
+                        to="/wishlist"
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
+                        onClick={() => setUserDropdown(false)}
+                      >
+                        <FaHeart className="h-4 w-4" />
+                        <span>My Wishlist</span>
+                        {wishlistCount > 0 && (
+                          <span className="ml-auto bg-primary-100 text-primary-800 text-xs font-bold px-2 py-0.5 rounded-full">
+                            {wishlistCount}
+                          </span>
+                        )}
+                      </Link>
+                      <Link
                         to="/my-orders"
                         className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
                         onClick={() => setUserDropdown(false)}
                       >
                         <FaBox className="h-4 w-4" />
                         <span>My Orders</span>
+                      </Link>
+                      <Link
+                        to="/profile"
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
+                        onClick={() => setUserDropdown(false)}
+                      >
+                        <FaUser className="h-4 w-4" />
+                        <span>My Profile</span>
                       </Link>
                       <button
                         onClick={() => {
@@ -543,6 +589,23 @@ const Navbar = () => {
               </Link>
             </div>
 
+            {/* Wishlist */}
+            <Link
+              to={isAuthenticated ? "/wishlist" : "/login"}
+              className="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+              onClick={() => setIsOpen(false)}
+            >
+              <div className="flex items-center space-x-3">
+                <FaHeart className="h-5 w-5 text-primary-600" />
+                <span className="font-medium">Wishlist</span>
+              </div>
+              {isAuthenticated && wishlistCount > 0 && (
+                <span className="bg-primary-600 text-white text-sm font-bold px-3 py-1 rounded-full">
+                  {wishlistCount} items
+                </span>
+              )}
+            </Link>
+
             {/* Cart Item Count Display */}
             <Link
               to="/cart"
@@ -613,7 +676,7 @@ const Navbar = () => {
                         className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50 pl-8"
                         onClick={() => setIsOpen(false)}
                       >
-                        <FaChevronDown className="h-3 w-3 text-gray-400" />
+                        <FaChevronRight className="h-3 w-3 text-gray-400" />
                         <span className="font-medium">{item.name}</span>
                       </Link>
                     ))}
@@ -665,7 +728,7 @@ const Navbar = () => {
             {/* Footer Info */}
             <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
               <p className="text-xs text-gray-500 text-center">
-                © 2023 Shoppina. All rights reserved.
+                © {new Date().getFullYear()} Shoppina. All rights reserved.
               </p>
             </div>
           </div>

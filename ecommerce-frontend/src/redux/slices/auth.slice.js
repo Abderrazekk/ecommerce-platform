@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "../../services/auth.service";
+import wishlistService from "../../services/wishlist.service";
 import { toast } from "react-hot-toast";
 
 // Async thunks
@@ -47,12 +48,103 @@ export const logout = createAsyncThunk("auth/logout", async () => {
   toast.success("Logged out successfully!");
 });
 
+export const fetchWishlist = createAsyncThunk(
+  "auth/fetchWishlist",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await wishlistService.getWishlist();
+      return response.data.wishlist;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
+  },
+);
+
+// New: Add to wishlist
+export const addToWishlist = createAsyncThunk(
+  "auth/addToWishlist",
+  async (productId, { rejectWithValue, getState }) => {
+    try {
+      const response = await wishlistService.addToWishlist(productId);
+      const state = getState();
+
+      // Add product ID to local wishlist
+      const product =
+        state.products.products.find((p) => p._id === productId) ||
+        state.products.product ||
+        state.products.featuredProducts.find((p) => p._id === productId);
+
+      toast.success("Added to wishlist!");
+      return {
+        productId,
+        product,
+        count: response.data.count,
+      };
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to add to wishlist");
+      return rejectWithValue(error.response?.data?.message);
+    }
+  },
+);
+
+// New: Remove from wishlist
+export const removeFromWishlist = createAsyncThunk(
+  "auth/removeFromWishlist",
+  async (productId, { rejectWithValue }) => {
+    try {
+      const response = await wishlistService.removeFromWishlist(productId);
+      toast.success("Removed from wishlist!");
+      return {
+        productId,
+        count: response.data.count,
+      };
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to remove from wishlist",
+      );
+      return rejectWithValue(error.response?.data?.message);
+    }
+  },
+);
+
+// New: Check wishlist status
+export const checkWishlistStatus = createAsyncThunk(
+  "auth/checkWishlistStatus",
+  async (productId, { rejectWithValue }) => {
+    try {
+      const response = await wishlistService.checkWishlist(productId);
+      return {
+        productId,
+        isInWishlist: response.data.isInWishlist,
+      };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
+  },
+);
+
+// New: Get wishlist count
+export const fetchWishlistCount = createAsyncThunk(
+  "auth/fetchWishlistCount",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await wishlistService.getWishlistCount();
+      return response.data.count;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
+  },
+);
+
 const initialState = {
   user: JSON.parse(localStorage.getItem("user")) || null,
   token: localStorage.getItem("token") || null,
   isAuthenticated: !!localStorage.getItem("token"),
   loading: false,
   error: null,
+  wishlist: [], // Array of product objects
+  wishlistIds: new Set(), // For quick lookup
+  wishlistCount: 0,
 };
 
 const authSlice = createSlice({
@@ -65,6 +157,11 @@ const authSlice = createSlice({
     updateProfile: (state, action) => {
       state.user = { ...state.user, ...action.payload };
       localStorage.setItem("user", JSON.stringify(state.user));
+    },
+    clearWishlist: (state) => {
+      state.wishlist = [];
+      state.wishlistIds = new Set();
+      state.wishlistCount = 0;
     },
   },
   extraReducers: (builder) => {
@@ -80,7 +177,7 @@ const authSlice = createSlice({
 
         // Ensure user object has consistent _id field
         state.user = {
-          _id: userData.id || userData._id, // Use id from backend as _id
+          _id: userData.id || userData._id,
           name: userData.name,
           email: userData.email,
           role: userData.role,
@@ -90,21 +187,22 @@ const authSlice = createSlice({
 
         state.token = action.payload.token;
         state.isAuthenticated = true;
+
+        // Clear previous wishlist data
+        state.wishlist = [];
+        state.wishlistIds = new Set();
+        state.wishlistCount = 0;
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+
       // Register
-      .addCase(register.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
         const userData = action.payload.user;
 
-        // Ensure user object has consistent _id field
         state.user = {
           _id: userData.id || userData._id,
           name: userData.name,
@@ -116,11 +214,13 @@ const authSlice = createSlice({
 
         state.token = action.payload.token;
         state.isAuthenticated = true;
+
+        // Clear previous wishlist data
+        state.wishlist = [];
+        state.wishlistIds = new Set();
+        state.wishlistCount = 0;
       })
-      .addCase(register.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+
       // Logout
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
@@ -128,9 +228,57 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.loading = false;
         state.error = null;
+        state.wishlist = [];
+        state.wishlistIds = new Set();
+        state.wishlistCount = 0;
+      })
+
+      // Fetch wishlist
+      .addCase(fetchWishlist.fulfilled, (state, action) => {
+        state.wishlist = action.payload;
+        state.wishlistIds = new Set(action.payload.map((p) => p._id));
+        state.wishlistCount = action.payload.length;
+      })
+
+      // Add to wishlist
+      .addCase(addToWishlist.fulfilled, (state, action) => {
+        const { productId, product, count } = action.payload;
+
+        if (product && !state.wishlistIds.has(productId)) {
+          state.wishlist.push(product);
+          state.wishlistIds.add(productId);
+        }
+        state.wishlistCount = count;
+      })
+
+      // Remove from wishlist
+      .addCase(removeFromWishlist.fulfilled, (state, action) => {
+        const { productId, count } = action.payload;
+
+        state.wishlist = state.wishlist.filter((p) => p._id !== productId);
+        state.wishlistIds.delete(productId);
+        state.wishlistCount = count;
+      })
+
+      // Check wishlist status
+      .addCase(checkWishlistStatus.fulfilled, (state, action) => {
+        const { productId, isInWishlist } = action.payload;
+
+        if (isInWishlist && !state.wishlistIds.has(productId)) {
+          // Note: We don't have the full product object here
+          // We'll need to fetch it separately or handle differently
+          state.wishlistIds.add(productId);
+        } else if (!isInWishlist) {
+          state.wishlistIds.delete(productId);
+        }
+      })
+
+      // Fetch wishlist count
+      .addCase(fetchWishlistCount.fulfilled, (state, action) => {
+        state.wishlistCount = action.payload;
       });
   },
 });
 
-export const { clearError, updateProfile } = authSlice.actions;
+export const { clearError, updateProfile, clearWishlist } = authSlice.actions;
 export default authSlice.reducer;
