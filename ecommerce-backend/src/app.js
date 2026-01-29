@@ -8,6 +8,7 @@ const productRoutes = require("./routes/product.routes");
 const orderRoutes = require("./routes/order.routes");
 const adminRoutes = require("./routes/admin.routes");
 const heroRoutes = require("./routes/hero.routes");
+const commentRoutes = require("./routes/comment.routes");
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/hero", heroRoutes);
+app.use("/api", commentRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {

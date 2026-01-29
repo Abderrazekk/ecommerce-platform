@@ -155,6 +155,18 @@ productSchema.pre("save", function (next) {
   next();
 });
 
+productSchema.virtual("comments", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "product",
+});
+
+// Add this to the Product model to get comment count
+productSchema.virtual("commentCount").get(function () {
+  // This would need population or separate query
+  return 0;
+});
+
 const Product = mongoose.model("Product", productSchema);
 
 // Export both as named exports

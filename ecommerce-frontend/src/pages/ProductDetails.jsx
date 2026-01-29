@@ -2,6 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchProductById } from "../redux/slices/product.slice";
+import {
+  fetchProductComments,
+  addComment,
+  editComment,
+  removeComment,
+} from "../redux/slices/comment.slice";
 import { addToCart } from "../redux/slices/cart.slice";
 import { formatPrice } from "../utils/formatPrice";
 import Loader from "../components/common/Loader";
@@ -18,6 +24,19 @@ import {
   Pause,
   Image as ImageIcon,
   Video as VideoIcon,
+  MessageSquare,
+  Edit2,
+  Trash2,
+  Send,
+  X,
+  User,
+  Calendar,
+  Edit,
+  ChevronLeft,
+  ChevronRight,
+  Save,
+  XCircle,
+  Clock,
 } from "lucide-react";
 
 const ProductDetails = () => {
@@ -25,7 +44,17 @@ const ProductDetails = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { product, loading } = useSelector((state) => state.products);
+  const { product, loading: productLoading } = useSelector(
+    (state) => state.products,
+  );
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const {
+    commentsByProduct,
+    loading: commentsLoading,
+    submitting,
+    error,
+  } = useSelector((state) => state.comments);
+
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -45,8 +74,19 @@ const ProductDetails = () => {
   const mainImageRef = useRef(null);
   const zoomLensRef = useRef(null);
 
+  // Comment states
+  const [commentText, setCommentText] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editText, setEditText] = useState("");
+  const [localSubmitting, setLocalSubmitting] = useState(false);
+
   useEffect(() => {
+    console.log("DEBUG - Initializing ProductDetails for product:", id);
+    console.log("DEBUG - User state:", user);
+    console.log("DEBUG - Is Authenticated:", isAuthenticated);
+
     dispatch(fetchProductById(id));
+    dispatch(fetchProductComments({ productId: id }));
   }, [dispatch, id]);
 
   // Reset showVideo when product changes
@@ -193,7 +233,6 @@ const ProductDetails = () => {
   const toggleView = (showVideoView) => {
     setShowVideo(showVideoView);
     if (showVideoView) {
-      // When switching to video, stop any playing video
       if (videoRef.current) {
         videoRef.current.pause();
         setVideoPlaying(false);
@@ -208,7 +247,230 @@ const ProductDetails = () => {
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  if (loading) return <Loader />;
+  // DEBUG: Function to check edit permissions with detailed logging
+  const checkEditPermissions = (comment) => {
+    console.group("DEBUG - Edit Permission Check");
+    console.log("Current User:", {
+      id: user?._id,
+      name: user?.name,
+      role: user?.role,
+    });
+    console.log("Comment Owner:", {
+      id: comment.user?._id,
+      name: comment.user?.name,
+      role: comment.user?.role,
+    });
+    console.log("Is Same User:", user?._id === comment.user?._id);
+    console.log("Is Admin:", user?.role === "admin");
+    console.log(
+      "Can Edit:",
+      user?._id === comment.user?._id || user?.role === "admin",
+    );
+    console.groupEnd();
+  };
+
+  // Comment handlers
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    console.log("DEBUG - Adding comment for product:", id);
+
+    if (!commentText.trim()) {
+      alert("Comment text is required");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      alert("You must be logged in to comment");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setLocalSubmitting(true);
+      const result = await dispatch(
+        addComment({ productId: id, text: commentText }),
+      );
+
+      console.log("DEBUG - Add comment result:", result);
+
+      if (result.type === "comments/add/fulfilled") {
+        setCommentText("");
+        console.log("DEBUG - Comment added successfully");
+      } else {
+        console.error("DEBUG - Failed to add comment:", result.payload);
+        alert(`Failed to add comment: ${result.payload || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("DEBUG - Exception adding comment:", error);
+      alert("An error occurred while adding comment");
+    } finally {
+      setLocalSubmitting(false);
+    }
+  };
+
+  const handleStartEdit = (comment) => {
+    console.log("DEBUG - Starting edit for comment:", comment._id);
+    console.log("Comment data:", comment);
+    checkEditPermissions(comment);
+
+    setEditingCommentId(comment._id);
+    setEditText(comment.text);
+  };
+
+  const handleCancelEdit = () => {
+    console.log("DEBUG - Cancelling edit");
+    setEditingCommentId(null);
+    setEditText("");
+  };
+
+  const handleUpdateComment = async (commentId) => {
+    console.log("DEBUG - Updating comment:", commentId);
+    console.log("New text:", editText);
+
+    if (!editText.trim()) {
+      alert("Comment text is required");
+      return;
+    }
+
+    try {
+      setLocalSubmitting(true);
+      const result = await dispatch(editComment({ commentId, text: editText }));
+
+      console.log("DEBUG - Update comment result:", result);
+
+      if (result.type === "comments/edit/fulfilled") {
+        setEditingCommentId(null);
+        setEditText("");
+        console.log("DEBUG - Comment updated successfully");
+      } else {
+        console.error("DEBUG - Failed to update comment:", result.payload);
+        alert(`Failed to update comment: ${result.payload || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("DEBUG - Exception updating comment:", error);
+      alert("An error occurred while updating comment");
+    } finally {
+      setLocalSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    console.log("DEBUG - Deleting comment:", commentId);
+
+    if (window.confirm("Are you sure you want to delete this comment?")) {
+      try {
+        const result = await dispatch(removeComment(commentId));
+        console.log("DEBUG - Delete comment result:", result);
+
+        if (result.type === "comments/delete/rejected") {
+          alert(
+            `Failed to delete comment: ${result.payload || "Unknown error"}`,
+          );
+        }
+      } catch (error) {
+        console.error("DEBUG - Exception deleting comment:", error);
+        alert("An error occurred while deleting comment");
+      }
+    }
+  };
+
+  // Enhanced permission check with detailed logging
+  // Replace the existing canEditComment function with this FIXED version:
+  const canEditComment = (comment) => {
+    if (!user || !comment || !comment.user) {
+      console.log("DEBUG - Missing data for edit check");
+      return false;
+    }
+
+    // Get the current user's ID - handle both .id and ._id formats
+    const currentUserId = user._id || user.id;
+
+    // Get the comment owner's ID - handle both ._id and .id formats
+    const commentOwnerId = comment.user._id || comment.user.id;
+
+    // Convert both to strings for safe comparison
+    const userIdStr = currentUserId?.toString();
+    const commentUserIdStr = commentOwnerId?.toString();
+
+    const isOwner = userIdStr === commentUserIdStr;
+    const isAdmin = user.role === "admin";
+
+    console.log("DEBUG - canEditCheck:", {
+      currentUser: {
+        id: user._id,
+        alternateId: user.id,
+        finalId: userIdStr,
+        name: user.name,
+        role: user.role,
+      },
+      commentUser: {
+        _id: comment.user._id,
+        id: comment.user.id,
+        finalId: commentUserIdStr,
+        name: comment.user.name,
+        role: comment.user.role,
+      },
+      isOwner,
+      isAdmin,
+      canEdit: isOwner || isAdmin,
+    });
+
+    return isOwner || isAdmin;
+  };
+  const canDeleteComment = (comment) => {
+    if (!user) return false;
+    return user.role === "admin";
+  };
+
+  // Format date for comments with relative time
+  const formatCommentDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return (
+        "Today at " +
+        date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+    } else if (diffDays === 1) {
+      return (
+        "Yesterday at " +
+        date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
+  };
+
+  // Get comments for current product
+  const currentComments = commentsByProduct[id]?.comments || [];
+  const commentPagination = commentsByProduct[id]?.pagination || {
+    total: 0,
+    page: 1,
+    totalPages: 1,
+  };
+
+  // Debug logging for comments
+  useEffect(() => {
+    console.log("DEBUG - Current comments:", currentComments);
+    console.log("DEBUG - Comments state:", commentsByProduct[id]);
+  }, [currentComments, commentsByProduct, id]);
+
+  if (productLoading) return <Loader />;
 
   if (!product) {
     return (
@@ -423,7 +685,7 @@ const ProductDetails = () => {
                           }}
                           className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-20"
                         >
-                          <ArrowLeft className="h-5 w-5" />
+                          <ChevronLeft className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => {
@@ -434,7 +696,7 @@ const ProductDetails = () => {
                           }}
                           className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-20"
                         >
-                          <ArrowLeft className="h-5 w-5 transform rotate-180" />
+                          <ChevronRight className="h-5 w-5" />
                         </button>
                       </>
                     )}
@@ -775,7 +1037,323 @@ const ProductDetails = () => {
                         : "🔴 Hidden from shop"}
                     </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Comments:</span>
+                    <span className="font-medium text-gray-800">
+                      {commentPagination.total || 0} comments
+                    </span>
+                  </div>
                 </div>
+              </div>
+
+              {/* Comments Section */}
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 flex items-center">
+                    <MessageSquare className="h-6 w-6 mr-2 text-primary-600" />
+                    Product Comments
+                    {commentPagination.total > 0 && (
+                      <span className="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                        {commentPagination.total}
+                      </span>
+                    )}
+                  </h3>
+                </div>
+
+                {/* Add Comment Form */}
+                {isAuthenticated ? (
+                  <div className="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <h4 className="text-lg font-semibold mb-4 text-gray-800">
+                      Add Your Comment
+                    </h4>
+                    <form onSubmit={handleAddComment}>
+                      <textarea
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        placeholder="Share your thoughts about this product..."
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                        rows={3}
+                        maxLength={1000}
+                        disabled={localSubmitting || submitting}
+                      />
+                      <div className="flex justify-between items-center mt-3">
+                        <span className="text-sm text-gray-500">
+                          {commentText.length}/1000 characters
+                        </span>
+                        <button
+                          type="submit"
+                          disabled={
+                            !commentText.trim() || localSubmitting || submitting
+                          }
+                          className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {localSubmitting || submitting ? (
+                            <>
+                              <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                              Posting...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4" />
+                              <span>Post Comment</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                    {error && (
+                      <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-700 text-sm">Error: {error}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                    <p className="text-blue-800">
+                      Please{" "}
+                      <button
+                        onClick={() => navigate("/login")}
+                        className="text-blue-600 hover:text-blue-800 font-semibold underline"
+                      >
+                        login
+                      </button>{" "}
+                      to add a comment
+                    </p>
+                  </div>
+                )}
+
+                {/* Comments List */}
+                {commentsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader />
+                  </div>
+                ) : currentComments.length === 0 ? (
+                  <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-medium text-gray-600 mb-2">
+                      No comments yet
+                    </h4>
+                    <p className="text-gray-500">
+                      Be the first to share your thoughts!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {currentComments.map((comment) => (
+                      <div
+                        key={comment._id}
+                        className="bg-white border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors group relative"
+                      >
+                        {/* Edit Tooltip */}
+                        {canEditComment(comment) && (
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded shadow-sm">
+                              Click pencil to edit
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Comment Header */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex-shrink-0">
+                              <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                <User className="h-5 w-5 text-primary-600" />
+                              </div>
+                            </div>
+                            <div>
+                              <h5 className="font-semibold text-gray-900">
+                                {comment.user?.name || "Unknown User"}
+                                {comment.user?.role === "admin" && (
+                                  <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                                    Admin
+                                  </span>
+                                )}
+                              </h5>
+                              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                                <Calendar className="h-3 w-3" />
+                                <time dateTime={comment.createdAt}>
+                                  {formatCommentDate(comment.createdAt)}
+                                </time>
+                                {comment.isEdited && (
+                                  <div className="relative group/edit-badge inline-block">
+                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded cursor-help">
+                                      Edited
+                                    </span>
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover/edit-badge:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                      <div className="flex items-center">
+                                        <Clock className="h-3 w-3 mr-1" />
+                                        Last edited:{" "}
+                                        {new Date(
+                                          comment.updatedAt,
+                                        ).toLocaleDateString()}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          {(canEditComment(comment) ||
+                            canDeleteComment(comment)) && (
+                            <div className="flex space-x-2">
+                              {canEditComment(comment) && (
+                                <button
+                                  onClick={() => {
+                                    console.log("DEBUG - Edit button clicked");
+                                    console.log(
+                                      "Comment user ID:",
+                                      comment.user?._id,
+                                    );
+                                    console.log("Current user ID:", user?._id);
+                                    handleStartEdit(comment);
+                                  }}
+                                  className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors"
+                                  title="Edit comment"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </button>
+                              )}
+                              {canDeleteComment(comment) && (
+                                <button
+                                  onClick={() =>
+                                    handleDeleteComment(comment._id)
+                                  }
+                                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                  title="Delete comment"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Comment Content */}
+                        {editingCommentId === comment._id ? (
+                          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="mb-3">
+                              <label className="block text-sm font-medium text-blue-800 mb-2">
+                                Edit your comment
+                              </label>
+                              <textarea
+                                value={editText}
+                                onChange={(e) => setEditText(e.target.value)}
+                                className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                rows={3}
+                                maxLength={1000}
+                                autoFocus
+                              />
+                              <div className="text-sm text-gray-600 mt-1 flex justify-between">
+                                <span>{editText.length}/1000 characters</span>
+                                {editText.length === 1000 && (
+                                  <span className="text-red-500">
+                                    Character limit reached
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex justify-end space-x-3">
+                              <button
+                                onClick={handleCancelEdit}
+                                className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                                disabled={localSubmitting}
+                              >
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => handleUpdateComment(comment._id)}
+                                disabled={
+                                  !editText.trim() ||
+                                  localSubmitting ||
+                                  submitting
+                                }
+                                className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              >
+                                {localSubmitting || submitting ? (
+                                  <>
+                                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                    Saving...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Save className="h-4 w-4 mr-2" />
+                                    Save Changes
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                            {comment.text}
+                          </p>
+                        )}
+
+                        {/* Debug info (visible only in development) */}
+                        {process.env.NODE_ENV === "development" && (
+                          <div className="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-400">
+                            <div className="flex justify-between">
+                              <span>Comment ID: {comment._id?.slice(-8)}</span>
+                              <span>
+                                User ID: {comment.user?._id?.slice(-8)}
+                              </span>
+                              <span>
+                                Can Edit:{" "}
+                                {canEditComment(comment) ? "Yes" : "No"}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Pagination for comments */}
+                {commentPagination.totalPages > 1 && (
+                  <div className="mt-8 flex justify-center">
+                    <nav className="flex items-center space-x-2">
+                      <button
+                        onClick={() =>
+                          dispatch(
+                            fetchProductComments({
+                              productId: id,
+                              page: commentPagination.page - 1,
+                            }),
+                          )
+                        }
+                        disabled={commentPagination.page === 1}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Previous
+                      </button>
+                      <span className="px-4 py-2 text-gray-600">
+                        Page {commentPagination.page} of{" "}
+                        {commentPagination.totalPages}
+                      </span>
+                      <button
+                        onClick={() =>
+                          dispatch(
+                            fetchProductComments({
+                              productId: id,
+                              page: commentPagination.page + 1,
+                            }),
+                          )
+                        }
+                        disabled={
+                          commentPagination.page >= commentPagination.totalPages
+                        }
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Next
+                      </button>
+                    </nav>
+                  </div>
+                )}
               </div>
             </div>
           </div>

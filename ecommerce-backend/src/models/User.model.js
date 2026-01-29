@@ -1,30 +1,30 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Please provide a name'],
+      required: [true, "Please provide a name"],
       trim: true,
     },
     email: {
       type: String,
-      required: [true, 'Please provide an email'],
+      required: [true, "Please provide an email"],
       unique: true,
       lowercase: true,
       trim: true,
     },
     password: {
       type: String,
-      required: [true, 'Please provide a password'],
+      required: [true, "Please provide a password"],
       minlength: 6,
       select: false,
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
+      enum: ["user", "admin"],
+      default: "user",
     },
     phone: {
       type: String,
@@ -41,12 +41,12 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
     return next();
   }
   this.password = await bcrypt.hash(this.password, 12);
@@ -58,5 +58,12 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-const User = mongoose.model('User', userSchema);
+// Add virtual for comments if needed
+userSchema.virtual("comments", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "user",
+});
+
+const User = mongoose.model("User", userSchema);
 module.exports = User;

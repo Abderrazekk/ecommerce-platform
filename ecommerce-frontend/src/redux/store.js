@@ -3,7 +3,8 @@ import authReducer from "./slices/auth.slice";
 import productReducer from "./slices/product.slice";
 import cartReducer from "./slices/cart.slice";
 import orderReducer from "./slices/order.slice";
-import heroReducer from "./slices/hero.slice"; // Add this import
+import heroReducer from "./slices/hero.slice";
+import commentReducer from "./slices/comment.slice"; // Add this import
 
 export const store = configureStore({
   reducer: {
@@ -11,10 +12,11 @@ export const store = configureStore({
     products: productReducer,
     cart: cartReducer,
     orders: orderReducer,
-    hero: heroReducer, // Add this line
+    hero: heroReducer,
+    comments: commentReducer, // Add this line
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: false, // Keep this false to handle Dates in comments
     }),
 });
