@@ -28,6 +28,7 @@ router.post(
   adminOnly,
   upload.array("images", 6),
   validateImageCount,
+  handleMulterError, // Add error handler here
   createHero,
 ); // POST /api/hero/admin
 router.put(
@@ -36,11 +37,12 @@ router.put(
   adminOnly,
   upload.array("images", 6),
   validateImageCount,
+  handleMulterError, // Add error handler here
   updateHero,
 ); // PUT /api/hero/admin/:id
 router.delete("/admin/:id", protect, adminOnly, deleteHero); // DELETE /api/hero/admin/:id
 
-// Multer error handling middleware
-router.use(handleMulterError);
+// Remove this line - handleMulterError should be in the route chain, not as router.use()
+// router.use(handleMulterError);
 
 module.exports = router;

@@ -19,6 +19,8 @@ import {
   Eye,
   EyeOff,
   X as XIcon,
+  Video,
+  Film,
 } from "lucide-react";
 
 const categories = [
@@ -53,7 +55,10 @@ const Products = () => {
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoPreview, setVideoPreview] = useState(null);
   const fileInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
   // Fetch ALL products (including hidden) for admin
   useEffect(() => {
@@ -79,6 +84,8 @@ const Products = () => {
       setImagePreviews(
         product.images ? product.images.map((img) => img.url) : [],
       );
+      setVideoFile(null);
+      setVideoPreview(product.video || null);
     } else {
       setEditingProduct(null);
       setFormData({
@@ -95,6 +102,8 @@ const Products = () => {
       });
       setImageFiles([]);
       setImagePreviews([]);
+      setVideoFile(null);
+      setVideoPreview(null);
     }
     setShowModal(true);
   };
@@ -116,8 +125,13 @@ const Products = () => {
     });
     setImageFiles([]);
     setImagePreviews([]);
+    setVideoFile(null);
+    setVideoPreview(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+    if (videoInputRef.current) {
+      videoInputRef.current.value = "";
     }
   };
 
@@ -156,6 +170,15 @@ const Products = () => {
       return;
     }
 
+    // Validate file size (max 10MB)
+    const oversizedFiles = validFiles.filter(
+      (file) => file.size > 10 * 1024 * 1024,
+    );
+    if (oversizedFiles.length > 0) {
+      toast.error("Image file size must be less than 10MB");
+      return;
+    }
+
     // Add new files
     setImageFiles((prev) => [...prev, ...validFiles]);
 
@@ -169,9 +192,60 @@ const Products = () => {
     });
   };
 
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) {
+      setVideoFile(null);
+      setVideoPreview(null);
+      return;
+    }
+
+    // Validate file type
+    const validTypes = [
+      "video/mp4",
+      "video/mov",
+      "video/avi",
+      "video/mkv",
+      "video/webm",
+      "video/flv",
+      "video/wmv",
+    ];
+
+    if (!validTypes.includes(file.type)) {
+      toast.error(
+        "Please select a valid video file (MP4, MOV, AVI, MKV, WebM, FLV, WMV)",
+      );
+      return;
+    }
+
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("Video file size must be less than 50MB");
+      return;
+    }
+
+    setVideoFile(file);
+
+    // Create video preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setVideoPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const removeImage = (index) => {
     setImageFiles((prev) => prev.filter((_, i) => i !== index));
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeVideo = () => {
+    setVideoFile(null);
+    setVideoPreview(null);
+    if (videoInputRef.current) {
+      videoInputRef.current.value = "";
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -256,6 +330,11 @@ const Products = () => {
       productData.append("images", file);
     });
 
+    // Append video if exists
+    if (videoFile) {
+      productData.append("video", videoFile);
+    }
+
     try {
       if (editingProduct) {
         await dispatch(
@@ -323,7 +402,7 @@ const Products = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Images
+                    Media
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name & Brand
@@ -352,18 +431,28 @@ const Products = () => {
                     className={`hover:bg-gray-50 ${!product.isVisible ? "bg-gray-100" : ""}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex -space-x-2">
-                        {product.images?.slice(0, 3).map((img, index) => (
-                          <img
-                            key={index}
-                            src={img.url}
-                            alt={`${product.name} ${index + 1}`}
-                            className="h-10 w-10 object-cover rounded-full border-2 border-white"
-                          />
-                        ))}
-                        {product.images?.length > 3 && (
-                          <div className="h-10 w-10 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs font-semibold">
-                            +{product.images.length - 3}
+                      <div className="flex items-start space-x-2">
+                        <div className="flex -space-x-2">
+                          {product.images?.slice(0, 3).map((img, index) => (
+                            <img
+                              key={index}
+                              src={img.url}
+                              alt={`${product.name} ${index + 1}`}
+                              className="h-10 w-10 object-cover rounded-full border-2 border-white"
+                            />
+                          ))}
+                          {product.images?.length > 3 && (
+                            <div className="h-10 w-10 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs font-semibold">
+                              +{product.images.length - 3}
+                            </div>
+                          )}
+                        </div>
+                        {product.video && (
+                          <div className="relative" title="Has video">
+                            <div className="h-10 w-10 rounded-full bg-purple-100 border-2 border-white flex items-center justify-center">
+                              <Film className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div className="absolute -top-1 -right-1 h-4 w-4 bg-purple-600 rounded-full border-2 border-white"></div>
                           </div>
                         )}
                       </div>
@@ -401,6 +490,12 @@ const Products = () => {
                           <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 flex items-center">
                             <EyeOff className="h-3 w-3 mr-1" />
                             Hidden
+                          </span>
+                        )}
+                        {product.video && (
+                          <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800 flex items-center">
+                            <Film className="h-3 w-3 mr-1" />
+                            Video
                           </span>
                         )}
                         {product.discountPrice && (
@@ -537,7 +632,7 @@ const Products = () => {
                                   Click to upload product images
                                 </p>
                                 <p className="text-xs text-gray-500 mt-1">
-                                  PNG, JPG, GIF, WebP up to 5MB each
+                                  PNG, JPG, GIF, WebP up to 10MB each
                                 </p>
                                 <p className="text-xs text-gray-500">
                                   Minimum 1 image, Maximum 6 images
@@ -570,6 +665,83 @@ const Products = () => {
                         <p className="text-red-500 text-sm mt-1">
                           At least one image is required for new products
                         </p>
+                      )}
+                    </div>
+
+                    {/* Product Video */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Product Video (Optional)
+                      </label>
+
+                      {videoPreview ? (
+                        <div className="mb-4">
+                          <div className="relative">
+                            {videoFile?.type?.startsWith("video/") ? (
+                              <video
+                                src={videoPreview}
+                                className="w-full h-64 object-cover rounded-lg"
+                                controls
+                              />
+                            ) : (
+                              <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <Film className="h-12 w-12 text-gray-400" />
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={removeVideo}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                            >
+                              <XIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            {videoFile?.name || "Video file"}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="mt-1">
+                          <label className="cursor-pointer block">
+                            <div className="flex flex-col items-center justify-center h-32 w-full border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-500 hover:bg-gray-50">
+                              <div className="text-center p-4">
+                                <Video className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-600">
+                                  Click to upload product video
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  MP4, MOV, AVI up to 50MB
+                                </p>
+                              </div>
+                            </div>
+                            <input
+                              ref={videoInputRef}
+                              type="file"
+                              className="hidden"
+                              accept="video/*"
+                              onChange={handleVideoChange}
+                            />
+                          </label>
+                        </div>
+                      )}
+
+                      {editingProduct?.video && !videoPreview && (
+                        <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                          <p className="text-sm text-gray-600">
+                            Current video:{" "}
+                            <a
+                              href={editingProduct.video}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary-600 hover:underline"
+                            >
+                              View video
+                            </a>
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Upload a new video to replace the existing one
+                          </p>
+                        </div>
                       )}
                     </div>
 

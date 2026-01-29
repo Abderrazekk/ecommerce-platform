@@ -63,7 +63,7 @@ const productService = {
 
     // Log form data entries for debugging
     for (let [key, value] of productData.entries()) {
-      if (key === "images") {
+      if (key === "images" || key === "video") {
         console.log(`${key}: File - ${value.name || "File object"}`);
       } else {
         console.log(`${key}: ${value}`);
@@ -82,7 +82,7 @@ const productService = {
 
     // Log form data entries for debugging
     for (let [key, value] of productData.entries()) {
-      if (key === "images") {
+      if (key === "images" || key === "video") {
         console.log(`${key}: File - ${value.name || "File object"}`);
       } else {
         console.log(`${key}: ${value}`);

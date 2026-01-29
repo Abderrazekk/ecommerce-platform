@@ -65,6 +65,22 @@ const productSchema = new mongoose.Schema(
         message: "Product must have between 1 and 6 images",
       },
     },
+    video: {
+      type: String,
+      default: null,
+      validate: {
+        validator: function (value) {
+          // Allow null or Cloudinary URL format
+          if (!value) return true;
+          return (
+            value.startsWith("http") &&
+            (value.includes("cloudinary") ||
+              value.includes("res.cloudinary.com"))
+          );
+        },
+        message: "Video must be a valid Cloudinary URL",
+      },
+    },
     category: {
       type: String,
       required: [true, "Please select a category"],

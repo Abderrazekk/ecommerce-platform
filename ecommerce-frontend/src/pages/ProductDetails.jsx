@@ -13,6 +13,11 @@ import {
   Tag,
   ZoomIn,
   Maximize2,
+  Film,
+  Play,
+  Pause,
+  Image as ImageIcon,
+  Video as VideoIcon,
 } from "lucide-react";
 
 const ProductDetails = () => {
@@ -24,12 +29,18 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-
+  
+  // Video state
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [showVideo, setShowVideo] = useState(product?.video ? true : false);
+  const videoRef = useRef(null);
+  
   // Zoom state
   const [isHovering, setIsHovering] = useState(false);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
-
   const imageContainerRef = useRef(null);
   const mainImageRef = useRef(null);
   const zoomLensRef = useRef(null);
@@ -37,6 +48,15 @@ const ProductDetails = () => {
   useEffect(() => {
     dispatch(fetchProductById(id));
   }, [dispatch, id]);
+
+  // Reset showVideo when product changes
+  useEffect(() => {
+    if (product?.video) {
+      setShowVideo(true);
+    } else {
+      setShowVideo(false);
+    }
+  }, [product]);
 
   // Handle image load
   const handleImageLoad = () => {
@@ -57,7 +77,7 @@ const ProductDetails = () => {
     }
   };
 
-  // Handle mouse move for zoom - Professional implementation
+  // Handle mouse move for zoom
   const handleMouseMove = (e) => {
     if (
       !imageContainerRef.current ||
@@ -68,7 +88,6 @@ const ProductDetails = () => {
       return;
 
     const container = imageContainerRef.current;
-    const img = mainImageRef.current;
     const rect = container.getBoundingClientRect();
 
     // Get mouse position relative to container
@@ -141,6 +160,53 @@ const ProductDetails = () => {
     };
   }, []);
 
+  // Video controls
+  const handleVideoPlayPause = () => {
+    if (videoRef.current) {
+      if (videoPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setVideoPlaying(!videoPlaying);
+    }
+  };
+
+  const handleVideoTimeUpdate = () => {
+    if (videoRef.current) {
+      const progress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+      setVideoProgress(progress);
+    }
+  };
+
+  const handleVideoLoaded = () => {
+    if (videoRef.current) {
+      setVideoDuration(videoRef.current.duration);
+    }
+  };
+
+  const handleVideoEnded = () => {
+    setVideoPlaying(false);
+  };
+
+  const toggleView = (showVideoView) => {
+    setShowVideo(showVideoView);
+    if (showVideoView) {
+      // When switching to video, stop any playing video
+      if (videoRef.current) {
+        videoRef.current.pause();
+        setVideoPlaying(false);
+      }
+    }
+  };
+
+  const formatTime = (seconds) => {
+    if (isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
   if (loading) return <Loader />;
 
   if (!product) {
@@ -182,157 +248,241 @@ const ProductDetails = () => {
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
-            {/* Product Images Gallery */}
-            <div className="relative">
-              {/* Zoom and Fullscreen Controls */}
-              <div className="absolute top-4 left-4 z-20 flex flex-col space-y-2">
-                <div className="flex items-center space-x-2 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
-                  <ZoomIn className="h-5 w-5 text-primary-600" />
-                  <span className="text-sm font-medium text-gray-700">
-                    1.5x Zoom
-                  </span>
-                </div>
-                <button
-                  onClick={toggleFullscreen}
-                  className="p-3 rounded-full bg-white text-gray-700 shadow-lg hover:bg-gray-50 transition-colors"
-                  title="Fullscreen"
-                >
-                  <Maximize2 className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Main Image Container with Zoom */}
-              <div
-                ref={imageContainerRef}
-                className="relative overflow-hidden rounded-lg cursor-none"
-                onMouseMove={handleMouseMove}
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={handleMouseLeave}
-              >
-                {/* Main Image */}
-                <img
-                  ref={mainImageRef}
-                  src={product.images?.[selectedImageIndex]?.url || ""}
-                  alt={`${product.name} - Image ${selectedImageIndex + 1}`}
-                  className="w-full h-96 object-cover"
-                  onLoad={handleImageLoad}
-                />
-
-                {/* Zoom Lens - Professional glass effect */}
-                {isHovering && product.images && imageLoaded && (
-                  <div
-                    ref={zoomLensRef}
-                    className="absolute pointer-events-none z-10 overflow-hidden rounded-full"
-                    style={{
-                      left: `${zoomStyle.lensPosition?.x || 0}px`,
-                      top: `${zoomStyle.lensPosition?.y || 0}px`,
-                      width: "180px",
-                      height: "180px",
-                      // Glass effect styling
-                      border: "2px solid rgba(255, 255, 255, 0.9)",
-                      boxShadow: `
-                        0 0 0 1px rgba(0, 0, 0, 0.1),
-                        0 8px 32px rgba(0, 0, 0, 0.2),
-                        inset 0 0 32px rgba(255, 255, 255, 0.2)
-                      `,
-                      // Remove all background color for pure glass effect
-                      backgroundColor: "transparent",
-                      backdropFilter: "blur(2px)",
-                      // Zoom image as background
-                      backgroundImage: `url(${product.images[selectedImageIndex].url})`,
-                      backgroundRepeat: "no-repeat",
-                      backgroundSize: zoomStyle.backgroundSize || "auto",
-                      backgroundPosition:
-                        zoomStyle.backgroundPosition || "0px 0px",
-                      // Smooth but responsive movement
-                      transition: "left 0.05s linear, top 0.05s linear",
-                    }}
+            {/* Product Media Section */}
+            <div className="space-y-6">
+              {/* View Toggle - Show only if product has video */}
+              {product.video && (
+                <div className="flex space-x-2 mb-4">
+                  <button
+                    onClick={() => toggleView(false)}
+                    className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all ${
+                      !showVideo
+                        ? "bg-primary-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                   >
-                    {/* Subtle inner ring for depth */}
-                    <div
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        boxShadow: "inset 0 0 20px rgba(0, 0, 0, 0.1)",
-                        border: "1px solid rgba(255, 255, 255, 0.3)",
-                      }}
+                    <ImageIcon className="h-4 w-4" />
+                    <span>Images ({product.images?.length || 0})</span>
+                  </button>
+                  <button
+                    onClick={() => toggleView(true)}
+                    className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all ${
+                      showVideo
+                        ? "bg-primary-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    <VideoIcon className="h-4 w-4" />
+                    <span>Video</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Video Player */}
+              {showVideo && product.video && (
+                <div className="mb-6">
+                  <div className="relative rounded-lg overflow-hidden shadow-lg bg-black">
+                    <video
+                      ref={videoRef}
+                      src={product.video}
+                      className="w-full h-96 object-contain"
+                      controls
+                      onTimeUpdate={handleVideoTimeUpdate}
+                      onLoadedMetadata={handleVideoLoaded}
+                      onEnded={handleVideoEnded}
+                      poster={product.images?.[0]?.url}
                     />
+                    
+                    {/* Custom video controls overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={handleVideoPlayPause}
+                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 text-white transition-colors"
+                        >
+                          {videoPlaying ? (
+                            <Pause className="h-5 w-5" />
+                          ) : (
+                            <Play className="h-5 w-5" />
+                          )}
+                        </button>
+                        
+                        <div className="flex-1 mx-4">
+                          <div className="w-full bg-gray-600/50 h-1.5 rounded-full overflow-hidden">
+                            <div 
+                              className="bg-primary-500 h-full transition-all duration-100"
+                              style={{ width: `${videoProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-gray-300 mt-1">
+                            <span>{formatTime(videoRef.current?.currentTime || 0)}</span>
+                            <span>{formatTime(videoDuration)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
-
-                {/* Image Navigation Arrows */}
-                {product.images && product.images.length > 1 && (
-                  <>
-                    <button
-                      onClick={() => {
-                        setSelectedImageIndex((prev) =>
-                          prev > 0 ? prev - 1 : product.images.length - 1,
-                        );
-                        setIsHovering(false);
-                      }}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-20"
-                    >
-                      <ArrowLeft className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedImageIndex((prev) =>
-                          prev < product.images.length - 1 ? prev + 1 : 0,
-                        );
-                        setIsHovering(false);
-                      }}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-20"
-                    >
-                      <ArrowLeft className="h-5 w-5 transform rotate-180" />
-                    </button>
-                  </>
-                )}
-              </div>
-
-              {/* Thumbnail Gallery */}
-              {product.images && product.images.length > 1 && (
-                <div className="mt-6">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-sm font-medium text-gray-700">
-                      More Views
-                    </h3>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                      {selectedImageIndex + 1} of {product.images.length}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
-                    {product.images.map((image, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedImageIndex(index)}
-                        className={`relative overflow-hidden rounded-lg border-2 transition-all duration-200 transform hover:scale-105 ${
-                          selectedImageIndex === index
-                            ? "border-primary-500 ring-2 ring-primary-200 ring-opacity-50 scale-105"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        <img
-                          src={image.url}
-                          alt={`Thumbnail ${index + 1}`}
-                          className="h-20 w-full object-cover"
-                        />
-                        {selectedImageIndex === index && (
-                          <div className="absolute inset-0 bg-primary-500 bg-opacity-10"></div>
-                        )}
-                      </button>
-                    ))}
+                  <div className="mt-2 text-center">
+                    <p className="text-sm text-gray-600">
+                      Product demonstration video
+                    </p>
                   </div>
                 </div>
               )}
 
-              {/* Zoom Instructions */}
-              <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-lg">
-                <p className="text-sm text-blue-700 flex items-center justify-center">
-                  <ZoomIn className="h-4 w-4 mr-2" />
-                  <span className="font-medium">
-                    Hover over image for 1.5x zoom magnifier
-                  </span>
-                </p>
-              </div>
+              {/* Image Gallery */}
+              {!showVideo && (
+                <div className="relative">
+                  {/* Zoom and Fullscreen Controls */}
+                  <div className="absolute top-4 left-4 z-20 flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
+                      <ZoomIn className="h-5 w-5 text-primary-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        1.5x Zoom
+                      </span>
+                    </div>
+                    <button
+                      onClick={toggleFullscreen}
+                      className="p-3 rounded-full bg-white text-gray-700 shadow-lg hover:bg-gray-50 transition-colors"
+                      title="Fullscreen"
+                    >
+                      <Maximize2 className="h-5 w-5" />
+                    </button>
+                  </div>
+
+                  {/* Main Image Container with Zoom */}
+                  <div
+                    ref={imageContainerRef}
+                    className="relative overflow-hidden rounded-lg cursor-none"
+                    onMouseMove={handleMouseMove}
+                    onMouseEnter={() => setIsHovering(true)}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    {/* Main Image */}
+                    {product.images && product.images.length > 0 && (
+                      <img
+                        ref={mainImageRef}
+                        src={product.images[selectedImageIndex]?.url || ""}
+                        alt={`${product.name} - Image ${selectedImageIndex + 1}`}
+                        className="w-full h-96 object-cover"
+                        onLoad={handleImageLoad}
+                      />
+                    )}
+
+                    {/* Zoom Lens - Professional glass effect */}
+                    {isHovering && product.images && imageLoaded && product.images[selectedImageIndex] && (
+                      <div
+                        ref={zoomLensRef}
+                        className="absolute pointer-events-none z-10 overflow-hidden rounded-full"
+                        style={{
+                          left: `${zoomStyle.lensPosition?.x || 0}px`,
+                          top: `${zoomStyle.lensPosition?.y || 0}px`,
+                          width: "180px",
+                          height: "180px",
+                          border: "2px solid rgba(255, 255, 255, 0.9)",
+                          boxShadow: `
+                            0 0 0 1px rgba(0, 0, 0, 0.1),
+                            0 8px 32px rgba(0, 0, 0, 0.2),
+                            inset 0 0 32px rgba(255, 255, 255, 0.2)
+                          `,
+                          backgroundColor: "transparent",
+                          backdropFilter: "blur(2px)",
+                          backgroundImage: `url(${product.images[selectedImageIndex].url})`,
+                          backgroundRepeat: "no-repeat",
+                          backgroundSize: zoomStyle.backgroundSize || "auto",
+                          backgroundPosition: zoomStyle.backgroundPosition || "0px 0px",
+                          transition: "left 0.05s linear, top 0.05s linear",
+                        }}
+                      >
+                        <div
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            boxShadow: "inset 0 0 20px rgba(0, 0, 0, 0.1)",
+                            border: "1px solid rgba(255, 255, 255, 0.3)",
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Image Navigation Arrows */}
+                    {product.images && product.images.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setSelectedImageIndex((prev) =>
+                              prev > 0 ? prev - 1 : product.images.length - 1,
+                            );
+                            setIsHovering(false);
+                          }}
+                          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-20"
+                        >
+                          <ArrowLeft className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedImageIndex((prev) =>
+                              prev < product.images.length - 1 ? prev + 1 : 0,
+                            );
+                            setIsHovering(false);
+                          }}
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-20"
+                        >
+                          <ArrowLeft className="h-5 w-5 transform rotate-180" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Thumbnail Gallery */}
+                  {product.images && product.images.length > 1 && (
+                    <div className="mt-6">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-sm font-medium text-gray-700">
+                          More Views
+                        </h3>
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                          {selectedImageIndex + 1} of {product.images.length}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
+                        {product.images.map((image, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setSelectedImageIndex(index);
+                              setShowVideo(false);
+                            }}
+                            className={`relative overflow-hidden rounded-lg border-2 transition-all duration-200 transform hover:scale-105 ${
+                              selectedImageIndex === index && !showVideo
+                                ? "border-primary-500 ring-2 ring-primary-200 ring-opacity-50 scale-105"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                          >
+                            <img
+                              src={image.url}
+                              alt={`Thumbnail ${index + 1}`}
+                              className="h-20 w-full object-cover"
+                            />
+                            {selectedImageIndex === index && !showVideo && (
+                              <div className="absolute inset-0 bg-primary-500 bg-opacity-10"></div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Zoom Instructions */}
+                  <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-lg">
+                    <p className="text-sm text-blue-700 flex items-center justify-center">
+                      <ZoomIn className="h-4 w-4 mr-2" />
+                      <span className="font-medium">
+                        Hover over image for 1.5x zoom magnifier
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Product Details */}
@@ -351,6 +501,12 @@ const ProductDetails = () => {
                   <span className="inline-flex bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full items-center">
                     <Star className="h-3 w-3 mr-1" />
                     Featured
+                  </span>
+                )}
+                {product.video && (
+                  <span className="inline-flex bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full items-center">
+                    <Film className="h-3 w-3 mr-1" />
+                    Has Video
                   </span>
                 )}
                 {discountPercentage > 0 && (
@@ -588,6 +744,14 @@ const ProductDetails = () => {
                       {product.images?.length || 0} photos
                     </span>
                   </div>
+                  {product.video && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Video:</span>
+                      <span className="font-medium text-green-800">
+                        ✅ Available
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-gray-600">Added:</span>
                     <span className="font-medium text-gray-800">

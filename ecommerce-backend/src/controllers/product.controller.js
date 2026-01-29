@@ -7,7 +7,10 @@ const uploadImagesToCloudinary = async (files) => {
   const uploadPromises = files.map((file) => {
     return new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
-        { folder: "ecommerce/products" },
+        {
+          folder: "ecommerce/products",
+          resource_type: "auto", // Auto-detect image
+        },
         (error, result) => {
           if (error) {
             console.error("Cloudinary upload error:", error);
@@ -27,6 +30,29 @@ const uploadImagesToCloudinary = async (files) => {
   return await Promise.all(uploadPromises);
 };
 
+// NEW: Helper function to upload video to Cloudinary
+const uploadVideoToCloudinary = async (file) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "ecommerce/products/videos",
+        resource_type: "video", // Explicitly set to video
+        chunk_size: 6000000, // 6MB chunks for large videos
+      },
+      (error, result) => {
+        if (error) {
+          console.error("Cloudinary video upload error:", error);
+          reject(error);
+        } else {
+          console.log("Video uploaded successfully:", result.public_id);
+          resolve(result.secure_url);
+        }
+      },
+    );
+    stream.end(file.buffer);
+  });
+};
+
 // Helper function to delete images from Cloudinary
 const deleteImagesFromCloudinary = async (images) => {
   if (!images || images.length === 0) return;
@@ -36,6 +62,24 @@ const deleteImagesFromCloudinary = async (images) => {
   });
 
   await Promise.all(deletePromises);
+};
+
+// NEW: Helper function to delete video from Cloudinary
+const deleteVideoFromCloudinary = async (videoUrl) => {
+  if (!videoUrl) return;
+
+  try {
+    // Extract public_id from Cloudinary URL
+    const urlParts = videoUrl.split("/");
+    const publicIdWithExtension = urlParts.slice(-1)[0];
+    const publicId =
+      "ecommerce/products/videos/" + publicIdWithExtension.split(".")[0];
+
+    await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
+    console.log("Video deleted from Cloudinary:", publicId);
+  } catch (error) {
+    console.error("Error deleting video from Cloudinary:", error);
+  }
 };
 
 // @desc    Get all products (visible only)
@@ -193,10 +237,7 @@ const getProductById = asyncHandler(async (req, res) => {
 const createProduct = asyncHandler(async (req, res) => {
   console.log("=== CREATE PRODUCT REQUEST ===");
   console.log("Request body:", req.body);
-  console.log(
-    "Request files:",
-    req.files ? `${req.files.length} files received` : "No files",
-  );
+  console.log("Request files:", req.files);
 
   const {
     name,
@@ -212,8 +253,8 @@ const createProduct = asyncHandler(async (req, res) => {
   } = req.body;
 
   // Check for required images
-  if (!req.files || req.files.length === 0) {
-    console.log("No files in request");
+  if (!req.files?.images || req.files.images.length === 0) {
+    console.log("No images in request");
     res.status(400);
     throw new Error("Please upload at least one product image");
   }
@@ -224,7 +265,7 @@ const createProduct = asyncHandler(async (req, res) => {
     throw new Error("Invalid category");
   }
 
-  // Parse tags if provided (comma-separated string)
+  // Parse tags if provided
   let parsedTags = [];
   if (tags) {
     parsedTags = tags
@@ -235,9 +276,17 @@ const createProduct = asyncHandler(async (req, res) => {
 
   try {
     // Upload images to Cloudinary
-    console.log(`Uploading ${req.files.length} images to Cloudinary...`);
-    const uploadedImages = await uploadImagesToCloudinary(req.files);
-    console.log("Cloudinary upload successful");
+    console.log(`Uploading ${req.files.images.length} images to Cloudinary...`);
+    const uploadedImages = await uploadImagesToCloudinary(req.files.images);
+    console.log("Images uploaded successfully:", uploadedImages.length);
+
+    // Upload video to Cloudinary if provided
+    let videoUrl = null;
+    if (req.files.video && req.files.video.length > 0) {
+      console.log("Uploading video to Cloudinary...");
+      videoUrl = await uploadVideoToCloudinary(req.files.video[0]);
+      console.log("Video uploaded successfully:", videoUrl);
+    }
 
     const product = await Product.create({
       name,
@@ -249,13 +298,14 @@ const createProduct = asyncHandler(async (req, res) => {
           ? discountPrice === "" || discountPrice === null
             ? null
             : Number(discountPrice)
-          : product.discountPrice, // Only set if provided
+          : null,
       category,
       stock,
       tags: parsedTags,
       images: uploadedImages,
+      video: videoUrl, // NEW: Add video URL
       isFeatured: isFeatured === "true" || isFeatured === true,
-      isVisible: isVisible !== "false", // Default to true if not specified
+      isVisible: isVisible !== "false",
     });
 
     console.log("Product created successfully:", product._id);
@@ -267,14 +317,24 @@ const createProduct = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("Error in createProduct:", error);
 
-    // Clean up uploaded images if product creation fails
-    if (req.files && req.files.length > 0) {
+    // Clean up uploaded files if product creation fails
+    if (req.files?.images && req.files.images.length > 0) {
       try {
-        // Extract public_ids from uploaded images (assuming upload succeeded)
-        const uploadedImages = await uploadImagesToCloudinary(req.files);
+        // Extract public_ids from uploaded images
+        const uploadedImages = await uploadImagesToCloudinary(req.files.images);
         await deleteImagesFromCloudinary(uploadedImages);
       } catch (cleanupError) {
         console.error("Error cleaning up images:", cleanupError);
+      }
+    }
+
+    // Clean up uploaded video if exists
+    if (req.files?.video && req.files.video.length > 0) {
+      try {
+        const videoUrl = await uploadVideoToCloudinary(req.files.video[0]);
+        await deleteVideoFromCloudinary(videoUrl);
+      } catch (cleanupError) {
+        console.error("Error cleaning up video:", cleanupError);
       }
     }
 
@@ -327,13 +387,6 @@ const updateProduct = asyncHandler(async (req, res) => {
     const priceNum = price ? parseFloat(price) : product.price;
     const discountNum = parseFloat(discountPrice);
 
-    console.log("DEBUG: Price comparison:", {
-      price: priceNum,
-      discount: discountNum,
-      priceType: typeof priceNum,
-      discountType: typeof discountNum,
-    });
-
     if (isNaN(discountNum)) {
       res.status(400);
       throw new Error("Discount price must be a valid number");
@@ -350,15 +403,19 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
   }
 
-  // Store old images for cleanup
+  // Store old files for cleanup
   const oldImages = [...product.images];
+  const oldVideoUrl = product.video;
   let newImages = [...product.images];
+  let newVideoUrl = product.video;
 
   // Upload new images if provided
-  if (req.files && req.files.length > 0) {
+  if (req.files?.images && req.files.images.length > 0) {
     try {
-      console.log(`Uploading ${req.files.length} new images to Cloudinary...`);
-      const uploadedImages = await uploadImagesToCloudinary(req.files);
+      console.log(
+        `Uploading ${req.files.images.length} new images to Cloudinary...`,
+      );
+      const uploadedImages = await uploadImagesToCloudinary(req.files.images);
       newImages = uploadedImages; // Replace all images
 
       // Delete old images from Cloudinary
@@ -371,6 +428,23 @@ const updateProduct = asyncHandler(async (req, res) => {
     } catch (uploadError) {
       console.error("Error uploading new images:", uploadError);
       throw new Error("Failed to upload new images");
+    }
+  }
+
+  // Upload new video if provided
+  if (req.files?.video && req.files.video.length > 0) {
+    try {
+      console.log("Uploading new video to Cloudinary...");
+      newVideoUrl = await uploadVideoToCloudinary(req.files.video[0]);
+
+      // Delete old video from Cloudinary if it exists
+      if (oldVideoUrl) {
+        console.log("Deleting old video from Cloudinary...");
+        await deleteVideoFromCloudinary(oldVideoUrl);
+      }
+    } catch (uploadError) {
+      console.error("Error uploading new video:", uploadError);
+      throw new Error("Failed to upload new video");
     }
   }
 
@@ -390,6 +464,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     stock: stock !== undefined ? Number(stock) : product.stock,
     tags: parsedTags,
     images: newImages,
+    video: newVideoUrl, // NEW: Add video URL
   };
 
   // Only update boolean fields if provided
@@ -429,6 +504,11 @@ const deleteProduct = asyncHandler(async (req, res) => {
     await deleteImagesFromCloudinary(product.images);
   }
 
+  // Delete video from Cloudinary if exists
+  if (product.video) {
+    await deleteVideoFromCloudinary(product.video);
+  }
+
   await product.deleteOne();
 
   res.json({
@@ -436,7 +516,6 @@ const deleteProduct = asyncHandler(async (req, res) => {
     message: "Product deleted successfully",
   });
 });
-
 // @desc    Get all categories
 // @route   GET /api/products/categories
 // @access  Public
