@@ -391,14 +391,6 @@ const Hero = () => {
                 {hero.season.charAt(0).toUpperCase() + hero.season.slice(1)}{" "}
                 Collection
               </span>
-              <span className="px-3 py-1 bg-primary-600/80 backdrop-blur-sm rounded-full drop-shadow-md">
-                Active Now
-              </span>
-              {isSlideshowMode && (
-                <span className="px-3 py-1 bg-purple-600/80 backdrop-blur-sm rounded-full drop-shadow-md">
-                  Slideshow Mode
-                </span>
-              )}
             </div>
           </div>
         </div>
