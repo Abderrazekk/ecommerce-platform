@@ -101,7 +101,7 @@ const Navbar = () => {
             <Link to="/" className="flex items-center">
               <div className="relative">
                 <img
-                  src="/shoppina.jpg"
+                  src="/shoppina1.jpg"
                   alt="Shoppina Logo"
                   className="h-10 w-auto object-contain"
                   onError={(e) => {
