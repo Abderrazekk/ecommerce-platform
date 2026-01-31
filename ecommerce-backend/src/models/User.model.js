@@ -26,6 +26,24 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
+    bannedAt: {
+      type: Date,
+      default: null,
+    },
+    bannedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    banReason: {
+      type: String,
+      default: null,
+      trim: true,
+    },
     phone: {
       type: String,
       trim: true,
@@ -38,7 +56,7 @@ const userSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
-        unique: true, // Prevents duplicate products
+        unique: true,
       },
     ],
     createdAt: {
@@ -65,9 +83,14 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+// Method to check if user is banned
+userSchema.methods.isUserBanned = function () {
+  return this.isBanned;
+};
+
 // Prevent duplicate products in wishlist
 userSchema.path("wishlist").validate(function (value) {
-  return value.length === new Set(value.map(id => id.toString())).size;
+  return value.length === new Set(value.map((id) => id.toString())).size;
 }, "Duplicate product in wishlist");
 
 // Add virtual for comments if needed

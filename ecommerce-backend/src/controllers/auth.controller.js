@@ -1,6 +1,6 @@
-const User = require('../models/User.model');
-const generateToken = require('../utils/generateToken');
-const asyncHandler = require('../middlewares/error.middleware').asyncHandler;
+const User = require("../models/User.model");
+const generateToken = require("../utils/generateToken");
+const asyncHandler = require("../middlewares/error.middleware").asyncHandler;
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -12,17 +12,17 @@ const registerUser = asyncHandler(async (req, res) => {
   const userExists = await User.findOne({ email });
   if (userExists) {
     res.status(400);
-    throw new Error('User already exists');
+    throw new Error("User already exists");
   }
 
   // Only allow creating admin if requester is admin or it's the default admin creation
-  let userRole = 'user';
-  if (role === 'admin') {
-    if (req.user && req.user.role === 'admin') {
-      userRole = 'admin';
+  let userRole = "user";
+  if (role === "admin") {
+    if (req.user && req.user.role === "admin") {
+      userRole = "admin";
     } else {
       res.status(403);
-      throw new Error('Not authorized to create admin account');
+      throw new Error("Not authorized to create admin account");
     }
   }
 
@@ -37,7 +37,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (user) {
     const token = generateToken(user._id, user.role);
-    
+
     res.status(201).json({
       success: true,
       user: {
@@ -45,6 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        isBanned: user.isBanned,
         phone: user.phone,
         address: user.address,
       },
@@ -52,7 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(400);
-    throw new Error('Invalid user data');
+    throw new Error("Invalid user data");
   }
 });
 
@@ -62,24 +63,30 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // Check for user email
-  const user = await User.findOne({ email }).select('+password');
-  
+  // Check for user email (include isBanned field)
+  const user = await User.findOne({ email }).select("+password");
+
   if (!user) {
     res.status(401);
-    throw new Error('Invalid credentials');
+    throw new Error("Invalid credentials");
+  }
+
+  // Check if user is banned
+  if (user.isBanned) {
+    res.status(403);
+    throw new Error("Your account has been banned");
   }
 
   // Check password
   const isPasswordMatch = await user.comparePassword(password);
-  
+
   if (!isPasswordMatch) {
     res.status(401);
-    throw new Error('Invalid credentials');
+    throw new Error("Invalid credentials");
   }
 
   const token = generateToken(user._id, user.role);
-  
+
   res.json({
     success: true,
     user: {
@@ -87,6 +94,7 @@ const loginUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      isBanned: user.isBanned,
       phone: user.phone,
       address: user.address,
     },
@@ -98,8 +106,10 @@ const loginUser = asyncHandler(async (req, res) => {
 // @route   GET /api/auth/profile
 // @access  Private
 const getUserProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id);
-  
+  const user = await User.findById(req.user._id)
+    .select("-password")
+    .populate("bannedBy", "name email");
+
   if (user) {
     res.json({
       success: true,
@@ -108,6 +118,16 @@ const getUserProfile = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        isBanned: user.isBanned,
+        bannedAt: user.bannedAt,
+        bannedBy: user.bannedBy
+          ? {
+              id: user.bannedBy._id,
+              name: user.bannedBy.name,
+              email: user.bannedBy.email,
+            }
+          : null,
+        banReason: user.banReason,
         phone: user.phone,
         address: user.address,
         createdAt: user.createdAt,
@@ -115,7 +135,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(404);
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 });
 

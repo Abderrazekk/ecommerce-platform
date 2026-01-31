@@ -20,6 +20,16 @@ const authService = {
   getAllUsers: () => {
     return api.get('/admin/users')
   },
+  
+  // Updated: Toggle user ban status with reason
+  toggleUserBan: (userId, data = {}) => {
+    return api.put(`/admin/users/${userId}/ban`, data)
+  },
+  
+  // New: Update user profile
+  updateProfile: (userData) => {
+    return api.put('/auth/profile', userData)
+  },
 }
 
 export default authService

@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
@@ -19,7 +21,8 @@ import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import MyOrders from "./pages/MyOrders";
-import Wishlist from "./pages/Wishlist"; // NEW: Add this import
+import Wishlist from "./pages/Wishlist";
+import Profile from "./pages/Profile";
 
 // Admin Pages
 import Dashboard from "./pages/admin/Dashboard";
@@ -31,7 +34,21 @@ import Hero from "./pages/admin/Hero";
 // Optional: Not Found page
 import NotFound from "./pages/NotFound";
 
+// Import auth actions
+import { logout } from "./redux/slices/auth.slice";
+
 function App() {
+  const dispatch = useDispatch();
+  const { isBanned } = useSelector((state) => state.auth);
+
+  // Global ban check - if user becomes banned while using the app
+  useEffect(() => {
+    if (isBanned) {
+      dispatch(logout("Your account has been banned"));
+      window.location.href = "/login?message=Your account has been banned";
+    }
+  }, [isBanned, dispatch]);
+
   return (
     <BrowserRouter>
       <div className="flex flex-col min-h-screen">
@@ -73,7 +90,14 @@ function App() {
                 </PrivateRoute>
               }
             />
-            {/* NEW: Wishlist Route */}
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="/wishlist"
               element={
@@ -87,41 +111,41 @@ function App() {
             <Route
               path="/admin/dashboard"
               element={
-                <AdminRoute>
+                <PrivateRoute adminOnly>
                   <Dashboard />
-                </AdminRoute>
+                </PrivateRoute>
               }
             />
             <Route
               path="/admin/hero"
               element={
-                <AdminRoute>
+                <PrivateRoute adminOnly>
                   <Hero />
-                </AdminRoute>
+                </PrivateRoute>
               }
             />
             <Route
               path="/admin/products"
               element={
-                <AdminRoute>
+                <PrivateRoute adminOnly>
                   <Products />
-                </AdminRoute>
+                </PrivateRoute>
               }
             />
             <Route
               path="/admin/orders"
               element={
-                <AdminRoute>
+                <PrivateRoute adminOnly>
                   <Orders />
-                </AdminRoute>
+                </PrivateRoute>
               }
             />
             <Route
               path="/admin/users"
               element={
-                <AdminRoute>
+                <PrivateRoute adminOnly>
                   <Users />
-                </AdminRoute>
+                </PrivateRoute>
               }
             />
 
@@ -131,7 +155,22 @@ function App() {
         </main>
 
         <Footer />
-        <Toaster position="top-right" />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: "#363636",
+              color: "#fff",
+            },
+            success: {
+              duration: 3000,
+            },
+            error: {
+              duration: 5000,
+            },
+          }}
+        />
       </div>
     </BrowserRouter>
   );

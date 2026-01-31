@@ -12,11 +12,27 @@ export const login = createAsyncThunk(
       if (response.data.success) {
         localStorage.setItem("user", JSON.stringify(response.data.user));
         localStorage.setItem("token", response.data.token);
+
+        // Check if user is banned (shouldn't happen but just in case)
+        if (response.data.user.isBanned) {
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+          throw new Error("Your account has been banned");
+        }
+
         toast.success("Login successful!");
         return response.data;
       }
       throw new Error(response.data.message);
     } catch (error) {
+      // Handle ban error specifically
+      if (error.response?.status === 403 || error.message.includes("banned")) {
+        toast.error("Your account has been banned. Please contact support.", {
+          duration: 10000,
+        });
+        return rejectWithValue("Account banned");
+      }
+
       toast.error(error.response?.data?.message || error.message);
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -42,11 +58,19 @@ export const register = createAsyncThunk(
   },
 );
 
-export const logout = createAsyncThunk("auth/logout", async () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  toast.success("Logged out successfully!");
-});
+export const logout = createAsyncThunk(
+  "auth/logout",
+  async (message = null) => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    if (message && message.includes("banned")) {
+      toast.error(message);
+    } else {
+      toast.success("Logged out successfully!");
+    }
+  },
+);
 
 export const fetchWishlist = createAsyncThunk(
   "auth/fetchWishlist",
@@ -142,8 +166,9 @@ const initialState = {
   isAuthenticated: !!localStorage.getItem("token"),
   loading: false,
   error: null,
-  wishlist: [], // Array of product objects
-  wishlistIds: new Set(), // For quick lookup
+  isBanned: false, // Add ban status flag
+  wishlist: [],
+  wishlistIds: new Set(),
   wishlistCount: 0,
 };
 
@@ -163,6 +188,16 @@ const authSlice = createSlice({
       state.wishlistIds = new Set();
       state.wishlistCount = 0;
     },
+    // Add reducer to handle ban detection from API interceptor
+    setBanned: (state) => {
+      state.isBanned = true;
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      state.wishlist = [];
+      state.wishlistIds = new Set();
+      state.wishlistCount = 0;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -170,6 +205,7 @@ const authSlice = createSlice({
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.isBanned = false;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
@@ -181,12 +217,14 @@ const authSlice = createSlice({
           name: userData.name,
           email: userData.email,
           role: userData.role,
+          isBanned: userData.isBanned || false,
           phone: userData.phone,
           address: userData.address,
         };
 
         state.token = action.payload.token;
         state.isAuthenticated = true;
+        state.isBanned = false;
 
         // Clear previous wishlist data
         state.wishlist = [];
@@ -196,6 +234,11 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        // Check if error is ban-related
+        if (action.payload === "Account banned") {
+          state.isBanned = true;
+          state.isAuthenticated = false;
+        }
       })
 
       // Register
@@ -228,6 +271,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.loading = false;
         state.error = null;
+        state.isBanned = false;
         state.wishlist = [];
         state.wishlistIds = new Set();
         state.wishlistCount = 0;
@@ -280,5 +324,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, updateProfile, clearWishlist } = authSlice.actions;
+export const { clearError, updateProfile, clearWishlist, setBanned } =
+  authSlice.actions;
 export default authSlice.reducer;

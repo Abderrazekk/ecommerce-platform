@@ -29,7 +29,9 @@ const Navbar = () => {
   const [shopDropdown, setShopDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const { isAuthenticated, user, wishlistCount } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, wishlistCount } = useSelector(
+    (state) => state.auth,
+  );
   const { cartItems } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const navigate = useNavigate();
