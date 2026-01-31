@@ -4,7 +4,8 @@ import productReducer from "./slices/product.slice";
 import cartReducer from "./slices/cart.slice";
 import orderReducer from "./slices/order.slice";
 import heroReducer from "./slices/hero.slice";
-import commentReducer from "./slices/comment.slice"; // Add this import
+import commentReducer from "./slices/comment.slice";
+import adminReducer from "./slices/admin.slice";
 
 export const store = configureStore({
   reducer: {
@@ -13,7 +14,9 @@ export const store = configureStore({
     cart: cartReducer,
     orders: orderReducer,
     hero: heroReducer,
-    comments: commentReducer, // Add this line
+    comments: commentReducer,
+    admin: adminReducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

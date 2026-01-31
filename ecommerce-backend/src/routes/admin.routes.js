@@ -7,6 +7,11 @@ const {
   updateOrderStatus,
   createAdmin,
   toggleUserBan,
+  getDashboardAnalytics,
+  exportAnalytics,
+  getProductPerformance,
+  getRevenueReport,
+  getUserMetrics
 } = require("../controllers/admin.controller");
 const { protect } = require("../middlewares/auth.middleware");
 const { adminOnly } = require("../middlewares/admin.middleware");
@@ -15,7 +20,15 @@ const { adminOnly } = require("../middlewares/admin.middleware");
 router.use(protect);
 router.use(adminOnly);
 
+// Dashboard routes
 router.get("/dashboard", getDashboardStats);
+router.get("/dashboard/analytics", getDashboardAnalytics);
+router.get("/dashboard/export", exportAnalytics);
+router.get("/dashboard/product-performance/:productId", getProductPerformance);
+router.get("/dashboard/revenue-report", getRevenueReport);
+router.get("/dashboard/user-metrics", getUserMetrics);
+
+// Existing routes
 router.get("/users", getAllUsers);
 router.get("/orders", getAllOrders);
 router.put("/order/:id/status", updateOrderStatus);

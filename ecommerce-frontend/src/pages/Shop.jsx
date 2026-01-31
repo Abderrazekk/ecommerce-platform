@@ -1,25 +1,31 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchProducts, fetchBrands, setCategories } from "../redux/slices/product.slice";
+import {
+  fetchProducts,
+  fetchBrands,
+  setCategories,
+} from "../redux/slices/product.slice";
 import ProductCard from "../components/product/ProductCard";
 import Loader from "../components/common/Loader";
-import { 
-  Search, 
-  Filter, 
-  X, 
-  ChevronDown, 
+import {
+  Search,
+  Filter,
+  X,
+  ChevronDown,
   ChevronUp,
   SlidersHorizontal,
   RefreshCw,
   Tag,
   Star,
-  Truck
+  Truck,
 } from "lucide-react";
 
 const Shop = () => {
   const dispatch = useDispatch();
-  const { products, loading, pagination, brands } = useSelector((state) => state.products);
-  
+  const { products, loading, pagination, brands } = useSelector(
+    (state) => state.products,
+  );
+
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,7 +35,7 @@ const Shop = () => {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [discountedOnly, setDiscountedOnly] = useState(false);
   const [featuredOnly, setFeaturedOnly] = useState(false);
-  
+
   // Filter panel states
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isBrandOpen, setIsBrandOpen] = useState(true);
@@ -55,16 +61,17 @@ const Shop = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    const category = selectedCategory === "All Categories" ? "" : selectedCategory;
+    const category =
+      selectedCategory === "All Categories" ? "" : selectedCategory;
     const brand = selectedBrand || "";
-    
+
     dispatch(
-      fetchProducts({ 
-        page: currentPage, 
-        category, 
+      fetchProducts({
+        page: currentPage,
+        category,
         search: searchTerm,
-        brand 
-      })
+        brand,
+      }),
     );
   }, [dispatch, currentPage, selectedCategory, searchTerm, selectedBrand]);
 
@@ -87,27 +94,28 @@ const Shop = () => {
 
   const filteredProducts = useCallback(() => {
     let filtered = [...products];
-    
+
     // Apply price filter
-    filtered = filtered.filter(product => 
-      product.price >= priceRange.min && product.price <= priceRange.max
+    filtered = filtered.filter(
+      (product) =>
+        product.price >= priceRange.min && product.price <= priceRange.max,
     );
-    
+
     // Apply in stock filter
     if (inStockOnly) {
-      filtered = filtered.filter(product => product.stock > 0);
+      filtered = filtered.filter((product) => product.stock > 0);
     }
-    
+
     // Apply discount filter
     if (discountedOnly) {
-      filtered = filtered.filter(product => product.discountPrice);
+      filtered = filtered.filter((product) => product.discountPrice);
     }
-    
+
     // Apply featured filter
     if (featuredOnly) {
-      filtered = filtered.filter(product => product.isFeatured);
+      filtered = filtered.filter((product) => product.isFeatured);
     }
-    
+
     // Apply sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -122,14 +130,14 @@ const Shop = () => {
           return new Date(b.createdAt) - new Date(a.createdAt);
       }
     });
-    
+
     return filtered;
   }, [products, priceRange, inStockOnly, discountedOnly, featuredOnly, sortBy]);
 
   const handlePriceChange = (type, value) => {
-    setPriceRange(prev => ({
+    setPriceRange((prev) => ({
       ...prev,
-      [type]: parseInt(value) || 0
+      [type]: parseInt(value) || 0,
     }));
   };
 
@@ -150,7 +158,7 @@ const Shop = () => {
     </div>
   );
 
-  const activeFiltersCount = 
+  const activeFiltersCount =
     (selectedCategory !== "All Categories" ? 1 : 0) +
     (selectedBrand ? 1 : 0) +
     (searchTerm ? 1 : 0) +
@@ -171,7 +179,7 @@ const Shop = () => {
                 {pagination.total} products available
               </p>
             </div>
-            
+
             <form onSubmit={handleSearch} className="w-full md:w-auto">
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -202,7 +210,7 @@ const Shop = () => {
                 <Filter className="h-4 w-4" />
                 <span>Active Filters ({activeFiltersCount}):</span>
               </div>
-              
+
               {selectedCategory !== "All Categories" && (
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 text-primary-800 rounded-full text-sm">
                   {selectedCategory}
@@ -211,7 +219,7 @@ const Shop = () => {
                   </button>
                 </span>
               )}
-              
+
               {selectedBrand && (
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm">
                   Brand: {selectedBrand}
@@ -220,7 +228,7 @@ const Shop = () => {
                   </button>
                 </span>
               )}
-              
+
               {(priceRange.min > 0 || priceRange.max < 10000) && (
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm">
                   Price: ${priceRange.min} - ${priceRange.max}
@@ -229,7 +237,7 @@ const Shop = () => {
                   </button>
                 </span>
               )}
-              
+
               {inStockOnly && (
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm">
                   In Stock Only
@@ -238,7 +246,7 @@ const Shop = () => {
                   </button>
                 </span>
               )}
-              
+
               {discountedOnly && (
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-orange-100 text-orange-800 rounded-full text-sm">
                   On Sale
@@ -247,7 +255,7 @@ const Shop = () => {
                   </button>
                 </span>
               )}
-              
+
               {featuredOnly && (
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-yellow-100 text-yellow-800 rounded-full text-sm">
                   <Star className="h-3 w-3" />
@@ -257,7 +265,7 @@ const Shop = () => {
                   </button>
                 </span>
               )}
-              
+
               <button
                 onClick={handleClearFilters}
                 className="ml-auto flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
@@ -312,7 +320,7 @@ const Shop = () => {
                       </label>
                     </div>
                   ))}
-                </div>
+                </div>,
               )}
 
               {/* Price Range Filter */}
@@ -334,7 +342,9 @@ const Shop = () => {
                           type="number"
                           min="0"
                           value={priceRange.min}
-                          onChange={(e) => handlePriceChange("min", e.target.value)}
+                          onChange={(e) =>
+                            handlePriceChange("min", e.target.value)
+                          }
                           className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         />
                       </div>
@@ -351,7 +361,9 @@ const Shop = () => {
                           type="number"
                           min="0"
                           value={priceRange.max}
-                          onChange={(e) => handlePriceChange("max", e.target.value)}
+                          onChange={(e) =>
+                            handlePriceChange("max", e.target.value)
+                          }
                           className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         />
                       </div>
@@ -363,7 +375,7 @@ const Shop = () => {
                       <span>${priceRange.max}</span>
                     </div>
                   </div>
-                </div>
+                </div>,
               )}
 
               {/* Brands Filter */}
@@ -424,7 +436,7 @@ const Shop = () => {
                       No brands found
                     </p>
                   )}
-                </div>
+                </div>,
               )}
 
               {/* Additional Features Filter */}
@@ -448,7 +460,7 @@ const Shop = () => {
                       In Stock Only
                     </label>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -467,7 +479,7 @@ const Shop = () => {
                       </span>
                     </label>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -486,7 +498,7 @@ const Shop = () => {
                       </span>
                     </label>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -503,7 +515,7 @@ const Shop = () => {
                       </span>
                     </label>
                   </div>
-                </div>
+                </div>,
               )}
 
               {/* Quick Actions */}
@@ -517,19 +529,6 @@ const Shop = () => {
                 </button>
               </div>
             </div>
-
-            {/* Additional Info */}
-            <div className="mt-6 bg-gradient-to-r from-primary-50 to-blue-50 border border-primary-100 rounded-xl p-6">
-              <h3 className="font-semibold text-primary-800 mb-2">
-                Need Help?
-              </h3>
-              <p className="text-sm text-primary-600 mb-4">
-                Can't find what you're looking for? Contact our support team.
-              </p>
-              <button className="w-full px-4 py-2 text-sm font-medium text-primary-700 bg-white border border-primary-200 rounded-lg hover:bg-primary-50 transition-colors">
-                Contact Support
-              </button>
-            </div>
           </div>
 
           {/* Products Section */}
@@ -539,14 +538,20 @@ const Shop = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <p className="text-gray-600">
-                    Showing <span className="font-semibold">{filteredProducts().length}</span> of{" "}
-                    <span className="font-semibold">{pagination.total}</span> products
+                    Showing{" "}
+                    <span className="font-semibold">
+                      {filteredProducts().length}
+                    </span>{" "}
+                    of <span className="font-semibold">{pagination.total}</span>{" "}
+                    products
                   </p>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600 font-medium">Sort by:</label>
+                    <label className="text-sm text-gray-600 font-medium">
+                      Sort by:
+                    </label>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
@@ -582,9 +587,10 @@ const Shop = () => {
                       <div className="bg-white rounded-xl shadow-sm border p-6">
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                           <div className="text-sm text-gray-600">
-                            Page {currentPage} of {pagination.totalPages} • {pagination.total} total products
+                            Page {currentPage} of {pagination.totalPages} •{" "}
+                            {pagination.total} total products
                           </div>
-                          
+
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() => setCurrentPage(currentPage - 1)}
@@ -593,48 +599,59 @@ const Shop = () => {
                             >
                               Previous
                             </button>
-                            
+
                             <div className="flex items-center space-x-1">
-                              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                                let pageNum;
-                                if (pagination.totalPages <= 5) {
-                                  pageNum = i + 1;
-                                } else if (currentPage <= 3) {
-                                  pageNum = i + 1;
-                                } else if (currentPage >= pagination.totalPages - 2) {
-                                  pageNum = pagination.totalPages - 4 + i;
-                                } else {
-                                  pageNum = currentPage - 2 + i;
-                                }
-                                
-                                return (
-                                  <button
-                                    key={pageNum}
-                                    onClick={() => setCurrentPage(pageNum)}
-                                    className={`w-10 h-10 text-sm font-medium rounded-lg transition-colors ${
-                                      currentPage === pageNum
-                                        ? "bg-primary-600 text-white"
-                                        : "text-gray-700 hover:bg-gray-100"
-                                    }`}
-                                  >
-                                    {pageNum}
-                                  </button>
-                                );
-                              })}
-                              
-                              {pagination.totalPages > 5 && currentPage < pagination.totalPages - 2 && (
-                                <>
-                                  <span className="px-2 text-gray-400">...</span>
-                                  <button
-                                    onClick={() => setCurrentPage(pagination.totalPages)}
-                                    className="w-10 h-10 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                                  >
-                                    {pagination.totalPages}
-                                  </button>
-                                </>
+                              {Array.from(
+                                { length: Math.min(5, pagination.totalPages) },
+                                (_, i) => {
+                                  let pageNum;
+                                  if (pagination.totalPages <= 5) {
+                                    pageNum = i + 1;
+                                  } else if (currentPage <= 3) {
+                                    pageNum = i + 1;
+                                  } else if (
+                                    currentPage >=
+                                    pagination.totalPages - 2
+                                  ) {
+                                    pageNum = pagination.totalPages - 4 + i;
+                                  } else {
+                                    pageNum = currentPage - 2 + i;
+                                  }
+
+                                  return (
+                                    <button
+                                      key={pageNum}
+                                      onClick={() => setCurrentPage(pageNum)}
+                                      className={`w-10 h-10 text-sm font-medium rounded-lg transition-colors ${
+                                        currentPage === pageNum
+                                          ? "bg-primary-600 text-white"
+                                          : "text-gray-700 hover:bg-gray-100"
+                                      }`}
+                                    >
+                                      {pageNum}
+                                    </button>
+                                  );
+                                },
                               )}
+
+                              {pagination.totalPages > 5 &&
+                                currentPage < pagination.totalPages - 2 && (
+                                  <>
+                                    <span className="px-2 text-gray-400">
+                                      ...
+                                    </span>
+                                    <button
+                                      onClick={() =>
+                                        setCurrentPage(pagination.totalPages)
+                                      }
+                                      className="w-10 h-10 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                    >
+                                      {pagination.totalPages}
+                                    </button>
+                                  </>
+                                )}
                             </div>
-                            
+
                             <button
                               onClick={() => setCurrentPage(currentPage + 1)}
                               disabled={currentPage === pagination.totalPages}
