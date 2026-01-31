@@ -37,6 +37,19 @@ import {
   Save,
   XCircle,
   Clock,
+  ChevronDown,
+  Volume2,
+  VolumeX,
+  Settings,
+  Download,
+  Heart,
+  Share2,
+  Package,
+  Truck,
+  Shield,
+  Award,
+  RefreshCw,
+  Globe,
 } from "lucide-react";
 
 const ProductDetails = () => {
@@ -58,13 +71,20 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
-  // Video state
+  // Enhanced Video state
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
-  const [showVideo, setShowVideo] = useState(product?.video ? true : false);
+  const [videoVolume, setVideoVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [videoSpeed, setVideoSpeed] = useState(1);
+  const [showVideoControls, setShowVideoControls] = useState(true);
+  const [videoQuality, setVideoQuality] = useState("auto");
   const videoRef = useRef(null);
+  const videoControlsTimeout = useRef(null);
 
   // Zoom state
   const [isHovering, setIsHovering] = useState(false);
@@ -81,24 +101,175 @@ const ProductDetails = () => {
   const [localSubmitting, setLocalSubmitting] = useState(false);
 
   useEffect(() => {
-    console.log("DEBUG - Initializing ProductDetails for product:", id);
-    console.log("DEBUG - User state:", user);
-    console.log("DEBUG - Is Authenticated:", isAuthenticated);
-
     dispatch(fetchProductById(id));
     dispatch(fetchProductComments({ productId: id }));
   }, [dispatch, id]);
 
-  // Reset showVideo when product changes
-  useEffect(() => {
-    if (product?.video) {
-      setShowVideo(true);
-    } else {
-      setShowVideo(false);
+  // Enhanced Video Controls
+  const handleVideoPlayPause = () => {
+    if (videoRef.current) {
+      if (videoPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setVideoPlaying(!videoPlaying);
+      resetVideoControlsTimeout();
     }
-  }, [product]);
+  };
 
-  // Handle image load
+  const handleVideoTimeUpdate = () => {
+    if (videoRef.current) {
+      const progress =
+        (videoRef.current.currentTime / videoRef.current.duration) * 100;
+      setVideoProgress(progress);
+    }
+  };
+
+  const handleVideoLoaded = () => {
+    if (videoRef.current) {
+      setVideoDuration(videoRef.current.duration);
+      videoRef.current.volume = videoVolume;
+    }
+  };
+
+  const handleVideoEnded = () => {
+    setVideoPlaying(false);
+  };
+
+  const handleVolumeChange = (e) => {
+    const volume = parseFloat(e.target.value);
+    setVideoVolume(volume);
+    setIsMuted(volume === 0);
+    if (videoRef.current) {
+      videoRef.current.volume = volume;
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      if (isMuted) {
+        videoRef.current.volume = videoVolume || 0.5;
+        setIsMuted(false);
+      } else {
+        videoRef.current.volume = 0;
+        setIsMuted(true);
+      }
+      resetVideoControlsTimeout();
+    }
+  };
+
+  const changeVideoSpeed = (speed) => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = speed;
+      setVideoSpeed(speed);
+      resetVideoControlsTimeout();
+    }
+  };
+
+  const handleSeek = (e) => {
+    if (videoRef.current && videoDuration) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      videoRef.current.currentTime = percent * videoDuration;
+      setVideoProgress(percent * 100);
+      resetVideoControlsTimeout();
+    }
+  };
+
+  const toggleFullscreen = (element) => {
+    if (!document.fullscreenElement) {
+      element?.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  const resetVideoControlsTimeout = () => {
+    setShowVideoControls(true);
+    if (videoControlsTimeout.current) {
+      clearTimeout(videoControlsTimeout.current);
+    }
+    videoControlsTimeout.current = setTimeout(() => {
+      setShowVideoControls(false);
+    }, 3000);
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      if (videoControlsTimeout.current) {
+        clearTimeout(videoControlsTimeout.current);
+      }
+    };
+  }, []);
+
+  const formatTime = (seconds) => {
+    if (isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
+
+  // Handle mouse move for zoom
+  const handleMouseMove = (e) => {
+    if (
+      !imageContainerRef.current ||
+      !mainImageRef.current ||
+      !product?.images ||
+      !imageLoaded
+    )
+      return;
+
+    const container = imageContainerRef.current;
+    const rect = container.getBoundingClientRect();
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+      setIsHovering(true);
+      setCursorPos({ x, y });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+  };
+
+  const calculateZoomStyle = () => {
+    if (!imageContainerRef.current || !mainImageRef.current || !product?.images)
+      return {};
+
+    const container = imageContainerRef.current;
+    const rect = container.getBoundingClientRect();
+
+    const lensSize = 180;
+    const zoomFactor = 2;
+
+    let lensX = cursorPos.x - lensSize / 2;
+    let lensY = cursorPos.y - lensSize / 2;
+
+    lensX = Math.max(0, Math.min(lensX, rect.width - lensSize));
+    lensY = Math.max(0, Math.min(lensY, rect.height - lensSize));
+
+    const bgX = -(cursorPos.x * zoomFactor - lensSize / 2);
+    const bgY = -(cursorPos.y * zoomFactor - lensSize / 2);
+
+    return {
+      lensPosition: { x: lensX, y: lensY },
+      backgroundPosition: `${bgX}px ${bgY}px`,
+      backgroundSize: `${rect.width * zoomFactor}px ${rect.height * zoomFactor}px`,
+    };
+  };
+
   const handleImageLoad = () => {
     setImageLoaded(true);
   };
@@ -117,162 +288,9 @@ const ProductDetails = () => {
     }
   };
 
-  // Handle mouse move for zoom
-  const handleMouseMove = (e) => {
-    if (
-      !imageContainerRef.current ||
-      !mainImageRef.current ||
-      !product?.images ||
-      !imageLoaded
-    )
-      return;
-
-    const container = imageContainerRef.current;
-    const rect = container.getBoundingClientRect();
-
-    // Get mouse position relative to container
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Only update if mouse is inside container
-    if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
-      setIsHovering(true);
-      setCursorPos({ x, y });
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovering(false);
-  };
-
-  // Calculate zoom lens position and background
-  const calculateZoomStyle = () => {
-    if (!imageContainerRef.current || !mainImageRef.current || !product?.images)
-      return {};
-
-    const container = imageContainerRef.current;
-    const img = mainImageRef.current;
-    const rect = container.getBoundingClientRect();
-
-    // Lens dimensions
-    const lensSize = 180;
-    const zoomFactor = 1.5;
-
-    // Calculate lens position (centered on cursor)
-    let lensX = cursorPos.x - lensSize / 2;
-    let lensY = cursorPos.y - lensSize / 2;
-
-    // Keep lens within image bounds
-    lensX = Math.max(0, Math.min(lensX, rect.width - lensSize));
-    lensY = Math.max(0, Math.min(lensY, rect.height - lensSize));
-
-    // Calculate background position for zoom
-    const bgX = -(cursorPos.x * zoomFactor - lensSize / 2);
-    const bgY = -(cursorPos.y * zoomFactor - lensSize / 2);
-
-    return {
-      lensPosition: { x: lensX, y: lensY },
-      backgroundPosition: `${bgX}px ${bgY}px`,
-      backgroundSize: `${rect.width * zoomFactor}px ${rect.height * zoomFactor}px`,
-    };
-  };
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      imageContainerRef.current?.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
-
-  // Handle fullscreen change
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
-
-  // Video controls
-  const handleVideoPlayPause = () => {
-    if (videoRef.current) {
-      if (videoPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setVideoPlaying(!videoPlaying);
-    }
-  };
-
-  const handleVideoTimeUpdate = () => {
-    if (videoRef.current) {
-      const progress =
-        (videoRef.current.currentTime / videoRef.current.duration) * 100;
-      setVideoProgress(progress);
-    }
-  };
-
-  const handleVideoLoaded = () => {
-    if (videoRef.current) {
-      setVideoDuration(videoRef.current.duration);
-    }
-  };
-
-  const handleVideoEnded = () => {
-    setVideoPlaying(false);
-  };
-
-  const toggleView = (showVideoView) => {
-    setShowVideo(showVideoView);
-    if (showVideoView) {
-      if (videoRef.current) {
-        videoRef.current.pause();
-        setVideoPlaying(false);
-      }
-    }
-  };
-
-  const formatTime = (seconds) => {
-    if (isNaN(seconds)) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-  };
-
-  // DEBUG: Function to check edit permissions with detailed logging
-  const checkEditPermissions = (comment) => {
-    console.group("DEBUG - Edit Permission Check");
-    console.log("Current User:", {
-      id: user?._id,
-      name: user?.name,
-      role: user?.role,
-    });
-    console.log("Comment Owner:", {
-      id: comment.user?._id,
-      name: comment.user?.name,
-      role: comment.user?.role,
-    });
-    console.log("Is Same User:", user?._id === comment.user?._id);
-    console.log("Is Admin:", user?.role === "admin");
-    console.log(
-      "Can Edit:",
-      user?._id === comment.user?._id || user?.role === "admin",
-    );
-    console.groupEnd();
-  };
-
   // Comment handlers
   const handleAddComment = async (e) => {
     e.preventDefault();
-    console.log("DEBUG - Adding comment for product:", id);
 
     if (!commentText.trim()) {
       alert("Comment text is required");
@@ -291,17 +309,12 @@ const ProductDetails = () => {
         addComment({ productId: id, text: commentText }),
       );
 
-      console.log("DEBUG - Add comment result:", result);
-
       if (result.type === "comments/add/fulfilled") {
         setCommentText("");
-        console.log("DEBUG - Comment added successfully");
       } else {
-        console.error("DEBUG - Failed to add comment:", result.payload);
         alert(`Failed to add comment: ${result.payload || "Unknown error"}`);
       }
     } catch (error) {
-      console.error("DEBUG - Exception adding comment:", error);
       alert("An error occurred while adding comment");
     } finally {
       setLocalSubmitting(false);
@@ -309,24 +322,16 @@ const ProductDetails = () => {
   };
 
   const handleStartEdit = (comment) => {
-    console.log("DEBUG - Starting edit for comment:", comment._id);
-    console.log("Comment data:", comment);
-    checkEditPermissions(comment);
-
     setEditingCommentId(comment._id);
     setEditText(comment.text);
   };
 
   const handleCancelEdit = () => {
-    console.log("DEBUG - Cancelling edit");
     setEditingCommentId(null);
     setEditText("");
   };
 
   const handleUpdateComment = async (commentId) => {
-    console.log("DEBUG - Updating comment:", commentId);
-    console.log("New text:", editText);
-
     if (!editText.trim()) {
       alert("Comment text is required");
       return;
@@ -336,18 +341,13 @@ const ProductDetails = () => {
       setLocalSubmitting(true);
       const result = await dispatch(editComment({ commentId, text: editText }));
 
-      console.log("DEBUG - Update comment result:", result);
-
       if (result.type === "comments/edit/fulfilled") {
         setEditingCommentId(null);
         setEditText("");
-        console.log("DEBUG - Comment updated successfully");
       } else {
-        console.error("DEBUG - Failed to update comment:", result.payload);
         alert(`Failed to update comment: ${result.payload || "Unknown error"}`);
       }
     } catch (error) {
-      console.error("DEBUG - Exception updating comment:", error);
       alert("An error occurred while updating comment");
     } finally {
       setLocalSubmitting(false);
@@ -355,74 +355,36 @@ const ProductDetails = () => {
   };
 
   const handleDeleteComment = async (commentId) => {
-    console.log("DEBUG - Deleting comment:", commentId);
-
     if (window.confirm("Are you sure you want to delete this comment?")) {
       try {
         const result = await dispatch(removeComment(commentId));
-        console.log("DEBUG - Delete comment result:", result);
-
         if (result.type === "comments/delete/rejected") {
           alert(
             `Failed to delete comment: ${result.payload || "Unknown error"}`,
           );
         }
       } catch (error) {
-        console.error("DEBUG - Exception deleting comment:", error);
         alert("An error occurred while deleting comment");
       }
     }
   };
 
-  // Enhanced permission check with detailed logging
-  // Replace the existing canEditComment function with this FIXED version:
   const canEditComment = (comment) => {
-    if (!user || !comment || !comment.user) {
-      console.log("DEBUG - Missing data for edit check");
-      return false;
-    }
-
-    // Get the current user's ID - handle both .id and ._id formats
+    if (!user || !comment || !comment.user) return false;
     const currentUserId = user._id || user.id;
-
-    // Get the comment owner's ID - handle both ._id and .id formats
     const commentOwnerId = comment.user._id || comment.user.id;
-
-    // Convert both to strings for safe comparison
     const userIdStr = currentUserId?.toString();
     const commentUserIdStr = commentOwnerId?.toString();
-
     const isOwner = userIdStr === commentUserIdStr;
     const isAdmin = user.role === "admin";
-
-    console.log("DEBUG - canEditCheck:", {
-      currentUser: {
-        id: user._id,
-        alternateId: user.id,
-        finalId: userIdStr,
-        name: user.name,
-        role: user.role,
-      },
-      commentUser: {
-        _id: comment.user._id,
-        id: comment.user.id,
-        finalId: commentUserIdStr,
-        name: comment.user.name,
-        role: comment.user.role,
-      },
-      isOwner,
-      isAdmin,
-      canEdit: isOwner || isAdmin,
-    });
-
     return isOwner || isAdmin;
   };
+
   const canDeleteComment = (comment) => {
     if (!user) return false;
     return user.role === "admin";
   };
 
-  // Format date for comments with relative time
   const formatCommentDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -432,27 +394,17 @@ const ProductDetails = () => {
     if (diffDays === 0) {
       return (
         "Today at " +
-        date.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+        date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       );
     } else if (diffDays === 1) {
       return (
         "Yesterday at " +
-        date.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+        date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       );
     } else if (diffDays < 7) {
       return `${diffDays} days ago`;
     } else {
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
+      return date.toLocaleDateString();
     }
   };
 
@@ -464,820 +416,887 @@ const ProductDetails = () => {
     totalPages: 1,
   };
 
-  // Debug logging for comments
-  useEffect(() => {
-    console.log("DEBUG - Current comments:", currentComments);
-    console.log("DEBUG - Comments state:", commentsByProduct[id]);
-  }, [currentComments, commentsByProduct, id]);
-
   if (productLoading) return <Loader />;
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Product not found
+          <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Package className="h-12 w-12 text-gray-400" />
+          </div>
+          <h2 className="text-3xl font-light text-gray-900 mb-4">
+            Product Not Found
           </h2>
-          <button onClick={() => navigate("/shop")} className="btn-primary">
-            Back to Shop
+          <p className="text-gray-600 mb-8">
+            The product you're looking for doesn't exist.
+          </p>
+          <button
+            onClick={() => navigate("/shop")}
+            className="px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors"
+          >
+            Continue Shopping
           </button>
         </div>
       </div>
     );
   }
 
-  // Calculate discount percentage
   const discountPercentage = product.discountPrice
     ? Math.round(
         ((product.price - product.discountPrice) / product.price) * 100,
       )
     : 0;
 
-  // Get zoom styles
   const zoomStyle = calculateZoomStyle();
+  const displayedComments = showAllComments
+    ? currentComments
+    : currentComments.slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-primary-600 mb-6"
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back
-        </button>
+    <div className="min-h-screen bg-white">
+      {/* Subtle Navigation */}
+      <div className="border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-8 py-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="group flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <div className="p-2 rounded-full group-hover:bg-gray-100 transition-colors mr-3">
+              <ArrowLeft className="h-5 w-5" />
+            </div>
+            <span className="font-medium">Back to Collection</span>
+          </button>
+        </div>
+      </div>
 
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
-            {/* Product Media Section */}
-            <div className="space-y-6">
-              {/* View Toggle - Show only if product has video */}
-              {product.video && (
-                <div className="flex space-x-2 mb-4">
-                  <button
-                    onClick={() => toggleView(false)}
-                    className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all ${
-                      !showVideo
-                        ? "bg-primary-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <ImageIcon className="h-4 w-4" />
-                    <span>Images ({product.images?.length || 0})</span>
-                  </button>
-                  <button
-                    onClick={() => toggleView(true)}
-                    className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all ${
-                      showVideo
-                        ? "bg-primary-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <VideoIcon className="h-4 w-4" />
-                    <span>Video</span>
-                  </button>
+      <div className="max-w-7xl mx-auto px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          {/* Left Column - Media */}
+          <div className="space-y-12">
+            {/* Images Section */}
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <h3 className="text-lg font-medium text-gray-900">Gallery</h3>
+                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    {product.images?.length || 0} images
+                  </span>
                 </div>
-              )}
+                <div className="flex items-center space-x-2 text-sm text-gray-500">
+                  <ZoomIn className="h-4 w-4" />
+                  <span>Hover to zoom 2x</span>
+                </div>
+              </div>
 
-              {/* Video Player */}
-              {showVideo && product.video && (
-                <div className="mb-6">
-                  <div className="relative rounded-lg overflow-hidden shadow-lg bg-black">
-                    <video
-                      ref={videoRef}
-                      src={product.video}
-                      className="w-full h-96 object-contain"
-                      controls
-                      onTimeUpdate={handleVideoTimeUpdate}
-                      onLoadedMetadata={handleVideoLoaded}
-                      onEnded={handleVideoEnded}
-                      poster={product.images?.[0]?.url}
+              {/* Main Image Container */}
+              <div
+                ref={imageContainerRef}
+                className="relative overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-sm"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={handleMouseLeave}
+              >
+                {/* Main Image */}
+                {product.images && product.images.length > 0 && (
+                  <img
+                    ref={mainImageRef}
+                    src={product.images[selectedImageIndex]?.url || ""}
+                    alt={`${product.name} - Image ${selectedImageIndex + 1}`}
+                    className="w-full h-[600px] object-contain"
+                    onLoad={handleImageLoad}
+                  />
+                )}
+
+                {/* Zoom Lens */}
+                {isHovering &&
+                  product.images &&
+                  imageLoaded &&
+                  product.images[selectedImageIndex] && (
+                    <div
+                      ref={zoomLensRef}
+                      className="absolute pointer-events-none z-20 overflow-hidden rounded-full"
+                      style={{
+                        left: `${zoomStyle.lensPosition?.x || 0}px`,
+                        top: `${zoomStyle.lensPosition?.y || 0}px`,
+                        width: "200px",
+                        height: "200px",
+                        border: "2px solid rgba(255, 255, 255, 0.9)",
+                        boxShadow:
+                          "0 20px 60px rgba(0, 0, 0, 0.3), inset 0 0 40px rgba(255, 255, 255, 0.3)",
+                        backgroundImage: `url(${product.images[selectedImageIndex].url})`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundSize: zoomStyle.backgroundSize || "auto",
+                        backgroundPosition:
+                          zoomStyle.backgroundPosition || "0px 0px",
+                        transition: "all 0.1s cubic-bezier(0.4, 0, 0.2, 1)",
+                      }}
                     />
-
-                    {/* Custom video controls overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                      <div className="flex items-center justify-between">
-                        <button
-                          onClick={handleVideoPlayPause}
-                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 text-white transition-colors"
-                        >
-                          {videoPlaying ? (
-                            <Pause className="h-5 w-5" />
-                          ) : (
-                            <Play className="h-5 w-5" />
-                          )}
-                        </button>
-
-                        <div className="flex-1 mx-4">
-                          <div className="w-full bg-gray-600/50 h-1.5 rounded-full overflow-hidden">
-                            <div
-                              className="bg-primary-500 h-full transition-all duration-100"
-                              style={{ width: `${videoProgress}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-gray-300 mt-1">
-                            <span>
-                              {formatTime(videoRef.current?.currentTime || 0)}
-                            </span>
-                            <span>{formatTime(videoDuration)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-center">
-                    <p className="text-sm text-gray-600">
-                      Product demonstration video
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Image Gallery */}
-              {!showVideo && (
-                <div className="relative">
-                  {/* Zoom and Fullscreen Controls */}
-                  <div className="absolute top-4 left-4 z-20 flex flex-col space-y-2">
-                    <div className="flex items-center space-x-2 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
-                      <ZoomIn className="h-5 w-5 text-primary-600" />
-                      <span className="text-sm font-medium text-gray-700">
-                        1.5x Zoom
-                      </span>
-                    </div>
-                    <button
-                      onClick={toggleFullscreen}
-                      className="p-3 rounded-full bg-white text-gray-700 shadow-lg hover:bg-gray-50 transition-colors"
-                      title="Fullscreen"
-                    >
-                      <Maximize2 className="h-5 w-5" />
-                    </button>
-                  </div>
-
-                  {/* Main Image Container with Zoom */}
-                  <div
-                    ref={imageContainerRef}
-                    className="relative overflow-hidden rounded-lg cursor-none"
-                    onMouseMove={handleMouseMove}
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    {/* Main Image */}
-                    {product.images && product.images.length > 0 && (
-                      <img
-                        ref={mainImageRef}
-                        src={product.images[selectedImageIndex]?.url || ""}
-                        alt={`${product.name} - Image ${selectedImageIndex + 1}`}
-                        className="w-full h-96 object-cover"
-                        onLoad={handleImageLoad}
-                      />
-                    )}
-
-                    {/* Zoom Lens - Professional glass effect */}
-                    {isHovering &&
-                      product.images &&
-                      imageLoaded &&
-                      product.images[selectedImageIndex] && (
-                        <div
-                          ref={zoomLensRef}
-                          className="absolute pointer-events-none z-10 overflow-hidden rounded-full"
-                          style={{
-                            left: `${zoomStyle.lensPosition?.x || 0}px`,
-                            top: `${zoomStyle.lensPosition?.y || 0}px`,
-                            width: "180px",
-                            height: "180px",
-                            border: "2px solid rgba(255, 255, 255, 0.9)",
-                            boxShadow: `
-                            0 0 0 1px rgba(0, 0, 0, 0.1),
-                            0 8px 32px rgba(0, 0, 0, 0.2),
-                            inset 0 0 32px rgba(255, 255, 255, 0.2)
-                          `,
-                            backgroundColor: "transparent",
-                            backdropFilter: "blur(2px)",
-                            backgroundImage: `url(${product.images[selectedImageIndex].url})`,
-                            backgroundRepeat: "no-repeat",
-                            backgroundSize: zoomStyle.backgroundSize || "auto",
-                            backgroundPosition:
-                              zoomStyle.backgroundPosition || "0px 0px",
-                            transition: "left 0.05s linear, top 0.05s linear",
-                          }}
-                        >
-                          <div
-                            className="absolute inset-0 rounded-full"
-                            style={{
-                              boxShadow: "inset 0 0 20px rgba(0, 0, 0, 0.1)",
-                              border: "1px solid rgba(255, 255, 255, 0.3)",
-                            }}
-                          />
-                        </div>
-                      )}
-
-                    {/* Image Navigation Arrows */}
-                    {product.images && product.images.length > 1 && (
-                      <>
-                        <button
-                          onClick={() => {
-                            setSelectedImageIndex((prev) =>
-                              prev > 0 ? prev - 1 : product.images.length - 1,
-                            );
-                            setIsHovering(false);
-                          }}
-                          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-20"
-                        >
-                          <ChevronLeft className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedImageIndex((prev) =>
-                              prev < product.images.length - 1 ? prev + 1 : 0,
-                            );
-                            setIsHovering(false);
-                          }}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 z-20"
-                        >
-                          <ChevronRight className="h-5 w-5" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Thumbnail Gallery */}
-                  {product.images && product.images.length > 1 && (
-                    <div className="mt-6">
-                      <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-sm font-medium text-gray-700">
-                          More Views
-                        </h3>
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                          {selectedImageIndex + 1} of {product.images.length}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
-                        {product.images.map((image, index) => (
-                          <button
-                            key={index}
-                            onClick={() => {
-                              setSelectedImageIndex(index);
-                              setShowVideo(false);
-                            }}
-                            className={`relative overflow-hidden rounded-lg border-2 transition-all duration-200 transform hover:scale-105 ${
-                              selectedImageIndex === index && !showVideo
-                                ? "border-primary-500 ring-2 ring-primary-200 ring-opacity-50 scale-105"
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                          >
-                            <img
-                              src={image.url}
-                              alt={`Thumbnail ${index + 1}`}
-                              className="h-20 w-full object-cover"
-                            />
-                            {selectedImageIndex === index && !showVideo && (
-                              <div className="absolute inset-0 bg-primary-500 bg-opacity-10"></div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
                   )}
 
-                  {/* Zoom Instructions */}
-                  <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-lg">
-                    <p className="text-sm text-blue-700 flex items-center justify-center">
-                      <ZoomIn className="h-4 w-4 mr-2" />
-                      <span className="font-medium">
-                        Hover over image for 1.5x zoom magnifier
-                      </span>
-                    </p>
-                  </div>
+                {/* Navigation & Controls */}
+                {product.images && product.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setSelectedImageIndex((prev) =>
+                          prev > 0 ? prev - 1 : product.images.length - 1,
+                        );
+                        setIsHovering(false);
+                      }}
+                      className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:shadow-xl transition-all duration-300 group"
+                    >
+                      <ChevronLeft className="h-6 w-6 group-hover:scale-110 transition-transform" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedImageIndex((prev) =>
+                          prev < product.images.length - 1 ? prev + 1 : 0,
+                        );
+                        setIsHovering(false);
+                      }}
+                      className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:shadow-xl transition-all duration-300 group"
+                    >
+                      <ChevronRight className="h-6 w-6 group-hover:scale-110 transition-transform" />
+                    </button>
+                  </>
+                )}
+
+                {/* Image Counter */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
+                  {selectedImageIndex + 1} / {product.images?.length || 1}
+                </div>
+              </div>
+
+              {/* Thumbnail Strip */}
+              {product.images && product.images.length > 1 && (
+                <div className="flex space-x-4 overflow-x-auto py-4">
+                  {product.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`flex-shrink-0 relative overflow-hidden rounded-xl transition-all duration-300 ${
+                        selectedImageIndex === index
+                          ? "ring-2 ring-primary-500 ring-offset-2"
+                          : "opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      <img
+                        src={image.url}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-24 h-24 object-cover"
+                      />
+                      {selectedImageIndex === index && (
+                        <div className="absolute inset-0 bg-primary-500/10"></div>
+                      )}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Product Details */}
-            <div>
-              {/* Brand and Category */}
-              <div className="mb-4 flex flex-wrap gap-2">
+            {/* Video Section - Professional Video Player */}
+            {product.video && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-blue-50 rounded-xl">
+                      <Film className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Product Video
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Detailed demonstration
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => toggleFullscreen(videoRef.current)}
+                    className="p-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <Maximize2 className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div
+                  className="relative rounded-2xl overflow-hidden bg-black border border-gray-800 shadow-2xl"
+                  onMouseMove={resetVideoControlsTimeout}
+                  onMouseLeave={() => {
+                    if (videoControlsTimeout.current) {
+                      clearTimeout(videoControlsTimeout.current);
+                    }
+                    videoControlsTimeout.current = setTimeout(() => {
+                      setShowVideoControls(false);
+                    }, 1000);
+                  }}
+                >
+                  <video
+                    ref={videoRef}
+                    src={product.video}
+                    className="w-full h-[500px] object-contain"
+                    onTimeUpdate={handleVideoTimeUpdate}
+                    onLoadedMetadata={handleVideoLoaded}
+                    onEnded={handleVideoEnded}
+                    poster={product.images?.[0]?.url}
+                    onClick={handleVideoPlayPause}
+                  />
+
+                  {/* Enhanced Video Controls Overlay */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300 ${
+                      showVideoControls ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    {/* Top Controls Bar */}
+                    <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center">
+                      <div className="flex items-center space-x-4">
+                        <button
+                          onClick={toggleMute}
+                          className="p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors"
+                        >
+                          {isMuted ? (
+                            <VolumeX className="h-5 w-5 text-white" />
+                          ) : (
+                            <Volume2 className="h-5 w-5 text-white" />
+                          )}
+                        </button>
+                        <div className="w-32">
+                          <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.01"
+                            value={isMuted ? 0 : videoVolume}
+                            onChange={handleVolumeChange}
+                            className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        <div className="relative group">
+                          <button className="p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors">
+                            <Settings className="h-5 w-5 text-white" />
+                          </button>
+                          <div className="absolute right-0 top-full mt-2 w-40 bg-gray-900/95 backdrop-blur-sm rounded-xl p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-xl">
+                            {[0.5, 1, 1.5, 2].map((speed) => (
+                              <button
+                                key={speed}
+                                onClick={() => changeVideoSpeed(speed)}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm text-white hover:bg-white/10 transition-colors ${
+                                  videoSpeed === speed ? "bg-white/20" : ""
+                                }`}
+                              >
+                                {speed}x Speed
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Center Play Button */}
+                    {!videoPlaying && (
+                      <button
+                        onClick={handleVideoPlayPause}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-300 group"
+                      >
+                        <Play className="h-10 w-10 text-white ml-1 group-hover:scale-110 transition-transform" />
+                      </button>
+                    )}
+
+                    {/* Bottom Controls Bar */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 space-y-4">
+                      {/* Progress Bar */}
+                      <div
+                        className="relative h-1.5 bg-gray-700/50 rounded-full cursor-pointer group"
+                        onClick={handleSeek}
+                      >
+                        <div
+                          className="absolute h-full bg-primary-500 rounded-full transition-all duration-100"
+                          style={{ width: `${videoProgress}%` }}
+                        />
+                        <div
+                          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          style={{ left: `calc(${videoProgress}% - 8px)` }}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <button
+                            onClick={handleVideoPlayPause}
+                            className="p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors"
+                          >
+                            {videoPlaying ? (
+                              <Pause className="h-5 w-5 text-white" />
+                            ) : (
+                              <Play className="h-5 w-5 text-white" />
+                            )}
+                          </button>
+                          <div className="text-white text-sm font-medium">
+                            {formatTime(videoRef.current?.currentTime || 0)} /{" "}
+                            {formatTime(videoDuration)}
+                          </div>
+                        </div>
+                        <div className="text-white text-sm">{videoSpeed}x</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Product Details */}
+          <div className="space-y-10">
+            {/* Product Header */}
+            <div className="space-y-6">
+              <div className="flex flex-wrap gap-3">
                 {product.brand && (
-                  <span className="inline-block bg-gray-100 text-gray-600 text-sm px-3 py-1 rounded-full">
+                  <span className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
                     {product.brand}
                   </span>
                 )}
-                <span className="inline-block bg-gray-100 text-gray-600 text-sm px-3 py-1 rounded-full">
+                <span className="inline-flex items-center px-4 py-2 bg-primary-50 text-primary-700 text-sm font-medium rounded-full">
                   {product.category}
                 </span>
                 {product.isFeatured && (
-                  <span className="inline-flex bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full items-center">
-                    <Star className="h-3 w-3 mr-1" />
+                  <span className="inline-flex items-center px-4 py-2 bg-yellow-50 text-yellow-700 text-sm font-medium rounded-full">
+                    <Star className="h-3 w-3 mr-2" />
                     Featured
                   </span>
                 )}
-                {product.video && (
-                  <span className="inline-flex bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full items-center">
-                    <Film className="h-3 w-3 mr-1" />
-                    Has Video
-                  </span>
-                )}
-                {discountPercentage > 0 && (
-                  <span className="inline-block bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full font-semibold">
-                    {discountPercentage}% OFF
-                  </span>
-                )}
               </div>
 
-              {/* Product Name */}
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl font-normal text-gray-900 leading-tight tracking-tight">
                 {product.name}
               </h1>
 
-              {/* Pricing */}
-              <div className="mb-6">
-                <div className="flex items-center space-x-4 mb-2">
-                  {product.discountPrice ? (
-                    <>
-                      <p className="text-4xl font-bold text-green-600">
-                        {formatPrice(product.discountPrice)}
-                      </p>
-                      <p className="text-2xl text-gray-500 line-through">
-                        {formatPrice(product.price)}
-                      </p>
-                    </>
-                  ) : (
-                    <p className="text-4xl font-bold text-primary-600">
-                      {formatPrice(product.price)}
-                    </p>
-                  )}
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-5 w-5 text-yellow-400 fill-current"
+                    />
+                  ))}
+                  <span className="ml-3 text-gray-600">4.8 • 128 reviews</span>
                 </div>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => setIsWishlisted(!isWishlisted)}
+                    className={`p-2.5 rounded-lg border transition-colors ${
+                      isWishlisted
+                        ? "bg-red-50 border-red-200 text-red-600"
+                        : "border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300"
+                    }`}
+                  >
+                    <Heart
+                      className={`h-5 w-5 ${isWishlisted ? "fill-current" : ""}`}
+                    />
+                  </button>
+                  <button className="p-2.5 rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors">
+                    <Share2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                {/* Stock Status */}
-                <p
-                  className={`text-sm font-medium ${
+            {/* Pricing Section */}
+            <div className="space-y-4">
+              <div className="flex items-baseline space-x-4">
+                {product.discountPrice ? (
+                  <>
+                    <div className="space-y-1">
+                      <div className="flex items-baseline space-x-3">
+                        <span className="text-5xl font-light text-gray-900">
+                          {formatPrice(product.discountPrice)}
+                        </span>
+                        <span className="text-xl text-gray-500 line-through">
+                          {formatPrice(product.price)}
+                        </span>
+                      </div>
+                      <div className="inline-flex items-center px-4 py-1.5 bg-red-50 text-red-700 rounded-full text-sm font-medium">
+                        Save {discountPercentage}% •{" "}
+                        {formatPrice(product.price - product.discountPrice)}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <span className="text-5xl font-light text-gray-900">
+                    {formatPrice(product.price)}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div
+                  className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
                     product.stock > 10
-                      ? "text-green-600"
+                      ? "bg-green-50 text-green-700"
                       : product.stock > 0
-                        ? "text-yellow-600"
-                        : "text-red-600"
+                        ? "bg-yellow-50 text-yellow-700"
+                        : "bg-red-50 text-red-700"
                   }`}
                 >
+                  <div
+                    className={`w-2 h-2 rounded-full mr-2 ${
+                      product.stock > 10
+                        ? "bg-green-500"
+                        : product.stock > 0
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                    }`}
+                  />
                   {product.stock > 10
-                    ? "✅ In Stock"
+                    ? "In Stock"
                     : product.stock > 0
-                      ? "⚠️ Low Stock"
-                      : "❌ Out of Stock"}
-                  {product.stock > 0 && ` (${product.stock} available)`}
+                      ? "Low Stock"
+                      : "Out of Stock"}
+                </div>
+                <span className="text-sm text-gray-500">
+                  {product.stock > 0 ? `${product.stock} units available` : ""}
+                </span>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+                Description
+              </h3>
+              <div className="prose prose-gray max-w-none">
+                <p className="text-gray-700 leading-relaxed">
+                  {product.description}
                 </p>
               </div>
+            </div>
 
-              {/* Tags */}
-              {product.tags && product.tags.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-2 flex items-center">
-                    <Tag className="h-5 w-5 mr-2 text-gray-600" />
-                    Tags
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {product.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="inline-block bg-blue-50 text-blue-700 text-sm px-3 py-1.5 rounded-full border border-blue-100 hover:bg-blue-100 hover:border-blue-200 transition-colors"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Description */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-3 text-gray-800">
-                  Description
+            {/* Tags */}
+            {product.tags && product.tags.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  Product Tags
                 </h3>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-                    {product.description}
-                  </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="inline-block bg-gray-50 text-gray-700 text-sm px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
                 </div>
               </div>
+            )}
 
-              {/* Quantity and Add to Cart */}
-              {product.stock > 0 ? (
+            {/* Quantity & Add to Cart */}
+            {product.stock > 0 ? (
+              <div className="space-y-8 pt-8 border-t border-gray-100">
                 <div className="space-y-6">
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-gray-700 font-medium">
-                        Quantity:
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-700">
+                        Quantity
+                      </label>
+                      <span className="text-sm text-gray-500">
+                        Max: {product.stock}
                       </span>
-                      <div className="flex items-center space-x-2">
-                        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                          <button
-                            onClick={() =>
-                              setQuantity(Math.max(1, quantity - 1))
-                            }
-                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors"
-                          >
-                            <span className="text-lg font-bold">-</span>
-                          </button>
-                          <span className="px-6 py-2 border-x border-gray-300 font-bold text-lg min-w-[60px] text-center">
-                            {quantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              setQuantity(Math.min(product.stock, quantity + 1))
-                            }
-                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors"
-                          >
-                            <span className="text-lg font-bold">+</span>
-                          </button>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center border border-gray-300 rounded-xl">
+                        <button
+                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          className="px-5 py-3 hover:bg-gray-50 transition-colors"
+                        >
+                          <span className="text-xl">−</span>
+                        </button>
+                        <span className="px-8 py-3 border-x border-gray-300 text-xl min-w-[100px] text-center font-medium">
+                          {quantity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            setQuantity(Math.min(product.stock, quantity + 1))
+                          }
+                          className="px-5 py-3 hover:bg-gray-50 transition-colors"
+                        >
+                          <span className="text-xl">+</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Total */}
+                  <div className="bg-gray-50 p-6 rounded-xl">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="text-gray-600">Total</div>
+                        <div className="text-sm text-gray-500">
+                          Including VAT
                         </div>
-                        <span className="text-sm text-gray-500">
-                          Max: {product.stock}
-                        </span>
                       </div>
+                      <span className="text-3xl font-light text-gray-900">
+                        {formatPrice(
+                          (product.discountPrice || product.price) * quantity,
+                        )}
+                      </span>
                     </div>
+                  </div>
 
-                    {/* Total Price */}
-                    <div className="mb-4 p-3 bg-white rounded border">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">Total:</span>
-                        <span className="text-2xl font-bold text-primary-600">
-                          {formatPrice(
-                            (product.discountPrice || product.price) * quantity,
-                          )}
-                        </span>
-                      </div>
-                    </div>
+                  <div className="space-y-4">
+                    <button
+                      onClick={handleAddToCart}
+                      className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-xl text-lg font-medium transition-colors shadow-sm hover:shadow"
+                    >
+                      Add to Cart
+                    </button>
 
-                    <div className="flex gap-3">
-                      {/* Add to Cart Button */}
-                      <button
-                        onClick={handleAddToCart}
-                        className="flex-1 flex items-center justify-center space-x-3 bg-primary-600 hover:bg-primary-700 text-white py-4 text-lg font-bold rounded-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200"
-                      >
-                        <ShoppingCart className="h-6 w-6" />
-                        <span>Add to Cart</span>
-                      </button>
-                    </div>
-
-                    {/* Quick add buttons */}
-                    <div className="flex space-x-2 mt-4">
+                    <div className="grid grid-cols-3 gap-3">
                       <button
                         onClick={() => setQuantity(Math.min(product.stock, 3))}
-                        className="flex-1 py-2.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                        className="py-3 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         Add 3
                       </button>
                       <button
                         onClick={() => setQuantity(Math.min(product.stock, 5))}
-                        className="flex-1 py-2.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                        className="py-3 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         Add 5
                       </button>
                       <button
                         onClick={() => setQuantity(product.stock)}
-                        className="flex-1 py-2.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                        className="py-3 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         Add All
                       </button>
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="p-5 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center mb-3">
-                    <div className="p-2 bg-red-100 rounded-full mr-3">
-                      <Check className="h-5 w-5 text-red-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-red-700">Out of Stock</h4>
-                      <p className="text-red-600 text-sm">
-                        This product is currently unavailable
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => {
-                        // Notify when back in stock
-                      }}
-                      className="flex-1 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors"
+
+                {/* Features Grid */}
+                <div className="grid grid-cols-2 gap-4 pt-8 border-t border-gray-100">
+                  {[
+                    {
+                      icon: Truck,
+                      label: "Free Shipping",
+                      desc: "2-3 business days",
+                    },
+                    {
+                      icon: Shield,
+                      label: "2-Year Warranty",
+                      desc: "Full coverage",
+                    },
+                    {
+                      icon: RefreshCw,
+                      label: "30-Day Returns",
+                      desc: "Easy process",
+                    },
+                    {
+                      icon: Globe,
+                      label: "Worldwide Delivery",
+                      desc: "International",
+                    },
+                  ].map((feature, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-colors"
                     >
-                      Notify me when available
+                      <div className="p-3 bg-gray-100 rounded-lg">
+                        <feature.icon className="h-6 w-6 text-gray-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {feature.label}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {feature.desc}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="p-4 bg-red-100 rounded-full">
+                    <Check className="h-8 w-8 text-red-600" />
+                  </div>
+                </div>
+                <h4 className="text-xl font-semibold text-red-700 mb-3">
+                  Out of Stock
+                </h4>
+                <p className="text-red-600 mb-6">
+                  This product is currently unavailable
+                </p>
+                <button className="w-full py-3 border-2 border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium">
+                  Notify When Available
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Comments Section */}
+        <div className="mt-24 pt-20 border-t border-gray-100">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-normal text-gray-900 mb-4">
+                Customer Reviews
+              </h2>
+              <div className="flex items-center justify-center space-x-4">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-6 w-6 text-yellow-400 fill-current"
+                    />
+                  ))}
+                </div>
+                <span className="text-gray-600 text-lg">
+                  {commentPagination.total} reviews • 4.8 average
+                </span>
+              </div>
+            </div>
+
+            {/* Add Comment Form */}
+            {isAuthenticated ? (
+              <div className="mb-12 bg-gray-50 rounded-2xl p-8">
+                <h3 className="text-xl font-medium text-gray-900 mb-6">
+                  Share Your Experience
+                </h3>
+                <form onSubmit={handleAddComment} className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          className="p-1 hover:scale-110 transition-transform"
+                        >
+                          <Star className="h-8 w-8 text-gray-300 hover:text-yellow-400" />
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      placeholder="Share your thoughts about this product..."
+                      className="w-full px-5 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none bg-white"
+                      rows={4}
+                      maxLength={1000}
+                      disabled={localSubmitting || submitting}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">
+                      {commentText.length}/1000 characters
+                    </span>
+                    <button
+                      type="submit"
+                      disabled={
+                        !commentText.trim() || localSubmitting || submitting
+                      }
+                      className="px-8 py-3 bg-gray-900 hover:bg-black text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-3"
+                    >
+                      {localSubmitting || submitting ? (
+                        <>
+                          <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                          Posting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-5 w-5" />
+                          <span>Post Review</span>
+                        </>
+                      )}
                     </button>
                   </div>
-                </div>
-              )}
-
-              {/* Comments Section */}
-              <div className="mt-12 pt-8 border-t border-gray-200">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 flex items-center">
-                    <MessageSquare className="h-6 w-6 mr-2 text-primary-600" />
-                    Product Comments
-                    {commentPagination.total > 0 && (
-                      <span className="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                        {commentPagination.total}
-                      </span>
-                    )}
-                  </h3>
-                </div>
-
-                {/* Add Comment Form */}
-                {isAuthenticated ? (
-                  <div className="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-200">
-                    <h4 className="text-lg font-semibold mb-4 text-gray-800">
-                      Add Your Comment
-                    </h4>
-                    <form onSubmit={handleAddComment}>
-                      <textarea
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        placeholder="Share your thoughts about this product..."
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-                        rows={3}
-                        maxLength={1000}
-                        disabled={localSubmitting || submitting}
-                      />
-                      <div className="flex justify-between items-center mt-3">
-                        <span className="text-sm text-gray-500">
-                          {commentText.length}/1000 characters
-                        </span>
-                        <button
-                          type="submit"
-                          disabled={
-                            !commentText.trim() || localSubmitting || submitting
-                          }
-                          className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          {localSubmitting || submitting ? (
-                            <>
-                              <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                              Posting...
-                            </>
-                          ) : (
-                            <>
-                              <Send className="h-4 w-4" />
-                              <span>Post Comment</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </form>
-                    {error && (
-                      <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-red-700 text-sm">Error: {error}</p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                    <p className="text-blue-800">
-                      Please{" "}
-                      <button
-                        onClick={() => navigate("/login")}
-                        className="text-blue-600 hover:text-blue-800 font-semibold underline"
-                      >
-                        login
-                      </button>{" "}
-                      to add a comment
-                    </p>
-                  </div>
-                )}
-
-                {/* Comments List */}
-                {commentsLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader />
-                  </div>
-                ) : currentComments.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                    <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-medium text-gray-600 mb-2">
-                      No comments yet
-                    </h4>
-                    <p className="text-gray-500">
-                      Be the first to share your thoughts!
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {currentComments.map((comment) => (
-                      <div
-                        key={comment._id}
-                        className="bg-white border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors group relative"
-                      >
-                        {/* Edit Tooltip */}
-                        {canEditComment(comment) && (
-                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded shadow-sm">
-                              Click pencil to edit
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Comment Header */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="flex-shrink-0">
-                              <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
-                                <User className="h-5 w-5 text-primary-600" />
-                              </div>
-                            </div>
-                            <div>
-                              <h5 className="font-semibold text-gray-900">
-                                {comment.user?.name || "Unknown User"}
-                                {comment.user?.role === "admin" && (
-                                  <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
-                                    Admin
-                                  </span>
-                                )}
-                              </h5>
-                              <div className="flex items-center space-x-2 text-sm text-gray-500">
-                                <Calendar className="h-3 w-3" />
-                                <time dateTime={comment.createdAt}>
-                                  {formatCommentDate(comment.createdAt)}
-                                </time>
-                                {comment.isEdited && (
-                                  <div className="relative group/edit-badge inline-block">
-                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded cursor-help">
-                                      Edited
-                                    </span>
-                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover/edit-badge:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                      <div className="flex items-center">
-                                        <Clock className="h-3 w-3 mr-1" />
-                                        Last edited:{" "}
-                                        {new Date(
-                                          comment.updatedAt,
-                                        ).toLocaleDateString()}
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Action Buttons */}
-                          {(canEditComment(comment) ||
-                            canDeleteComment(comment)) && (
-                            <div className="flex space-x-2">
-                              {canEditComment(comment) && (
-                                <button
-                                  onClick={() => {
-                                    console.log("DEBUG - Edit button clicked");
-                                    console.log(
-                                      "Comment user ID:",
-                                      comment.user?._id,
-                                    );
-                                    console.log("Current user ID:", user?._id);
-                                    handleStartEdit(comment);
-                                  }}
-                                  className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-colors"
-                                  title="Edit comment"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </button>
-                              )}
-                              {canDeleteComment(comment) && (
-                                <button
-                                  onClick={() =>
-                                    handleDeleteComment(comment._id)
-                                  }
-                                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                                  title="Delete comment"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Comment Content */}
-                        {editingCommentId === comment._id ? (
-                          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div className="mb-3">
-                              <label className="block text-sm font-medium text-blue-800 mb-2">
-                                Edit your comment
-                              </label>
-                              <textarea
-                                value={editText}
-                                onChange={(e) => setEditText(e.target.value)}
-                                className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                rows={3}
-                                maxLength={1000}
-                                autoFocus
-                              />
-                              <div className="text-sm text-gray-600 mt-1 flex justify-between">
-                                <span>{editText.length}/1000 characters</span>
-                                {editText.length === 1000 && (
-                                  <span className="text-red-500">
-                                    Character limit reached
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex justify-end space-x-3">
-                              <button
-                                onClick={handleCancelEdit}
-                                className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-100 rounded-lg transition-colors"
-                                disabled={localSubmitting}
-                              >
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Cancel
-                              </button>
-                              <button
-                                onClick={() => handleUpdateComment(comment._id)}
-                                disabled={
-                                  !editText.trim() ||
-                                  localSubmitting ||
-                                  submitting
-                                }
-                                className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              >
-                                {localSubmitting || submitting ? (
-                                  <>
-                                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                    Saving...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Save className="h-4 w-4 mr-2" />
-                                    Save Changes
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                            {comment.text}
-                          </p>
-                        )}
-
-                        {/* Debug info (visible only in development) */}
-                        {process.env.NODE_ENV === "development" && (
-                          <div className="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-400">
-                            <div className="flex justify-between">
-                              <span>Comment ID: {comment._id?.slice(-8)}</span>
-                              <span>
-                                User ID: {comment.user?._id?.slice(-8)}
-                              </span>
-                              <span>
-                                Can Edit:{" "}
-                                {canEditComment(comment) ? "Yes" : "No"}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Pagination for comments */}
-                {commentPagination.totalPages > 1 && (
-                  <div className="mt-8 flex justify-center">
-                    <nav className="flex items-center space-x-2">
-                      <button
-                        onClick={() =>
-                          dispatch(
-                            fetchProductComments({
-                              productId: id,
-                              page: commentPagination.page - 1,
-                            }),
-                          )
-                        }
-                        disabled={commentPagination.page === 1}
-                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        Previous
-                      </button>
-                      <span className="px-4 py-2 text-gray-600">
-                        Page {commentPagination.page} of{" "}
-                        {commentPagination.totalPages}
-                      </span>
-                      <button
-                        onClick={() =>
-                          dispatch(
-                            fetchProductComments({
-                              productId: id,
-                              page: commentPagination.page + 1,
-                            }),
-                          )
-                        }
-                        disabled={
-                          commentPagination.page >= commentPagination.totalPages
-                        }
-                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        Next
-                      </button>
-                    </nav>
+                </form>
+                {error && (
+                  <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-700 text-sm">Error: {error}</p>
                   </div>
                 )}
               </div>
-            </div>
+            ) : (
+              <div className="mb-12 bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <MessageSquare className="h-8 w-8 text-gray-400" />
+                </div>
+                <p className="text-gray-700 text-lg">
+                  Please{" "}
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="text-gray-900 hover:text-black font-medium underline"
+                  >
+                    sign in
+                  </button>{" "}
+                  to share your review
+                </p>
+              </div>
+            )}
+
+            {/* Comments List */}
+            {commentsLoading ? (
+              <div className="flex justify-center py-16">
+                <Loader />
+              </div>
+            ) : currentComments.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                  <MessageSquare className="h-12 w-12 text-gray-400" />
+                </div>
+                <h4 className="text-2xl font-normal text-gray-900 mb-4">
+                  No Reviews Yet
+                </h4>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Be the first to share your experience with this product.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {displayedComments.map((comment) => (
+                  <div
+                    key={comment._id}
+                    className="border-b border-gray-100 pb-8 last:border-0 last:pb-0"
+                  >
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-center space-x-4">
+                        <div className="relative">
+                          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                            <User className="h-7 w-7 text-gray-600" />
+                          </div>
+                          {comment.user?.role === "admin" && (
+                            <div className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs px-2 py-1 rounded-full">
+                              Admin
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <div className="flex items-center space-x-3 mb-1">
+                            <h5 className="font-medium text-gray-900">
+                              {comment.user?.name || "Anonymous"}
+                            </h5>
+                            <div className="flex items-center">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className="h-4 w-4 text-yellow-400 fill-current"
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-4 text-sm text-gray-500">
+                            <time dateTime={comment.createdAt}>
+                              {formatCommentDate(comment.createdAt)}
+                            </time>
+                            {comment.isEdited && (
+                              <span className="text-xs text-gray-400">
+                                Edited
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      {(canEditComment(comment) ||
+                        canDeleteComment(comment)) && (
+                        <div className="flex space-x-2">
+                          {canEditComment(comment) && (
+                            <button
+                              onClick={() => handleStartEdit(comment)}
+                              className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                              title="Edit comment"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </button>
+                          )}
+                          {canDeleteComment(comment) && (
+                            <button
+                              onClick={() => handleDeleteComment(comment._id)}
+                              className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete comment"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {editingCommentId === comment._id ? (
+                      <div className="space-y-6 bg-gray-50 p-6 rounded-xl">
+                        <div className="space-y-4">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Edit Your Review
+                          </label>
+                          <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none bg-white"
+                            rows={4}
+                            maxLength={1000}
+                            autoFocus
+                          />
+                          <div className="text-sm text-gray-500 flex justify-between">
+                            <span>{editText.length}/1000 characters</span>
+                            {editText.length === 1000 && (
+                              <span className="text-red-500">
+                                Character limit reached
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex justify-end space-x-4">
+                          <button
+                            onClick={handleCancelEdit}
+                            className="px-5 py-2.5 text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                            disabled={localSubmitting}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleUpdateComment(comment._id)}
+                            disabled={
+                              !editText.trim() || localSubmitting || submitting
+                            }
+                            className="px-6 py-2.5 bg-gray-900 hover:bg-black text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            {localSubmitting || submitting
+                              ? "Saving..."
+                              : "Save Changes"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-700 text-lg leading-relaxed">
+                        {comment.text}
+                      </p>
+                    )}
+                  </div>
+                ))}
+
+                {/* Show More Comments Button */}
+                {currentComments.length > 3 && !showAllComments && (
+                  <div className="text-center pt-12">
+                    <button
+                      onClick={() => setShowAllComments(true)}
+                      className="inline-flex items-center px-8 py-4 bg-gray-900 text-white rounded-xl hover:bg-black transition-colors font-medium group"
+                    >
+                      <span>
+                        Show {currentComments.length - 3} More Reviews
+                      </span>
+                      <ChevronDown className="h-5 w-5 ml-3 group-hover:translate-y-1 transition-transform" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
