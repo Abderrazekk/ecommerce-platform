@@ -346,7 +346,15 @@ const createProduct = asyncHandler(async (req, res) => {
 // @desc    Update a product
 // @route   PUT /api/products/:id
 // @access  Private/Admin
+// @desc    Update a product
+// @route   PUT /api/products/:id
+// @access  Private/Admin
 const updateProduct = asyncHandler(async (req, res) => {
+  console.log("=== UPDATE PRODUCT REQUEST ===");
+  console.log("Product ID:", req.params.id);
+  console.log("Request body:", req.body);
+  console.log("Request files:", req.files);
+
   const product = await Product.findById(req.params.id);
 
   if (!product) {
@@ -376,10 +384,13 @@ const updateProduct = asyncHandler(async (req, res) => {
   // Parse tags if provided
   let parsedTags = product.tags;
   if (tags !== undefined) {
-    parsedTags = tags
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0);
+    parsedTags =
+      typeof tags === "string"
+        ? tags
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter((tag) => tag.length > 0)
+        : tags;
   }
 
   // Validate discount price if provided
@@ -406,7 +417,7 @@ const updateProduct = asyncHandler(async (req, res) => {
   // Store old files for cleanup
   const oldImages = [...product.images];
   const oldVideoUrl = product.video;
-  let newImages = [...product.images];
+  let newImages = [...product.images]; // Start with existing images
   let newVideoUrl = product.video;
 
   // Upload new images if provided
@@ -430,6 +441,7 @@ const updateProduct = asyncHandler(async (req, res) => {
       throw new Error("Failed to upload new images");
     }
   }
+  // If no new images provided, keep existing ones (already set above)
 
   // Upload new video if provided
   if (req.files?.video && req.files.video.length > 0) {
@@ -447,6 +459,21 @@ const updateProduct = asyncHandler(async (req, res) => {
       throw new Error("Failed to upload new video");
     }
   }
+  // Handle video removal if removeVideo flag is set
+  else if (req.body.removeVideo === "true") {
+    console.log("Removing existing video as requested...");
+
+    // Delete old video from Cloudinary if it exists
+    if (oldVideoUrl) {
+      await deleteVideoFromCloudinary(oldVideoUrl);
+    }
+
+    newVideoUrl = null; // Set to null to remove the video
+  }
+  // If no new video and no remove flag, keep existing video
+  else {
+    newVideoUrl = oldVideoUrl; // Keep existing video
+  }
 
   // Build update object
   const updateData = {
@@ -463,8 +490,8 @@ const updateProduct = asyncHandler(async (req, res) => {
     category: category || product.category,
     stock: stock !== undefined ? Number(stock) : product.stock,
     tags: parsedTags,
-    images: newImages,
-    video: newVideoUrl, // NEW: Add video URL
+    images: newImages, // This will be existing images if no new ones provided
+    video: newVideoUrl,
   };
 
   // Only update boolean fields if provided
@@ -475,6 +502,8 @@ const updateProduct = asyncHandler(async (req, res) => {
   if (isVisible !== undefined) {
     updateData.isVisible = isVisible !== "false";
   }
+
+  console.log("Updating product with data:", updateData);
 
   const updatedProduct = await Product.findByIdAndUpdate(
     req.params.id,
