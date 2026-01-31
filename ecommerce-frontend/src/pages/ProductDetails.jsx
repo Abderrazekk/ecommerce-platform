@@ -9,7 +9,6 @@ import {
   removeComment,
 } from "../redux/slices/comment.slice";
 import { addToCart } from "../redux/slices/cart.slice";
-import { addToWishlist, removeFromWishlist } from "../redux/slices/auth.slice"; // NEW: Wishlist actions
 import { formatPrice } from "../utils/formatPrice";
 import Loader from "../components/common/Loader";
 import {
@@ -38,8 +37,6 @@ import {
   Save,
   XCircle,
   Clock,
-  Heart,
-  HeartOff,
 } from "lucide-react";
 
 const ProductDetails = () => {
@@ -50,18 +47,13 @@ const ProductDetails = () => {
   const { product, loading: productLoading } = useSelector(
     (state) => state.products,
   );
-  const { user, isAuthenticated, wishlistIds } = useSelector(
-    (state) => state.auth,
-  );
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const {
     commentsByProduct,
     loading: commentsLoading,
     submitting,
     error,
   } = useSelector((state) => state.comments);
-
-  // NEW: Wishlist state
-  const isInWishlist = wishlistIds.has(id);
 
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -122,22 +114,6 @@ const ProductDetails = () => {
           quantity: quantity,
         }),
       );
-    }
-  };
-
-  // NEW: Handle wishlist toggle
-  const handleWishlistToggle = () => {
-    if (!isAuthenticated) {
-      navigate(
-        `/login?redirect=${encodeURIComponent(window.location.pathname)}`,
-      );
-      return;
-    }
-
-    if (isInWishlist) {
-      dispatch(removeFromWishlist(id));
-    } else {
-      dispatch(addToWishlist(id));
     }
   };
 
@@ -807,13 +783,6 @@ const ProductDetails = () => {
                     {discountPercentage}% OFF
                   </span>
                 )}
-                {/* NEW: Wishlist Badge */}
-                {isInWishlist && (
-                  <span className="inline-flex bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full items-center">
-                    <FaHeart className="h-3 w-3 fill-red-500 mr-1" />
-                    In Wishlist
-                  </span>
-                )}
               </div>
 
               {/* Product Name */}
@@ -948,27 +917,6 @@ const ProductDetails = () => {
                         <ShoppingCart className="h-6 w-6" />
                         <span>Add to Cart</span>
                       </button>
-
-                      {/* NEW: Wishlist Button */}
-                      <button
-                        onClick={handleWishlistToggle}
-                        className={`px-4 py-4 rounded-lg flex items-center justify-center transition-all duration-200 ${
-                          isInWishlist
-                            ? "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
-                            : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
-                        }`}
-                        title={
-                          isInWishlist
-                            ? "Remove from Wishlist"
-                            : "Add to Wishlist"
-                        }
-                      >
-                        {isInWishlist ? (
-                          <Heart className="h-6 w-6 fill-red-500" />
-                        ) : (
-                          <Heart className="h-6 w-6" />
-                        )}
-                      </button>
                     </div>
 
                     {/* Quick add buttons */}
@@ -1009,28 +957,8 @@ const ProductDetails = () => {
                   </div>
                   <div className="flex gap-3">
                     <button
-                      onClick={handleWishlistToggle}
-                      className={`flex-1 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${
-                        isInWishlist
-                          ? "bg-red-100 text-red-700 border border-red-300 hover:bg-red-200"
-                          : "border border-red-300 text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors"
-                      }`}
-                    >
-                      {isInWishlist ? (
-                        <>
-                          <Heart className="h-5 w-5 fill-red-500" />
-                          Remove from Wishlist
-                        </>
-                      ) : (
-                        <>
-                          <Heart className="h-5 w-5" />
-                          Save for Later
-                        </>
-                      )}
-                    </button>
-                    <button
                       onClick={() => {
-                        // Add to wishlist or notify when back in stock
+                        // Notify when back in stock
                       }}
                       className="flex-1 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors"
                     >

@@ -1,6 +1,7 @@
 const User = require("../models/User.model");
 const generateToken = require("../utils/generateToken");
 const asyncHandler = require("../middlewares/error.middleware").asyncHandler;
+const { verifyGoogleToken } = require("../utils/googleAuth");
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -139,4 +140,96 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { registerUser, loginUser, getUserProfile };
+// @desc    Authenticate with Google
+// @route   POST /api/auth/google
+// @access  Public
+const googleAuth = asyncHandler(async (req, res) => {
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    res.status(400);
+    throw new Error("Google ID token is required");
+  }
+
+  try {
+    // Verify Google token
+    const googleUser = await verifyGoogleToken(idToken);
+
+    // Check if user exists by googleId or email
+    let user = await User.findOne({
+      $or: [
+        { googleId: googleUser.googleId },
+        { email: googleUser.email.toLowerCase() },
+      ],
+    });
+
+    // Handle existing user with different auth method
+    if (user) {
+      // If user exists but with different auth method (local)
+      if (user.authMethod === "local" && !user.googleId) {
+        // Check if the email is the same
+        if (user.email.toLowerCase() === googleUser.email.toLowerCase()) {
+          // Merge accounts: Add googleId to existing user
+          user.googleId = googleUser.googleId;
+          user.avatar = googleUser.picture || user.avatar;
+          await user.save();
+        } else {
+          res.status(409);
+          throw new Error(
+            "An account with this email already exists. Please use email/password login.",
+          );
+        }
+      }
+
+      // If user is banned
+      if (user.isBanned) {
+        res.status(403);
+        throw new Error("Your account has been banned");
+      }
+    } else {
+      // Create new user without password for Google auth
+      user = await User.create({
+        name: googleUser.name,
+        email: googleUser.email.toLowerCase(),
+        googleId: googleUser.googleId,
+        authMethod: "google",
+        avatar: googleUser.picture,
+        // Don't set password field for Google users
+      });
+    }
+
+    // Generate JWT token
+    const token = generateToken(user._id, user.role);
+
+    res.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        authMethod: user.authMethod,
+        avatar: user.avatar,
+        isBanned: user.isBanned,
+        phone: user.phone || null,
+        address: user.address || null,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error("Google auth error:", error);
+
+    // Handle duplicate email error
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.email) {
+      res.status(409);
+      throw new Error(
+        "An account with this email already exists. Please use email/password login.",
+      );
+    }
+
+    res.status(401);
+    throw new Error(error.message || "Google authentication failed");
+  }
+});
+
+module.exports = { registerUser, loginUser, getUserProfile, googleAuth };

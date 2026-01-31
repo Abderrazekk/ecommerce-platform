@@ -17,7 +17,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Please provide a password"],
+      required: function () {
+        return this.authMethod === "local";
+      },
       minlength: 6,
       select: false,
     },
@@ -25,6 +27,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+    authMethod: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+    },
+    avatar: {
+      type: String,
+      default: null,
     },
     isBanned: {
       type: Boolean,
@@ -52,13 +67,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    wishlist: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        unique: true,
-      },
-    ],
     createdAt: {
       type: Date,
       default: Date.now,
@@ -69,17 +77,28 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-// Hash password before saving
+// Only hash password for local authentication
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
+  if (this.authMethod !== "local" || !this.isModified("password")) {
     return next();
   }
-  this.password = await bcrypt.hash(this.password, 12);
+
+  if (this.password) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
   next();
 });
 
-// Compare password method
+// Compare password method (only for local auth)
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (this.authMethod !== "local") {
+    throw new Error("Password authentication not available for Google users");
+  }
+
+  if (!this.password) {
+    throw new Error("No password set for this user");
+  }
+
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
@@ -87,11 +106,6 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 userSchema.methods.isUserBanned = function () {
   return this.isBanned;
 };
-
-// Prevent duplicate products in wishlist
-userSchema.path("wishlist").validate(function (value) {
-  return value.length === new Set(value.map((id) => id.toString())).size;
-}, "Duplicate product in wishlist");
 
 // Add virtual for comments if needed
 userSchema.virtual("comments", {

@@ -1,12 +1,8 @@
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/slices/cart.slice";
-import {
-  addToWishlist,
-  removeFromWishlist,
-} from "../../redux/slices/auth.slice";
 import { formatPrice } from "../../utils/formatPrice";
-import { FaShoppingCart, FaHeart, FaEye, FaRegHeart } from "react-icons/fa";
+import { FaShoppingCart, FaEye } from "react-icons/fa";
 import { Truck, Zap, Shield, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -14,9 +10,6 @@ const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
   const [showQuickView, setShowQuickView] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-
-  const { isAuthenticated, wishlistIds } = useSelector((state) => state.auth);
-  const isInWishlist = wishlistIds.has(product._id);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -30,23 +23,6 @@ const ProductCard = ({ product }) => {
         quantity: 1,
       }),
     );
-  };
-
-  const handleWishlistToggle = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!isAuthenticated) {
-      // Redirect to login page
-      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
-      return;
-    }
-
-    if (isInWishlist) {
-      dispatch(removeFromWishlist(product._id));
-    } else {
-      dispatch(addToWishlist(product._id));
-    }
   };
 
   if (!product.isVisible) {
@@ -107,24 +83,6 @@ const ProductCard = ({ product }) => {
           <div
             className={`absolute top-4 right-4 flex flex-col gap-2 transition-all duration-300 ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
           >
-            {/* Wishlist Button */}
-            <button
-              onClick={handleWishlistToggle}
-              className={`p-2.5 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300 ${
-                isInWishlist
-                  ? "bg-gradient-to-br from-red-500 to-red-600 text-white shadow-red-200"
-                  : "bg-white/90 text-gray-700 hover:bg-red-50 hover:text-red-500"
-              }`}
-              title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-            >
-              {/* Use FaHeart for filled, FaRegHeart for outline */}
-              {isInWishlist ? (
-                <FaHeart className="h-4 w-4 fill-white" />
-              ) : (
-                <FaRegHeart className="h-4 w-4" />
-              )}
-            </button>
-
             {/* Quick View Button */}
             <button
               onClick={(e) => {
@@ -182,14 +140,6 @@ const ProductCard = ({ product }) => {
             {product.name}
           </h3>
         </Link>
-
-        {/* Wishlist Indicator */}
-        {isInWishlist && (
-          <div className="flex items-center gap-1 text-sm text-red-600 bg-red-50 px-3 py-1 rounded-full w-fit">
-            <FaHeart className="h-3 w-3 fill-red-500" />
-            <span className="font-medium">In Wishlist</span>
-          </div>
-        )}
 
         {/* Price Section */}
         <div className="pt-2 space-y-2">
@@ -294,21 +244,6 @@ const ProductCard = ({ product }) => {
                     }`}
                   >
                     Add to Cart
-                  </button>
-
-                  <button
-                    onClick={handleWishlistToggle}
-                    className={`p-3 rounded-lg ${
-                      isInWishlist
-                        ? "bg-red-100 text-red-600 border border-red-200"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {isInWishlist ? (
-                      <FaHeart className="h-5 w-5" />
-                    ) : (
-                      <FaRegHeart className="h-5 w-5" />
-                    )}
                   </button>
                 </div>
               </div>

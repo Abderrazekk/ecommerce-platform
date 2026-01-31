@@ -9,6 +9,11 @@ const authService = {
     return api.post('/auth/register', userData)
   },
   
+  // Add Google authentication
+  googleLogin: (idToken) => {
+    return api.post('/auth/google', { idToken })
+  },
+  
   getProfile: () => {
     return api.get('/auth/profile')
   },
@@ -21,12 +26,10 @@ const authService = {
     return api.get('/admin/users')
   },
   
-  // Updated: Toggle user ban status with reason
   toggleUserBan: (userId, data = {}) => {
     return api.put(`/admin/users/${userId}/ban`, data)
   },
   
-  // New: Update user profile
   updateProfile: (userData) => {
     return api.put('/auth/profile', userData)
   },

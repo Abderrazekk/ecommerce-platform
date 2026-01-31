@@ -21,7 +21,6 @@ import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import MyOrders from "./pages/MyOrders";
-import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
 
 // Admin Pages
@@ -95,14 +94,6 @@ function App() {
               element={
                 <PrivateRoute>
                   <Profile />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/wishlist"
-              element={
-                <PrivateRoute>
-                  <Wishlist />
                 </PrivateRoute>
               }
             />
