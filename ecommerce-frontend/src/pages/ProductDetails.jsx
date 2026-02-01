@@ -776,15 +776,6 @@ const ProductDetails = () => {
               </h1>
 
               <div className="flex items-center space-x-6">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-5 w-5 text-yellow-400 fill-current"
-                    />
-                  ))}
-                  <span className="ml-3 text-gray-600">4.8 • 128 reviews</span>
-                </div>
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={() => setIsWishlisted(!isWishlisted)}
@@ -857,9 +848,6 @@ const ProductDetails = () => {
                       ? "Low Stock"
                       : "Out of Stock"}
                 </div>
-                <span className="text-sm text-gray-500">
-                  {product.stock > 0 ? `${product.stock} units available` : ""}
-                </span>
               </div>
             </div>
 
@@ -1047,42 +1035,15 @@ const ProductDetails = () => {
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-normal text-gray-900 mb-4">
-                Customer Reviews
+                Customer Comments
               </h2>
-              <div className="flex items-center justify-center space-x-4">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-6 w-6 text-yellow-400 fill-current"
-                    />
-                  ))}
-                </div>
-                <span className="text-gray-600 text-lg">
-                  {commentPagination.total} reviews • 4.8 average
-                </span>
-              </div>
             </div>
 
             {/* Add Comment Form */}
             {isAuthenticated ? (
               <div className="mb-12 bg-gray-50 rounded-2xl p-8">
-                <h3 className="text-xl font-medium text-gray-900 mb-6">
-                  Share Your Experience
-                </h3>
                 <form onSubmit={handleAddComment} className="space-y-6">
                   <div className="space-y-4">
-                    <div className="flex items-center space-x-1">
-                      {[...Array(5)].map((_, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          className="p-1 hover:scale-110 transition-transform"
-                        >
-                          <Star className="h-8 w-8 text-gray-300 hover:text-yellow-400" />
-                        </button>
-                      ))}
-                    </div>
                     <textarea
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
