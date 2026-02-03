@@ -1,12 +1,21 @@
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../redux/slices/cart.slice";
+import {
+  addToWishlist,
+  removeFromWishlist,
+} from "../../redux/slices/wishlist.slice"; // Added wishlist imports
 import { formatPrice } from "../../utils/formatPrice";
 import { FaShoppingCart, FaEye, FaHeart } from "react-icons/fa";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { wishlistChecked, loading: wishlistLoading } = useSelector(
+    (state) => state.wishlist,
+  ); // Added wishlist state
   const [showQuickView, setShowQuickView] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -23,6 +32,43 @@ const ProductCard = ({ product }) => {
         quantity: 1,
       }),
     );
+  };
+
+  // Toggle wishlist function
+  const toggleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Please login to add items to your wishlist");
+      return;
+    }
+
+    const isInWishlist = wishlistChecked[product._id];
+
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product._id))
+        .unwrap()
+        .then(() => {
+          toast.success("Removed from wishlist");
+          setIsWishlisted(false);
+        })
+        .catch((error) => {
+          console.error("Failed to remove from wishlist:", error);
+          toast.error(error || "Failed to remove from wishlist");
+        });
+    } else {
+      dispatch(addToWishlist(product._id))
+        .unwrap()
+        .then(() => {
+          toast.success("Added to wishlist");
+          setIsWishlisted(true);
+        })
+        .catch((error) => {
+          console.error("Failed to add to wishlist:", error);
+          toast.error(error || "Failed to add to wishlist");
+        });
+    }
   };
 
   if (!product.isVisible) {
@@ -56,9 +102,7 @@ const ProductCard = ({ product }) => {
 
             {/* Hover Overlay */}
             <div
-              className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${
-                isHovered ? "opacity-100" : "opacity-0"
-              }`}
+              className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`}
             ></div>
 
             {/* Quick Actions */}
@@ -71,18 +115,16 @@ const ProductCard = ({ product }) => {
             >
               {/* Wishlist */}
               <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsWishlisted(!isWishlisted);
-                }}
+                onClick={toggleWishlist}
+                disabled={wishlistLoading}
                 className={`p-2 rounded-full backdrop-blur-sm transition-all ${
-                  isWishlisted
+                  wishlistChecked[product._id] || isWishlisted
                     ? "bg-white text-red-500"
                     : "bg-white/90 text-gray-700 hover:bg-white"
                 }`}
               >
                 <FaHeart
-                  className={`w-4 h-4 ${isWishlisted ? "fill-red-500" : ""}`}
+                  className={`w-4 h-4 ${wishlistChecked[product._id] || isWishlisted ? "fill-red-500" : ""}`}
                 />
               </button>
 
@@ -313,13 +355,32 @@ const ProductCard = ({ product }) => {
                         {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
                       </button>
 
-                      <Link
-                        to={`/product/${product._id}`}
-                        onClick={() => setShowQuickView(false)}
-                        className="w-full py-4 rounded-lg border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors text-base font-medium text-center block"
-                      >
-                        View Full Details
-                      </Link>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={toggleWishlist}
+                          disabled={wishlistLoading}
+                          className={`w-1/2 py-4 rounded-lg text-base font-medium transition-all flex items-center justify-center gap-2 ${
+                            wishlistChecked[product._id] || isWishlisted
+                              ? "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+                              : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                          }`}
+                        >
+                          <FaHeart
+                            className={`w-5 h-5 ${wishlistChecked[product._id] || isWishlisted ? "fill-red-500" : ""}`}
+                          />
+                          {wishlistChecked[product._id] || isWishlisted
+                            ? "In Wishlist"
+                            : "Add to Wishlist"}
+                        </button>
+
+                        <Link
+                          to={`/product/${product._id}`}
+                          onClick={() => setShowQuickView(false)}
+                          className="w-1/2 py-4 rounded-lg border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors text-base font-medium text-center block"
+                        >
+                          View Full Details
+                        </Link>
+                      </div>
                     </div>
 
                     {/* Features */}

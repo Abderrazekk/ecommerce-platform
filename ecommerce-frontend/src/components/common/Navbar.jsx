@@ -1,14 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/slices/auth.slice";
 import { clearCart } from "../../redux/slices/cart.slice";
+import { fetchWishlist } from "../../redux/slices/wishlist.slice";
 import {
   FaShoppingCart,
   FaUser,
   FaBars,
   FaTimes,
   FaChevronDown,
+  FaChevronRight,
   FaSearch,
   FaHome,
   FaStore,
@@ -17,6 +19,7 @@ import {
   FaUserCog,
   FaBox,
   FaSignOutAlt,
+  FaHeart,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -28,8 +31,43 @@ const Navbar = () => {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.cart);
+  const { itemCount: wishlistCount, wishlistItems } = useSelector(
+    (state) => state.wishlist,
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Ref for mobile menu container
+  const mobileMenuRef = useRef(null);
+
+  // Synchronize wishlist on auth change and periodically
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Fetch wishlist when user logs in
+      dispatch(fetchWishlist());
+
+      // Set up periodic sync (every 30 seconds) to ensure count is accurate
+      const syncInterval = setInterval(() => {
+        dispatch(fetchWishlist());
+      }, 30000);
+
+      return () => clearInterval(syncInterval);
+    }
+  }, [dispatch, isAuthenticated]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   // Shop categories
   const shopCategories = [
@@ -343,15 +381,59 @@ const Navbar = () => {
               <FaSearch className="h-5 w-5" />
             </button>
 
+            {/* Wishlist Icon - Optimized */}
+            <Link
+              to="/wishlist"
+              className="relative p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+              onClick={() => {
+                // Refresh wishlist count when navigating to wishlist page
+                if (isAuthenticated) {
+                  dispatch(fetchWishlist());
+                }
+              }}
+            >
+              <FaHeart className="h-5 w-5" />
+              {/* Animated badge for better UX */}
+              <span
+                className={`absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 ${
+                  wishlistCount > 0
+                    ? "bg-red-500 scale-100 opacity-100"
+                    : "scale-0 opacity-0"
+                }`}
+                key={`wishlist-badge-${wishlistCount}`} // Force re-animation on count change
+              >
+                {wishlistCount > 9 ? "9+" : wishlistCount}
+              </span>
+
+              {/* Pulse animation when count changes */}
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping"></span>
+                </span>
+              )}
+            </Link>
+
             {/* Cart Icon */}
             <Link
               to="/cart"
               className="relative p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
             >
               <FaShoppingCart className="h-5 w-5" />
+              <span
+                className={`absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 ${
+                  cartItemCount > 0
+                    ? "bg-primary-500 scale-100 opacity-100"
+                    : "scale-0 opacity-0"
+                }`}
+                key={`cart-badge-${cartItemCount}`}
+              >
+                {cartItemCount > 9 ? "9+" : cartItemCount}
+              </span>
+
+              {/* Pulse animation for cart */}
               {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartItemCount}
+                <span className="absolute -top-1 -right-1 h-5 w-5">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75 animate-ping"></span>
                 </span>
               )}
             </Link>
@@ -404,6 +486,23 @@ const Navbar = () => {
                   </button>
                   {userDropdown && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-10">
+                      <Link
+                        to="/wishlist"
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
+                        onClick={() => {
+                          setUserDropdown(false);
+                          // Refresh wishlist when navigating
+                          dispatch(fetchWishlist());
+                        }}
+                      >
+                        <FaHeart className="h-4 w-4" />
+                        <span>My Wishlist</span>
+                        {wishlistCount > 0 && (
+                          <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                            {wishlistCount}
+                          </span>
+                        )}
+                      </Link>
                       <Link
                         to="/my-orders"
                         className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
@@ -485,9 +584,16 @@ const Navbar = () => {
           </div>
         )}
 
-        {/* Mobile Menu Dropdown */}
+        {/* Mobile Menu Dropdown - SCROLLABLE VERSION */}
         {isOpen && (
-          <div className="md:hidden absolute left-0 right-0 bg-white shadow-lg border-t border-gray-100 z-40">
+          <div
+            ref={mobileMenuRef}
+            className="md:hidden fixed inset-0 top-16 bg-white z-40 overflow-y-auto"
+            style={{
+              height: "calc(100vh - 4rem)", // Full height minus navbar
+              WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
+            }}
+          >
             {/* Navigation Links */}
             <div className="py-2">
               <Link
@@ -508,27 +614,26 @@ const Navbar = () => {
                 <span className="font-medium">Shop</span>
               </Link>
 
-              {/* Shop Categories in Mobile */}
-              <div className="pl-8 border-b border-gray-50">
-                {shopCategories.slice(0, 5).map((category) => (
-                  <Link
-                    key={category.name}
-                    to={category.path}
-                    className="flex items-center px-4 py-3 text-sm text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50 last:border-0"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <span>{category.name}</span>
-                  </Link>
-                ))}
-                {shopCategories.length > 5 && (
-                  <Link
-                    to="/shop"
-                    className="flex items-center px-4 py-3 text-sm text-primary-600 hover:bg-primary-50 transition-all duration-200"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <span>View All Categories →</span>
-                  </Link>
-                )}
+              {/* Shop Categories in Mobile - SCROLLABLE SECTION */}
+              <div className="border-b border-gray-50">
+                <div className="px-4 py-3 bg-gray-50">
+                  <p className="text-sm font-medium text-gray-700">
+                    Shop Categories
+                  </p>
+                </div>
+                <div className="max-h-64 overflow-y-auto">
+                  {shopCategories.map((category) => (
+                    <Link
+                      key={category.name}
+                      to={category.path}
+                      className="flex items-center px-4 py-3 text-sm text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50 last:border-0 pl-8"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <FaChevronRight className="h-3 w-3 text-gray-400 mr-2" />
+                      <span>{category.name}</span>
+                    </Link>
+                  ))}
+                </div>
               </div>
 
               <Link
@@ -550,6 +655,29 @@ const Navbar = () => {
               </Link>
             </div>
 
+            {/* Wishlist Item Count Display */}
+            <Link
+              to="/wishlist"
+              className="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+              onClick={() => {
+                setIsOpen(false);
+                // Refresh wishlist when navigating
+                if (isAuthenticated) {
+                  dispatch(fetchWishlist());
+                }
+              }}
+            >
+              <div className="flex items-center space-x-3">
+                <FaHeart className="h-5 w-5 text-primary-600" />
+                <span className="font-medium">Wishlist</span>
+              </div>
+              {wishlistCount > 0 && (
+                <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full animate-pulse">
+                  {wishlistCount} item{wishlistCount !== 1 ? "s" : ""}
+                </span>
+              )}
+            </Link>
+
             {/* Cart Item Count Display */}
             <Link
               to="/cart"
@@ -561,8 +689,8 @@ const Navbar = () => {
                 <span className="font-medium">Shopping Cart</span>
               </div>
               {cartItemCount > 0 && (
-                <span className="bg-primary-600 text-white text-sm font-bold px-3 py-1 rounded-full">
-                  {cartItemCount} items
+                <span className="bg-primary-600 text-white text-sm font-bold px-3 py-1 rounded-full animate-pulse">
+                  {cartItemCount} item{cartItemCount !== 1 ? "s" : ""}
                 </span>
               )}
             </Link>
@@ -584,6 +712,24 @@ const Navbar = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* My Wishlist */}
+                <Link
+                  to="/wishlist"
+                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+                  onClick={() => {
+                    setIsOpen(false);
+                    dispatch(fetchWishlist());
+                  }}
+                >
+                  <FaHeart className="h-5 w-5 text-primary-600" />
+                  <span className="font-medium">My Wishlist</span>
+                  {wishlistCount > 0 && (
+                    <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
 
                 {/* My Orders */}
                 <Link
@@ -613,17 +759,19 @@ const Navbar = () => {
                         Admin Panel
                       </p>
                     </div>
-                    {adminMenuItems.map((item) => (
-                      <Link
-                        key={item.name}
-                        to={item.path}
-                        className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50 pl-8"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <FaChevronRight className="h-3 w-3 text-gray-400" />
-                        <span className="font-medium">{item.name}</span>
-                      </Link>
-                    ))}
+                    <div className="max-h-48 overflow-y-auto">
+                      {adminMenuItems.map((item) => (
+                        <Link
+                          key={item.name}
+                          to={item.path}
+                          className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50 pl-8"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <FaChevronRight className="h-3 w-3 text-gray-400" />
+                          <span className="font-medium">{item.name}</span>
+                        </Link>
+                      ))}
+                    </div>
                   </>
                 )}
 
@@ -669,8 +817,8 @@ const Navbar = () => {
               </>
             )}
 
-            {/* Footer Info */}
-            <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+            {/* Footer Info - Stays at bottom */}
+            <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 sticky bottom-0">
               <p className="text-xs text-gray-500 text-center">
                 © {new Date().getFullYear()} Shoppina. All rights reserved.
               </p>

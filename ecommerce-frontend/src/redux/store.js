@@ -6,6 +6,7 @@ import orderReducer from "./slices/order.slice";
 import heroReducer from "./slices/hero.slice";
 import commentReducer from "./slices/comment.slice";
 import adminReducer from "./slices/admin.slice";
+import wishlistReducer from "./slices/wishlist.slice";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     hero: heroReducer,
     comments: commentReducer,
     admin: adminReducer,
+    wishlist: wishlistReducer,
 
   },
   middleware: (getDefaultMiddleware) =>
