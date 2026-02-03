@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom"; // Add this import at the top
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
@@ -12,17 +14,26 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
             {/* Brand Column */}
             <div className="space-y-6">
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold text-xl">ES</span>
+              {/* Logo */}
+              <div className="flex items-center">
+                <Link to="/" className="flex items-center space-x-3">
+                  <div className="relative">
+                    <img
+                      src="/shoppina1.jpg"
+                      alt="Shoppina Logo"
+                      className="h-10 w-auto object-contain"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src =
+                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2310b981'/%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dy='.3em' fill='white' font-family='Arial'%3ES%3C/text%3E%3C/svg%3E";
+                      }}
+                    />
                   </div>
-                  <div className="absolute -inset-1 rounded-xl bg-gradient-to-br from-primary-400/20 to-primary-600/20 blur-md"></div>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white">E-Shop</h2>
-                  <p className="text-sm text-gray-400">Premium Retail</p>
-                </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Shoppina</h2>
+                    <p className="text-sm text-gray-400">Premium Retail</p>
+                  </div>
+                </Link>
               </div>
 
               <p className="text-gray-400 text-sm leading-relaxed">
@@ -82,7 +93,7 @@ const Footer = () => {
                         {item}
                       </a>
                     </li>
-                  ),
+                  )
                 )}
               </ul>
             </div>
@@ -116,26 +127,22 @@ const Footer = () => {
               </h3>
               <div className="space-y-3 text-sm text-gray-400">
                 <a
-                  href="mailto:hello@eshop.com"
+                  href="mailto:Contact@shoppina.com"
                   className="flex items-start group hover:text-white transition-colors duration-200"
                 >
                   <span className="text-primary-400 mr-3 mt-0.5">✉️</span>
-                  <span>hello@eshop.com</span>
+                  <span>Contact@shoppina.com</span>
                 </a>
                 <a
-                  href="tel:+1234567890"
+                  href="tel:+21655999444"
                   className="flex items-center group hover:text-white transition-colors duration-200"
                 >
                   <span className="text-primary-400 mr-3">📞</span>
-                  <span>+1 (234) 567-8900</span>
+                  <span>+216 55999444</span>
                 </a>
                 <div className="flex items-start group">
                   <span className="text-primary-400 mr-3 mt-0.5">📍</span>
-                  <span>
-                    123 Commerce St
-                    <br />
-                    New York, NY 10001
-                  </span>
+                  <span>Ariana, Tunisia</span>
                 </div>
               </div>
             </div>
@@ -147,7 +154,7 @@ const Footer = () => {
           {/* Bottom Bar */}
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-gray-400 text-sm">
-              <p>&copy; {currentYear} E-Shop. All rights reserved.</p>
+              <p>&copy; {currentYear} Shoppina. All rights reserved.</p>
             </div>
 
             <div className="flex items-center space-x-6">
@@ -169,13 +176,6 @@ const Footer = () => {
               >
                 Cookie Policy
               </a>
-            </div>
-
-            {/* Payment Methods */}
-            <div className="flex items-center space-x-4 text-xl opacity-75">
-              <span>💳</span>
-              <span>🔐</span>
-              <span>💎</span>
             </div>
           </div>
         </div>

@@ -26,8 +26,6 @@ import {
   X,
   CheckCircle,
   Plus,
-  Grid,
-  List,
   Filter,
   Search,
   Share2,
@@ -51,7 +49,6 @@ const Wishlist = () => {
   // Local state
   const [selectedItems, setSelectedItems] = useState([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
   const [filteredItems, setFilteredItems] = useState([]);
   const [sortBy, setSortBy] = useState("recent"); // recent, name, price-low, price-high
   const [searchQuery, setSearchQuery] = useState("");
@@ -456,7 +453,7 @@ const Wishlist = () => {
 
         {/* Stats & Controls */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {/* Stats */}
             <div className="text-center p-4 border-r border-gray-100">
               <div className="text-3xl font-bold text-rose-600">
@@ -481,25 +478,6 @@ const Wishlist = () => {
                 }
               </div>
               <div className="text-sm text-gray-600 mt-1">On Sale</div>
-            </div>
-
-            {/* View Toggle */}
-            <div className="text-center p-4 border-r border-gray-100">
-              <div className="flex justify-center space-x-2">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded-lg ${viewMode === "grid" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-                >
-                  <Grid className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2 rounded-lg ${viewMode === "list" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-                >
-                  <List className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="text-sm text-gray-600 mt-2">View</div>
             </div>
 
             {/* Sort */}
@@ -546,7 +524,7 @@ const Wishlist = () => {
           )}
         </div>
 
-        {/* Products Grid/List */}
+        {/* Products List */}
         {filteredItems.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -567,9 +545,7 @@ const Wishlist = () => {
             </button>
           </div>
         ) : (
-          <div
-            className={`${viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-4"} gap-6`}
-          >
+          <div className="space-y-4">
             {filteredItems.map((item) => {
               const product = item.product;
               if (!product) return null;
@@ -584,7 +560,7 @@ const Wishlist = () => {
               return (
                 <div
                   key={product._id}
-                  className={`bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 ${viewMode === "list" ? "flex" : ""}`}
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 flex"
                 >
                   {/* Checkbox */}
                   <div className="absolute top-4 left-4 z-10">
@@ -599,7 +575,7 @@ const Wishlist = () => {
                   {/* Image */}
                   <Link
                     to={`/product/${product._id}`}
-                    className={`relative block overflow-hidden ${viewMode === "list" ? "w-1/3" : "aspect-square"}`}
+                    className="relative block overflow-hidden w-1/3"
                   >
                     <div className="relative h-full bg-gradient-to-br from-gray-50 to-gray-100">
                       <img
@@ -629,7 +605,7 @@ const Wishlist = () => {
                   </Link>
 
                   {/* Details */}
-                  <div className={`p-6 ${viewMode === "list" ? "w-2/3" : ""}`}>
+                  <div className="p-6 w-2/3">
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
