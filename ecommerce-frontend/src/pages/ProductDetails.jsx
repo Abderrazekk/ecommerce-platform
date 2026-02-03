@@ -50,6 +50,8 @@ import {
   Award,
   RefreshCw,
   Globe,
+  Copy,
+  CheckCircle,
 } from "lucide-react";
 
 const ProductDetails = () => {
@@ -73,6 +75,10 @@ const ProductDetails = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  
+  // Share state
+  const [showShareTooltip, setShowShareTooltip] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // Enhanced Video state
   const [videoPlaying, setVideoPlaying] = useState(false);
@@ -104,6 +110,81 @@ const ProductDetails = () => {
     dispatch(fetchProductById(id));
     dispatch(fetchProductComments({ productId: id }));
   }, [dispatch, id]);
+
+  // Share functionality
+  const getProductUrl = () => {
+    // Get current origin (adapts to localhost in dev and real domain in production)
+    const baseUrl = window.location.origin;
+    // Construct the product URL
+    return `${baseUrl}/product/${id}`;
+  };
+
+  const handleShare = async () => {
+    const productUrl = getProductUrl();
+    
+    // Check if Web Share API is available (mobile devices)
+    if (navigator.share && navigator.canShare) {
+      try {
+        await navigator.share({
+          title: product?.name || "Check out this product",
+          text: product?.description ? `${product.name}: ${product.description.substring(0, 100)}...` : "Check out this amazing product!",
+          url: productUrl,
+        });
+      } catch (error) {
+        // User cancelled share or Web Share API failed
+        // Fall back to clipboard method
+        copyToClipboard(productUrl);
+      }
+    } else {
+      // Use clipboard method for desktop or unsupported browsers
+      copyToClipboard(productUrl);
+    }
+  };
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopySuccess(true);
+      
+      // Show success feedback
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 2000);
+    } catch (error) {
+      // Fallback for older browsers or insecure contexts
+      fallbackCopyToClipboard(text);
+    }
+  };
+
+  const fallbackCopyToClipboard = (text) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    // Make the textarea out of viewport
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      const successful = document.execCommand("copy");
+      if (successful) {
+        setCopySuccess(true);
+        setTimeout(() => {
+          setCopySuccess(false);
+        }, 2000);
+      } else {
+        alert("Failed to copy link. Please copy the URL manually: " + text);
+      }
+    } catch (error) {
+      console.error("Fallback copy failed:", error);
+      alert("Failed to copy link. Please copy the URL manually: " + text);
+    }
+    
+    document.body.removeChild(textArea);
+  };
 
   // Enhanced Video Controls
   const handleVideoPlayPause = () => {
@@ -455,6 +536,16 @@ const ProductDetails = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Share Success Toast */}
+      {copySuccess && (
+        <div className="fixed top-6 right-6 z-50 animate-fade-in">
+          <div className="bg-gray-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
+            <CheckCircle className="h-5 w-5 text-green-400" />
+            <span className="font-medium">Link copied to clipboard!</span>
+          </div>
+        </div>
+      )}
+
       {/* Subtle Navigation */}
       <div className="border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-8 py-6">
@@ -789,9 +880,33 @@ const ProductDetails = () => {
                       className={`h-5 w-5 ${isWishlisted ? "fill-current" : ""}`}
                     />
                   </button>
-                  <button className="p-2.5 rounded-lg border border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors">
-                    <Share2 className="h-5 w-5" />
-                  </button>
+                  <div className="relative">
+                    <button
+                      onClick={handleShare}
+                      onMouseEnter={() => setShowShareTooltip(true)}
+                      onMouseLeave={() => setShowShareTooltip(false)}
+                      className={`p-2.5 rounded-lg border transition-colors flex items-center justify-center ${
+                        copySuccess
+                          ? "bg-green-50 border-green-200 text-green-600"
+                          : "border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300"
+                      }`}
+                      title="Share product"
+                    >
+                      {copySuccess ? (
+                        <CheckCircle className="h-5 w-5" />
+                      ) : (
+                        <Share2 className="h-5 w-5" />
+                      )}
+                    </button>
+                    
+                    {/* Share Tooltip */}
+                    {showShareTooltip && !copySuccess && (
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-xl z-50 animate-fade-in">
+                        Click to copy product link
+                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-900"></div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
