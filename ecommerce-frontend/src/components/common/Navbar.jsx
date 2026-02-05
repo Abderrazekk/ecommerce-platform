@@ -20,6 +20,7 @@ import {
   FaBox,
   FaSignOutAlt,
   FaHeart,
+  FaStar,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -125,6 +126,7 @@ const Navbar = () => {
     { name: "Products", path: "/admin/products" },
     { name: "Orders", path: "/admin/orders" },
     { name: "Users", path: "/admin/users" },
+    { name: "Sponsors", path: "/admin/sponsors" }, // Add this line
   ];
 
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);

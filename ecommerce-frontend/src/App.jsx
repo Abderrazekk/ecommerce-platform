@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { ToastContainer } from 'react-toastify';
 
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
@@ -30,6 +31,7 @@ import Products from "./pages/admin/Products";
 import Orders from "./pages/admin/Orders";
 import Users from "./pages/admin/Users";
 import Hero from "./pages/admin/Hero";
+import AdminSponsors from "./pages/admin/Sponsors";
 
 // Optional: Not Found page
 import NotFound from "./pages/NotFound";
@@ -146,6 +148,14 @@ function App() {
                 <PrivateRoute adminOnly>
                   <Users />
                 </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/sponsors"
+              element={
+                <AdminRoute>
+                  <AdminSponsors />
+                </AdminRoute>
               }
             />
 

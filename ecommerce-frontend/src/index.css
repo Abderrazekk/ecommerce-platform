@@ -30,12 +30,29 @@
   }
 }
 
-/*@layer base {*/
- /* html {*/
-    /*font-size: 18px; /* default is 16px, increase for larger text */
- /* }*/
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
 
- /* body {*/
-   /* @apply bg-gray-50 text-gray-900;*/
+.animate-scroll {
+  animation: scroll 20s linear infinite;
+}
+
+.pause-animation:hover {
+  animation-play-state: paused;
+}
+
+/*@layer base {*/
+/* html {*/
+/*font-size: 18px; /* default is 16px, increase for larger text */
+/* }*/
+
+/* body {*/
+/* @apply bg-gray-50 text-gray-900;*/
 /*  }*/
 /*}*/

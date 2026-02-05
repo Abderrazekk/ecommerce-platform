@@ -7,6 +7,7 @@ import heroReducer from "./slices/hero.slice";
 import commentReducer from "./slices/comment.slice";
 import adminReducer from "./slices/admin.slice";
 import wishlistReducer from "./slices/wishlist.slice";
+import sponsorReducer from "./slices/sponsor.slice";
 
 export const store = configureStore({
   reducer: {
@@ -18,7 +19,7 @@ export const store = configureStore({
     comments: commentReducer,
     admin: adminReducer,
     wishlist: wishlistReducer,
-
+    sponsors: sponsorReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
