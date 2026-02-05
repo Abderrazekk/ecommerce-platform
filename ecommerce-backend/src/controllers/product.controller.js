@@ -9,7 +9,7 @@ const uploadImagesToCloudinary = async (files) => {
       const stream = cloudinary.uploader.upload_stream(
         {
           folder: "ecommerce/products",
-          resource_type: "auto", // Auto-detect image
+          resource_type: "auto",
         },
         (error, result) => {
           if (error) {
@@ -30,14 +30,13 @@ const uploadImagesToCloudinary = async (files) => {
   return await Promise.all(uploadPromises);
 };
 
-// NEW: Helper function to upload video to Cloudinary
 const uploadVideoToCloudinary = async (file) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: "ecommerce/products/videos",
-        resource_type: "video", // Explicitly set to video
-        chunk_size: 6000000, // 6MB chunks for large videos
+        resource_type: "video",
+        chunk_size: 6000000,
       },
       (error, result) => {
         if (error) {
@@ -53,7 +52,6 @@ const uploadVideoToCloudinary = async (file) => {
   });
 };
 
-// Helper function to delete images from Cloudinary
 const deleteImagesFromCloudinary = async (images) => {
   if (!images || images.length === 0) return;
 
@@ -64,12 +62,10 @@ const deleteImagesFromCloudinary = async (images) => {
   await Promise.all(deletePromises);
 };
 
-// NEW: Helper function to delete video from Cloudinary
 const deleteVideoFromCloudinary = async (videoUrl) => {
   if (!videoUrl) return;
 
   try {
-    // Extract public_id from Cloudinary URL
     const urlParts = videoUrl.split("/");
     const publicIdWithExtension = urlParts.slice(-1)[0];
     const publicId =
@@ -93,19 +89,16 @@ const getProducts = asyncHandler(async (req, res) => {
   const search = req.query.search;
   const brand = req.query.brand;
 
-  let filter = { isVisible: true }; // Only visible products for public
+  let filter = { isVisible: true };
 
-  // Filter by category
   if (category && productCategories.includes(category)) {
     filter.category = category;
   }
 
-  // Filter by brand
   if (brand) {
     filter.brand = new RegExp(brand, "i");
   }
 
-  // Search in name, description, and brand
   if (search) {
     filter.$or = [
       { name: { $regex: search, $options: "i" } },
@@ -146,19 +139,16 @@ const getAdminProducts = asyncHandler(async (req, res) => {
   const search = req.query.search;
   const brand = req.query.brand;
 
-  let filter = {}; // No visibility filter for admin
+  let filter = {};
 
-  // Filter by category
   if (category && productCategories.includes(category)) {
     filter.category = category;
   }
 
-  // Filter by brand
   if (brand) {
     filter.brand = new RegExp(brand, "i");
   }
 
-  // Search in name, description, and brand
   if (search) {
     filter.$or = [
       { name: { $regex: search, $options: "i" } },
@@ -219,7 +209,6 @@ const getProductById = asyncHandler(async (req, res) => {
     throw new Error("Product not found");
   }
 
-  // Check if product is visible for non-admin users
   if (!req.user?.isAdmin && !product.isVisible) {
     res.status(404);
     throw new Error("Product not found");
@@ -245,6 +234,7 @@ const createProduct = asyncHandler(async (req, res) => {
     description,
     price,
     discountPrice,
+    shippingFee, // ADDED: Extract shippingFee from req.body
     category,
     stock,
     isFeatured,
@@ -299,16 +289,18 @@ const createProduct = asyncHandler(async (req, res) => {
             ? null
             : Number(discountPrice)
           : null,
+      shippingFee: shippingFee ? Number(shippingFee) : 0, // ADDED: Include shipping fee
       category,
       stock,
       tags: parsedTags,
       images: uploadedImages,
-      video: videoUrl, // NEW: Add video URL
+      video: videoUrl,
       isFeatured: isFeatured === "true" || isFeatured === true,
       isVisible: isVisible !== "false",
     });
 
     console.log("Product created successfully:", product._id);
+    console.log("Product shipping fee:", product.shippingFee);
 
     res.status(201).json({
       success: true,
@@ -320,7 +312,6 @@ const createProduct = asyncHandler(async (req, res) => {
     // Clean up uploaded files if product creation fails
     if (req.files?.images && req.files.images.length > 0) {
       try {
-        // Extract public_ids from uploaded images
         const uploadedImages = await uploadImagesToCloudinary(req.files.images);
         await deleteImagesFromCloudinary(uploadedImages);
       } catch (cleanupError) {
@@ -328,7 +319,6 @@ const createProduct = asyncHandler(async (req, res) => {
       }
     }
 
-    // Clean up uploaded video if exists
     if (req.files?.video && req.files.video.length > 0) {
       try {
         const videoUrl = await uploadVideoToCloudinary(req.files.video[0]);
@@ -343,9 +333,6 @@ const createProduct = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update a product
-// @route   PUT /api/products/:id
-// @access  Private/Admin
 // @desc    Update a product
 // @route   PUT /api/products/:id
 // @access  Private/Admin
@@ -368,6 +355,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     description,
     price,
     discountPrice,
+    shippingFee, // ADDED: Extract shippingFee from req.body
     category,
     stock,
     isFeatured,
@@ -414,10 +402,24 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
   }
 
+  // Validate shipping fee if provided
+  if (shippingFee !== undefined && shippingFee !== "") {
+    const shippingNum = parseFloat(shippingFee);
+    if (isNaN(shippingNum)) {
+      res.status(400);
+      throw new Error("Shipping fee must be a valid number");
+    }
+
+    if (shippingNum < 0) {
+      res.status(400);
+      throw new Error("Shipping fee cannot be negative");
+    }
+  }
+
   // Store old files for cleanup
   const oldImages = [...product.images];
   const oldVideoUrl = product.video;
-  let newImages = [...product.images]; // Start with existing images
+  let newImages = [...product.images];
   let newVideoUrl = product.video;
 
   // Upload new images if provided
@@ -427,9 +429,8 @@ const updateProduct = asyncHandler(async (req, res) => {
         `Uploading ${req.files.images.length} new images to Cloudinary...`,
       );
       const uploadedImages = await uploadImagesToCloudinary(req.files.images);
-      newImages = uploadedImages; // Replace all images
+      newImages = uploadedImages;
 
-      // Delete old images from Cloudinary
       if (oldImages.length > 0) {
         console.log(
           `Deleting ${oldImages.length} old images from Cloudinary...`,
@@ -441,7 +442,6 @@ const updateProduct = asyncHandler(async (req, res) => {
       throw new Error("Failed to upload new images");
     }
   }
-  // If no new images provided, keep existing ones (already set above)
 
   // Upload new video if provided
   if (req.files?.video && req.files.video.length > 0) {
@@ -449,7 +449,6 @@ const updateProduct = asyncHandler(async (req, res) => {
       console.log("Uploading new video to Cloudinary...");
       newVideoUrl = await uploadVideoToCloudinary(req.files.video[0]);
 
-      // Delete old video from Cloudinary if it exists
       if (oldVideoUrl) {
         console.log("Deleting old video from Cloudinary...");
         await deleteVideoFromCloudinary(oldVideoUrl);
@@ -458,21 +457,16 @@ const updateProduct = asyncHandler(async (req, res) => {
       console.error("Error uploading new video:", uploadError);
       throw new Error("Failed to upload new video");
     }
-  }
-  // Handle video removal if removeVideo flag is set
-  else if (req.body.removeVideo === "true") {
+  } else if (req.body.removeVideo === "true") {
     console.log("Removing existing video as requested...");
 
-    // Delete old video from Cloudinary if it exists
     if (oldVideoUrl) {
       await deleteVideoFromCloudinary(oldVideoUrl);
     }
 
-    newVideoUrl = null; // Set to null to remove the video
-  }
-  // If no new video and no remove flag, keep existing video
-  else {
-    newVideoUrl = oldVideoUrl; // Keep existing video
+    newVideoUrl = null;
+  } else {
+    newVideoUrl = oldVideoUrl;
   }
 
   // Build update object
@@ -487,10 +481,15 @@ const updateProduct = asyncHandler(async (req, res) => {
           ? null
           : Number(discountPrice)
         : product.discountPrice,
+    // ADDED: Handle shipping fee update
+    shippingFee:
+      shippingFee !== undefined && shippingFee !== ""
+        ? Number(shippingFee)
+        : product.shippingFee,
     category: category || product.category,
     stock: stock !== undefined ? Number(stock) : product.stock,
     tags: parsedTags,
-    images: newImages, // This will be existing images if no new ones provided
+    images: newImages,
     video: newVideoUrl,
   };
 
@@ -545,6 +544,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
     message: "Product deleted successfully",
   });
 });
+
 // @desc    Get all categories
 // @route   GET /api/products/categories
 // @access  Public
@@ -563,7 +563,7 @@ const getBrands = asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    brands: brands.filter((brand) => brand).sort(), // Remove null/undefined and sort
+    brands: brands.filter((brand) => brand).sort(),
   });
 });
 

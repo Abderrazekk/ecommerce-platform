@@ -4,7 +4,7 @@ import { addToCart } from "../../redux/slices/cart.slice";
 import {
   addToWishlist,
   removeFromWishlist,
-} from "../../redux/slices/wishlist.slice"; // Added wishlist imports
+} from "../../redux/slices/wishlist.slice";
 import { formatPrice } from "../../utils/formatPrice";
 import { FaShoppingCart, FaEye, FaHeart } from "react-icons/fa";
 import { useState } from "react";
@@ -15,7 +15,7 @@ const ProductCard = ({ product }) => {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const { wishlistChecked, loading: wishlistLoading } = useSelector(
     (state) => state.wishlist,
-  ); // Added wishlist state
+  );
   const [showQuickView, setShowQuickView] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -28,6 +28,7 @@ const ProductCard = ({ product }) => {
         product: product._id,
         name: product.name,
         price: product.discountPrice || product.price,
+        shippingFee: product.shippingFee || 0, // FIXED: Add shipping fee here
         image: product.images?.[0]?.url || "",
         quantity: 1,
       }),
@@ -206,6 +207,35 @@ const ProductCard = ({ product }) => {
           )}
         </div>
 
+        {/* Shipping Fee Display */}
+        {product.shippingFee > 0 && (
+          <div className="flex items-center gap-1 mb-2">
+            <svg
+              className="w-3 h-3 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
+              ></path>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
+              ></path>
+            </svg>
+            <span className="text-xs text-gray-500">
+              Shipping: {formatPrice(product.shippingFee)}
+            </span>
+          </div>
+        )}
+
         {/* Stock Indicator */}
         <div className="flex items-center gap-2 mb-4">
           <div
@@ -321,6 +351,35 @@ const ProductCard = ({ product }) => {
                       )}
                     </div>
 
+                    {/* Shipping Fee Display */}
+                    {product.shippingFee > 0 && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
+                          ></path>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
+                          ></path>
+                        </svg>
+                        <span>
+                          Shipping fee: {formatPrice(product.shippingFee)}
+                        </span>
+                      </div>
+                    )}
+
                     {/* Stock */}
                     <div className="flex items-center gap-2">
                       <div
@@ -386,10 +445,6 @@ const ProductCard = ({ product }) => {
                     {/* Features */}
                     <div className="pt-6 border-t border-gray-100">
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                          <span>Free Shipping</span>
-                        </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
                           <span>Secure Payment</span>

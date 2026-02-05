@@ -137,12 +137,21 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     }
   }
 
+  // Update order status
+  const oldStatus = order.status;
   order.status = status;
   await order.save();
 
+  // Populate user info for response
+  const populatedOrder = await Order.findById(order._id).populate(
+    "user",
+    "name email",
+  );
+
   res.json({
     success: true,
-    order,
+    message: `Order status updated from ${oldStatus} to ${status}`,
+    order: populatedOrder,
   });
 });
 

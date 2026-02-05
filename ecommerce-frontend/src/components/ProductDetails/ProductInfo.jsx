@@ -1,7 +1,6 @@
-// src/components/product/ProductInfo.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux"; // Changed import
+import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/slices/cart.slice";
 import {
   addToWishlist,
@@ -19,6 +18,8 @@ import {
   Globe,
   Check,
   Star,
+  ShoppingBag,
+  Zap,
 } from "lucide-react";
 
 const ProductInfo = ({
@@ -31,9 +32,10 @@ const ProductInfo = ({
   const [quantity, setQuantity] = useState(1);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [isBuyNowLoading, setIsBuyNowLoading] = useState(false);
 
-  const navigate = useNavigate(); // Use hook here
-  const dispatch = useDispatch(); // Use hook here
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const toggleWishlist = async () => {
     if (!isAuthenticated) {
@@ -65,12 +67,40 @@ const ProductInfo = ({
           product: product._id,
           name: product.name,
           price: product.discountPrice || product.price,
+          shippingFee: product.shippingFee || 0,
           image: product.images?.[0]?.url || "",
           quantity: quantity,
         }),
       );
       toast.success("Added to cart");
     }
+  };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+
+    setIsBuyNowLoading(true);
+
+    // Add product to cart
+    dispatch(
+      addToCart({
+        product: product._id,
+        name: product.name,
+        price: product.discountPrice || product.price,
+        shippingFee: product.shippingFee || 0,
+        image: product.images?.[0]?.url || "",
+        quantity: quantity,
+      }),
+    );
+
+    // Show success message
+    toast.success("Added to cart! Redirecting to checkout...");
+
+    // Redirect to checkout after a short delay
+    setTimeout(() => {
+      navigate("/checkout");
+      setIsBuyNowLoading(false);
+    }, 1000);
   };
 
   const getProductUrl = () => {
@@ -249,6 +279,33 @@ const ProductInfo = ({
           )}
         </div>
 
+        {/* Shipping Fee Display */}
+        {product.shippingFee > 0 && (
+          <div className="flex items-center gap-2 text-gray-600">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
+              ></path>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
+              ></path>
+            </svg>
+            <span>Shipping fee: {formatPrice(product.shippingFee)}</span>
+          </div>
+        )}
+
         <div className="flex items-center space-x-4">
           <div
             className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
@@ -357,14 +414,58 @@ const ProductInfo = ({
               </div>
             </div>
 
+            {/* Action Buttons - Updated with Buy Now */}
             <div className="space-y-4">
-              <button
-                onClick={handleAddToCart}
-                className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-xl text-lg font-medium transition-colors shadow-sm hover:shadow"
-              >
-                Add to Cart
-              </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Add to Cart Button */}
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-xl text-lg font-medium transition-colors shadow-sm hover:shadow flex items-center justify-center gap-3"
+                >
+                  <ShoppingBag className="h-5 w-5" />
+                  Add to Cart
+                </button>
 
+                {/* Buy Now Button */}
+                <button
+                  onClick={handleBuyNow}
+                  disabled={isBuyNowLoading}
+                  className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-lg font-medium transition-colors shadow-sm hover:shadow flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isBuyNowLoading ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-5 w-5" />
+                      Buy Now
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Quick Quantity Buttons */}
               <div className="grid grid-cols-3 gap-3">
                 <button
                   onClick={() => setQuantity(Math.min(product.stock, 3))}
@@ -385,17 +486,33 @@ const ProductInfo = ({
                   Add All
                 </button>
               </div>
+
+              {/* Buy Now Explanation */}
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Zap className="h-4 w-4 text-blue-600" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-900 mb-1">
+                      Buy Now Feature
+                    </h4>
+                    <p className="text-xs text-blue-700">
+                      Click "Buy Now" to add this item to your cart and proceed
+                      directly to checkout. This saves time if you're ready to
+                      purchase immediately.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Features Grid */}
           <div className="grid grid-cols-2 gap-4 pt-8 border-t border-gray-100">
             {[
-              {
-                icon: Truck,
-                label: "Free Shipping",
-                desc: "2-3 business days",
-              },
               {
                 icon: Shield,
                 label: "2-Year Warranty",
@@ -410,6 +527,11 @@ const ProductInfo = ({
                 icon: Globe,
                 label: "Worldwide Delivery",
                 desc: "International",
+              },
+              {
+                icon: Truck,
+                label: "Fast Shipping",
+                desc: "2-3 business days",
               },
             ].map((feature, index) => (
               <div

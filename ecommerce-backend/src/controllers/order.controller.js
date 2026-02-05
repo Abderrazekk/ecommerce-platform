@@ -1,5 +1,5 @@
 const Order = require("../models/Order.model");
-const { Product } = require('../models/Product.model');
+const { Product } = require("../models/Product.model");
 const asyncHandler = require("../middlewares/error.middleware").asyncHandler;
 
 // @desc    Create new order
@@ -8,7 +8,7 @@ const asyncHandler = require("../middlewares/error.middleware").asyncHandler;
 const createOrder = asyncHandler(async (req, res) => {
   const { items, deliveryAddress, phone } = req.body;
 
-  console.log("Creating order with items:", items); // Debug log
+  console.log("Creating order with items:", items);
 
   if (!items || items.length === 0) {
     res.status(400);
@@ -17,10 +17,11 @@ const createOrder = asyncHandler(async (req, res) => {
 
   // Validate and process items
   let orderItems = [];
-  let totalPrice = 0;
+  let productsTotal = 0;
+  let highestShippingFee = 0;
+  const FREE_SHIPPING_THRESHOLD = 100;
 
   for (const item of items) {
-    // Make sure Product model is imported correctly
     const product = await Product.findById(item.product);
 
     if (!product) {
@@ -33,15 +34,23 @@ const createOrder = asyncHandler(async (req, res) => {
       throw new Error(`Insufficient stock for: ${product.name}`);
     }
 
-    const itemTotal = product.price * item.quantity;
-    totalPrice += itemTotal;
+    // Use discount price if available, otherwise use regular price
+    const itemPrice = product.discountPrice || product.price;
+    const itemTotal = itemPrice * item.quantity;
+    productsTotal += itemTotal;
+
+    // Track the highest shipping fee among products
+    if (product.shippingFee > highestShippingFee) {
+      highestShippingFee = product.shippingFee;
+    }
 
     orderItems.push({
       product: product._id,
       name: product.name,
-      price: product.price,
+      price: itemPrice,
       quantity: item.quantity,
-      image: product.image,
+      image: product.images[0]?.url || product.image,
+      shippingFee: product.shippingFee,
     });
 
     // Update product stock
@@ -49,10 +58,26 @@ const createOrder = asyncHandler(async (req, res) => {
     await product.save();
   }
 
+  // Calculate shipping fee (free if order total > 100 TND)
+  let shippingFee = 0;
+  let freeShipping = false;
+
+  if (productsTotal <= FREE_SHIPPING_THRESHOLD) {
+    shippingFee = highestShippingFee;
+  } else {
+    freeShipping = true;
+  }
+
+  // Calculate final total
+  const totalPrice = productsTotal + shippingFee;
+
   const order = await Order.create({
     user: req.user._id,
     items: orderItems,
+    productsTotal,
+    shippingFee,
     totalPrice,
+    freeShipping,
     deliveryAddress,
     phone,
   });
@@ -77,7 +102,7 @@ const getAllOrders = asyncHandler(async (req, res) => {
 
   // Populate user information
   const orders = await Order.find(filter)
-    .populate('user', 'name email phone address') // Add phone and address if needed
+    .populate("user", "name email phone address") // Add phone and address if needed
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 });
@@ -97,10 +122,12 @@ const getAllOrders = asyncHandler(async (req, res) => {
   });
 });
 
-// Also update fetchMyOrders to populate user info
+// @desc    Get user's orders
+// @route   GET /api/orders/my
+// @access  Private
 const getMyOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({ user: req.user._id })
-    .populate('user', 'name email')
+    .populate("user", "name email")
     .sort({ createdAt: -1 });
 
   res.json({
@@ -109,20 +136,27 @@ const getMyOrders = asyncHandler(async (req, res) => {
   });
 });
 
-// Update getOrderById to populate user info
+// @desc    Get order by ID
+// @route   GET /api/orders/:id
+// @access  Private
 const getOrderById = asyncHandler(async (req, res) => {
-  const order = await Order.findById(req.params.id)
-    .populate('user', 'name email phone address');
-  
+  const order = await Order.findById(req.params.id).populate(
+    "user",
+    "name email phone address",
+  );
+
   if (!order) {
     res.status(404);
-    throw new Error('Order not found');
+    throw new Error("Order not found");
   }
 
   // Check if user owns order or is admin
-  if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+  if (
+    order.user._id.toString() !== req.user._id.toString() &&
+    req.user.role !== "admin"
+  ) {
     res.status(401);
-    throw new Error('Not authorized to view this order');
+    throw new Error("Not authorized to view this order");
   }
 
   res.json({
@@ -131,6 +165,4 @@ const getOrderById = asyncHandler(async (req, res) => {
   });
 });
 
-
-
-module.exports = { createOrder, getMyOrders, getOrderById, getAllOrders  };
+module.exports = { createOrder, getMyOrders, getOrderById, getAllOrders };

@@ -24,7 +24,7 @@ const imageSchema = new mongoose.Schema(
     },
   },
   { _id: false },
-); // Don't create _id for subdocuments
+);
 
 const productSchema = new mongoose.Schema(
   {
@@ -52,14 +52,18 @@ const productSchema = new mongoose.Schema(
     discountPrice: {
       type: Number,
       min: [0, "Discount price cannot be negative"],
-      // REMOVE the validate object entirely
+    },
+    // NEW: Shipping fee per product
+    shippingFee: {
+      type: Number,
+      default: 0,
+      min: [0, "Shipping fee cannot be negative"],
     },
     images: {
       type: [imageSchema],
       required: [true, "Please upload at least one product image"],
       validate: {
         validator: function (images) {
-          // Must have between 1 and 6 images
           return images.length >= 1 && images.length <= 6;
         },
         message: "Product must have between 1 and 6 images",
@@ -70,7 +74,6 @@ const productSchema = new mongoose.Schema(
       default: null,
       validate: {
         validator: function (value) {
-          // Allow null or Cloudinary URL format
           if (!value) return true;
           return (
             value.startsWith("http") &&
@@ -91,7 +94,6 @@ const productSchema = new mongoose.Schema(
       default: [],
       validate: {
         validator: function (tags) {
-          // Each tag should be a non-empty string
           return tags.every(
             (tag) => typeof tag === "string" && tag.trim().length > 0,
           );
@@ -163,13 +165,11 @@ productSchema.virtual("comments", {
 
 // Add this to the Product model to get comment count
 productSchema.virtual("commentCount").get(function () {
-  // This would need population or separate query
   return 0;
 });
 
 const Product = mongoose.model("Product", productSchema);
 
-// Export both as named exports
 module.exports.Product = Product;
 module.exports.productCategories = productCategories;
 module.exports.imageSchema = imageSchema;
