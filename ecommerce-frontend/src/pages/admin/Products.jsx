@@ -9,7 +9,17 @@ import {
 import { formatPrice } from "../../utils/formatPrice";
 import Loader from "../../components/common/Loader";
 import { toast } from "react-hot-toast";
-import { Edit2, Trash2, Plus, X, Search, Truck } from "lucide-react";
+import {
+  Edit2,
+  Trash2,
+  Plus,
+  X,
+  Search,
+  Truck,
+  Globe,
+  Clock,
+  Phone,
+} from "lucide-react";
 
 const categories = [
   "Electronics & Gadgets",
@@ -37,12 +47,13 @@ const Products = () => {
     description: "",
     price: "",
     discountPrice: "",
-    shippingFee: "", // NEW: Shipping fee field
+    shippingFee: "",
     category: "",
     stock: "",
     tags: "",
     isFeatured: false,
     isVisible: true,
+    isAliExpress: false, // NEW: AliExpress field
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -70,6 +81,7 @@ const Products = () => {
       );
     });
   }, [products, searchQuery]);
+
   const handleOpenModal = (product = null) => {
     if (product) {
       setEditingProduct(product);
@@ -85,6 +97,7 @@ const Products = () => {
         tags: product.tags ? product.tags.join(", ") : "",
         isFeatured: product.isFeatured || false,
         isVisible: product.isVisible !== false,
+        isAliExpress: product.isAliExpress || false, // NEW
       });
       setImageFiles([]);
       setImagePreviews(
@@ -93,7 +106,7 @@ const Products = () => {
       setVideoFile(null);
       setVideoPreview(product.video || null);
       setRemoveExistingVideo(false);
-      setImagesToRemove([]); // Reset images to remove
+      setImagesToRemove([]);
     } else {
       setEditingProduct(null);
       setFormData({
@@ -102,12 +115,13 @@ const Products = () => {
         description: "",
         price: "",
         discountPrice: "",
-        shippingFee: "", // NEW: Initialize shipping fee
+        shippingFee: "",
         category: "",
         stock: "",
         tags: "",
         isFeatured: false,
         isVisible: true,
+        isAliExpress: false, // NEW
       });
       setImageFiles([]);
       setImagePreviews([]);
@@ -128,12 +142,13 @@ const Products = () => {
       description: "",
       price: "",
       discountPrice: "",
-      shippingFee: "", // NEW: Reset shipping fee
+      shippingFee: "",
       category: "",
       stock: "",
       tags: "",
       isFeatured: false,
       isVisible: true,
+      isAliExpress: false, // NEW
     });
     setImageFiles([]);
     setImagePreviews([]);
@@ -320,7 +335,7 @@ const Products = () => {
       }
     }
 
-    // NEW: Validate shipping fee
+    // Validate shipping fee
     const shippingFeeStr = String(formData.shippingFee || "");
     if (shippingFeeStr && shippingFeeStr.trim() !== "") {
       const shippingNum = parseFloat(shippingFeeStr);
@@ -362,6 +377,9 @@ const Products = () => {
     productData.append("isFeatured", formData.isFeatured);
     productData.append("isVisible", formData.isVisible);
 
+    // NEW: Append AliExpress flag
+    productData.append("isAliExpress", formData.isAliExpress);
+
     // Add only NEW images (existing ones are already in product.images)
     imageFiles.forEach((file) => {
       productData.append("images", file);
@@ -372,7 +390,7 @@ const Products = () => {
       productData.append(`removeImages[${idx}]`, publicId);
     });
 
-    // Video handling (unchanged)
+    // Video handling
     if (videoFile) productData.append("video", videoFile);
     if (editingProduct && removeExistingVideo && !videoFile)
       productData.append("removeVideo", "true");
@@ -438,14 +456,33 @@ const Products = () => {
         {filteredProducts.map((product) => (
           <div
             key={product._id}
-            className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+            className={`border rounded-lg overflow-hidden hover:shadow-md transition-shadow ${
+              product.isAliExpress ? "border-orange-300" : "border-gray-200"
+            }`}
           >
-            <div className="h-48 bg-gray-100 overflow-hidden">
+            <div className="h-48 bg-gray-100 overflow-hidden relative">
               <img
                 src={product.images?.[0]?.url || ""}
                 alt={product.name}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />
+              {/* AliExpress Badge */}
+              {product.isAliExpress && (
+                <div className="absolute top-2 left-2">
+                  <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full">
+                    <Globe className="h-3 w-3" />
+                    <span>AliExpress</span>
+                  </div>
+                </div>
+              )}
+              {/* Featured Badge */}
+              {product.isFeatured && (
+                <div className="absolute top-2 right-2">
+                  <div className="px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
+                    Featured
+                  </div>
+                </div>
+              )}
             </div>
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
@@ -455,10 +492,32 @@ const Products = () => {
                   </h3>
                   <p className="text-sm text-gray-500">{product.brand}</p>
                 </div>
-                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                <span
+                  className={`text-xs px-2 py-1 rounded ${
+                    product.isAliExpress
+                      ? "bg-orange-100 text-orange-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+                >
                   {product.category}
                 </span>
               </div>
+
+              {/* AliExpress Notice in Product Card */}
+              {product.isAliExpress && (
+                <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
+                  <div className="flex items-center gap-1 mb-1">
+                    <Clock className="h-3 w-3" />
+                    <span className="font-medium">10-20 days delivery</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Phone className="h-3 w-3" />
+                    <span className="font-medium">
+                      Phone confirmation required
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="mb-3">
                 <div className="flex items-center gap-2">
@@ -796,31 +855,81 @@ const Products = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-6">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="isFeatured"
-                        name="isFeatured"
-                        checked={formData.isFeatured}
-                        onChange={handleInputChange}
-                        className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-                      />
-                      <label htmlFor="isFeatured" className="ml-2 text-sm">
-                        Featured Product
-                      </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* AliExpress Checkbox */}
+                    <div className="space-y-4">
+                      <div
+                        className={`flex items-start gap-3 p-4 border rounded-xl transition-all ${
+                          formData.isAliExpress
+                            ? "border-orange-300 bg-orange-50"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          id="isAliExpress"
+                          name="isAliExpress"
+                          checked={formData.isAliExpress}
+                          onChange={handleInputChange}
+                          className="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-2 focus:ring-orange-500/20 focus:ring-offset-1 transition-all duration-200 mt-1"
+                        />
+                        <label htmlFor="isAliExpress" className="text-gray-700">
+                          <span className="font-medium flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-orange-500" />
+                            AliExpress Product
+                          </span>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Mark this product as coming from AliExpress
+                          </p>
+                          {formData.isAliExpress && (
+                            <div className="mt-2 space-y-1 text-xs text-orange-600">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-3 w-3" />
+                                <span>10-20 days delivery</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-3 w-3" />
+                                <span>Phone confirmation required</span>
+                              </div>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+
+                      {/* Featured Checkbox */}
+                      <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl">
+                        <input
+                          type="checkbox"
+                          id="isFeatured"
+                          name="isFeatured"
+                          checked={formData.isFeatured}
+                          onChange={handleInputChange}
+                          className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1 transition-all duration-200"
+                        />
+                        <label htmlFor="isFeatured" className="text-gray-700">
+                          <span className="font-medium">Featured Product</span>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Show this product on the homepage
+                          </p>
+                        </label>
+                      </div>
                     </div>
-                    <div className="flex items-center">
+
+                    {/* Visibility Checkbox */}
+                    <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl h-fit">
                       <input
                         type="checkbox"
                         id="isVisible"
                         name="isVisible"
                         checked={formData.isVisible}
                         onChange={handleInputChange}
-                        className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                        className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1 transition-all duration-200"
                       />
-                      <label htmlFor="isVisible" className="ml-2 text-sm">
-                        Visible in Store
+                      <label htmlFor="isVisible" className="text-gray-700">
+                        <span className="font-medium">Visible in Store</span>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Show this product to customers
+                        </p>
                       </label>
                     </div>
                   </div>

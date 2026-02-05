@@ -21,6 +21,11 @@ import {
   Sparkles,
   Zap,
   TrendingUp,
+  Globe,
+  Clock,
+  Phone,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const Shop = () => {
@@ -38,6 +43,7 @@ const Shop = () => {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [discountedOnly, setDiscountedOnly] = useState(false);
   const [featuredOnly, setFeaturedOnly] = useState(false);
+  const [aliExpressOnly, setAliExpressOnly] = useState(false);
 
   // Filter panel states
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
@@ -56,6 +62,7 @@ const Shop = () => {
     "Pets",
     "Automotive & Tools",
     "Lifestyle & Hobbies",
+    "AliExpress",
   ];
 
   useEffect(() => {
@@ -67,13 +74,20 @@ const Shop = () => {
     const category =
       selectedCategory === "All Categories" ? "" : selectedCategory;
     const brand = selectedBrand || "";
+    
+    // Handle AliExpress filter
+    let isAliExpress = "";
+    if (selectedCategory === "AliExpress") {
+      isAliExpress = "true";
+    }
 
     dispatch(
       fetchProducts({
         page: currentPage,
-        category,
+        category: selectedCategory === "AliExpress" ? "" : category,
         search: searchTerm,
         brand,
+        isAliExpress,
       }),
     );
   }, [dispatch, currentPage, selectedCategory, searchTerm, selectedBrand]);
@@ -92,6 +106,7 @@ const Shop = () => {
     setInStockOnly(false);
     setDiscountedOnly(false);
     setFeaturedOnly(false);
+    setAliExpressOnly(false);
     setCurrentPage(1);
   };
 
@@ -119,6 +134,11 @@ const Shop = () => {
       filtered = filtered.filter((product) => product.isFeatured);
     }
 
+    // Apply AliExpress filter locally
+    if (aliExpressOnly) {
+      filtered = filtered.filter((product) => product.isAliExpress);
+    }
+
     // Apply sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -135,7 +155,7 @@ const Shop = () => {
     });
 
     return filtered;
-  }, [products, priceRange, inStockOnly, discountedOnly, featuredOnly, sortBy]);
+  }, [products, priceRange, inStockOnly, discountedOnly, featuredOnly, aliExpressOnly, sortBy]);
 
   const handlePriceChange = (type, value) => {
     setPriceRange((prev) => ({
@@ -170,18 +190,82 @@ const Shop = () => {
     (inStockOnly ? 1 : 0) +
     (discountedOnly ? 1 : 0) +
     (featuredOnly ? 1 : 0) +
+    (aliExpressOnly ? 1 : 0) +
     (priceRange.min > 0 || priceRange.max < 10000 ? 1 : 0);
+
+  // Scroll to top when page changes
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 600, // Adjust this value based on your header height
+      behavior: 'smooth'
+    });
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < pagination.totalPages) {
+      setCurrentPage(prev => prev + 1);
+      scrollToTop();
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      scrollToTop();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Full width container */}
+      <div className="w-full mx-auto px-2 sm:px-4 lg:px-8 2xl:px-16">
+        {/* AliExpress Warning Banner */}
+        {selectedCategory === "AliExpress" && (
+          <div className="mb-6 animate-fadeIn mx-2 sm:mx-4">
+            <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-l-4 border-orange-500 rounded-r-xl p-6 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 p-3 bg-orange-100 rounded-xl">
+                  <Globe className="h-6 w-6 text-orange-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-orange-800 mb-2">
+                    ⚠️ Important Information for AliExpress Orders
+                  </h3>
+                  <div className="space-y-2 text-orange-700">
+                    <p className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span className="font-medium">Delivery Time:</span> 
+                      10–20 days for delivery
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      <span className="font-medium">Order Confirmation:</span> 
+                      Our team will call you to confirm the order
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span className="font-medium">Contact Required:</span> 
+                      Please ensure your phone number is correct in your profile
+                    </p>
+                  </div>
+                  <div className="mt-4 p-3 bg-orange-100/50 rounded-lg">
+                    <p className="text-sm text-orange-800 font-medium">
+                      Note: These products are shipped directly from international suppliers. 
+                      Please allow extra time for customs clearance.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header with Search */}
-        <div className="mb-12">
+        <div className="mb-12 mx-2 sm:mx-4">
           <div className="relative mb-8">
             <div className="absolute inset-0 bg-gradient-to-r from-primary-50 to-transparent rounded-3xl -z-10" />
             <div className="p-8 rounded-3xl border border-gray-100 bg-white/80 backdrop-blur-sm">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div>
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="p-2 bg-gradient-to-br from-primary-100 to-primary-50 rounded-xl">
                       <Sparkles className="h-6 w-6 text-primary-600" />
@@ -199,7 +283,7 @@ const Shop = () => {
                   </p>
                 </div>
 
-                <form onSubmit={handleSearch} className="w-full md:w-96">
+                <form onSubmit={handleSearch} className="w-full lg:w-1/2 xl:w-2/5">
                   <div className="relative group">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-400 to-primary-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-500" />
                     <div className="relative">
@@ -312,6 +396,32 @@ const Shop = () => {
                   </span>
                 )}
 
+                {selectedCategory === "AliExpress" && (
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-50 to-amber-100 text-orange-800 rounded-full text-sm font-medium shadow-sm">
+                    <Globe className="h-3.5 w-3.5" />
+                    AliExpress
+                    <button
+                      onClick={() => setSelectedCategory("All Categories")}
+                      className="hover:bg-orange-200/50 rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </span>
+                )}
+
+                {aliExpressOnly && selectedCategory !== "AliExpress" && (
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-50 to-amber-100 text-orange-800 rounded-full text-sm font-medium shadow-sm">
+                    <Globe className="h-3.5 w-3.5" />
+                    AliExpress Only
+                    <button
+                      onClick={() => setAliExpressOnly(false)}
+                      className="hover:bg-orange-200/50 rounded-full p-0.5 transition-colors"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </span>
+                )}
+
                 <button
                   onClick={handleClearFilters}
                   className="ml-auto flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-full transition-all duration-200 hover:shadow-sm"
@@ -324,9 +434,9 @@ const Shop = () => {
           )}
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-8 mx-2 sm:mx-4">
           {/* Sidebar Filters */}
-          <div className="lg:w-1/4">
+          <div className="lg:w-72 xl:w-80 2xl:w-96">
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24 transition-all duration-300 hover:shadow-md">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -562,6 +672,25 @@ const Shop = () => {
                   <div className="flex items-center group hover:bg-gray-50 p-2 rounded-lg transition-all duration-200">
                     <input
                       type="checkbox"
+                      id="ali-express"
+                      checked={aliExpressOnly}
+                      onChange={(e) => setAliExpressOnly(e.target.checked)}
+                      className="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-2 focus:ring-orange-500/20 focus:ring-offset-1 transition-all duration-200"
+                    />
+                    <label
+                      htmlFor="ali-express"
+                      className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-orange-500" />
+                        AliExpress Products Only
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center group hover:bg-gray-50 p-2 rounded-lg transition-all duration-200">
+                    <input
+                      type="checkbox"
                       id="free-shipping"
                       className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-1 transition-all duration-200"
                     />
@@ -592,7 +721,7 @@ const Shop = () => {
           </div>
 
           {/* Products Section */}
-          <div className="lg:w-3/4">
+          <div className="flex-1">
             {/* Sort and Results Info */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 p-6 mb-6 transition-all duration-300 hover:shadow-md">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -645,7 +774,94 @@ const Shop = () => {
               <>
                 {filteredProducts().length > 0 ? (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    {/* Navigation buttons when total products > 15 */}
+                    {pagination.total > 15 && pagination.totalPages > 1 && (
+                      <div className="flex justify-between items-center mb-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 p-4 transition-all duration-300 hover:shadow-md">
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm text-gray-600">
+                            Page {currentPage} of {pagination.totalPages}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={goToPrevPage}
+                            disabled={currentPage === 1}
+                            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-100 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:from-gray-100 disabled:hover:to-gray-50 group"
+                          >
+                            <ChevronLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+                            <span className="font-medium">Previous</span>
+                          </button>
+                          
+                          <div className="flex items-center gap-1">
+                            {Array.from(
+                              { length: Math.min(3, pagination.totalPages) },
+                              (_, i) => {
+                                let pageNum;
+                                if (pagination.totalPages <= 3) {
+                                  pageNum = i + 1;
+                                } else if (currentPage === 1) {
+                                  pageNum = i + 1;
+                                } else if (currentPage === pagination.totalPages) {
+                                  pageNum = pagination.totalPages - 2 + i;
+                                } else {
+                                  pageNum = currentPage - 1 + i;
+                                }
+                                
+                                if (pageNum > 0 && pageNum <= pagination.totalPages) {
+                                  return (
+                                    <button
+                                      key={pageNum}
+                                      onClick={() => {
+                                        setCurrentPage(pageNum);
+                                        scrollToTop();
+                                      }}
+                                      className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200 ${
+                                        currentPage === pageNum
+                                          ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-sm"
+                                          : "text-gray-700 hover:bg-gray-100"
+                                      }`}
+                                    >
+                                      {pageNum}
+                                    </button>
+                                  );
+                                }
+                                return null;
+                              }
+                            )}
+                            
+                            {pagination.totalPages > 3 && currentPage < pagination.totalPages - 1 && (
+                              <>
+                                {currentPage < pagination.totalPages - 2 && (
+                                  <span className="px-2 text-gray-400">...</span>
+                                )}
+                                <button
+                                  onClick={() => {
+                                    setCurrentPage(pagination.totalPages);
+                                    scrollToTop();
+                                  }}
+                                  className="w-10 h-10 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-200"
+                                >
+                                  {pagination.totalPages}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                          
+                          <button
+                            onClick={goToNextPage}
+                            disabled={currentPage === pagination.totalPages}
+                            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-100 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:from-gray-100 disabled:hover:to-gray-50 group"
+                          >
+                            <span className="font-medium">Next</span>
+                            <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Products Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-8">
                       {filteredProducts().map((product) => (
                         <div
                           key={product._id}
@@ -656,8 +872,37 @@ const Shop = () => {
                       ))}
                     </div>
 
-                    {/* Pagination */}
-                    {pagination.totalPages > 1 && (
+                    {/* Bottom navigation buttons for mobile/tablet */}
+                    {pagination.total > 15 && pagination.totalPages > 1 && (
+                      <div className="lg:hidden bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 p-6 transition-all duration-300 hover:shadow-md">
+                        <div className="flex items-center justify-between">
+                          <button
+                            onClick={goToPrevPage}
+                            disabled={currentPage === 1}
+                            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-100 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <ChevronLeft className="h-5 w-5" />
+                            <span>Previous</span>
+                          </button>
+                          
+                          <div className="text-sm text-gray-600">
+                            Page {currentPage} of {pagination.totalPages}
+                          </div>
+                          
+                          <button
+                            onClick={goToNextPage}
+                            disabled={currentPage === pagination.totalPages}
+                            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-100 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <span>Next</span>
+                            <ChevronRight className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Pagination for small screens */}
+                    {pagination.totalPages > 1 && pagination.total <= 15 && (
                       <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 p-6 transition-all duration-300 hover:shadow-md">
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                           <div className="text-sm text-gray-600">
@@ -674,7 +919,10 @@ const Shop = () => {
 
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => setCurrentPage(currentPage - 1)}
+                              onClick={() => {
+                                setCurrentPage(currentPage - 1);
+                                scrollToTop();
+                              }}
                               disabled={currentPage === 1}
                               className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl hover:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
                             >
@@ -702,7 +950,10 @@ const Shop = () => {
                                   return (
                                     <button
                                       key={pageNum}
-                                      onClick={() => setCurrentPage(pageNum)}
+                                      onClick={() => {
+                                        setCurrentPage(pageNum);
+                                        scrollToTop();
+                                      }}
                                       className={`w-10 h-10 text-sm font-medium rounded-xl transition-all duration-200 ${
                                         currentPage === pageNum
                                           ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-sm"
@@ -722,9 +973,10 @@ const Shop = () => {
                                       ...
                                     </span>
                                     <button
-                                      onClick={() =>
-                                        setCurrentPage(pagination.totalPages)
-                                      }
+                                      onClick={() => {
+                                        setCurrentPage(pagination.totalPages);
+                                        scrollToTop();
+                                      }}
                                       className="w-10 h-10 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-200"
                                     >
                                       {pagination.totalPages}
@@ -734,7 +986,10 @@ const Shop = () => {
                             </div>
 
                             <button
-                              onClick={() => setCurrentPage(currentPage + 1)}
+                              onClick={() => {
+                                setCurrentPage(currentPage + 1);
+                                scrollToTop();
+                              }}
                               disabled={currentPage === pagination.totalPages}
                               className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl hover:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
                             >

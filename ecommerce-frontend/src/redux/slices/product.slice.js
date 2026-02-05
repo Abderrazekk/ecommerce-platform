@@ -6,7 +6,14 @@ import { toast } from "react-hot-toast";
 export const fetchProducts = createAsyncThunk(
   "products/fetchAll",
   async (
-    { page = 1, limit = 12, category = "", search = "", brand = "" },
+    {
+      page = 1,
+      limit = 12,
+      category = "",
+      search = "",
+      brand = "",
+      isAliExpress = "", // NEW
+    },
     { rejectWithValue },
   ) => {
     try {
@@ -16,6 +23,7 @@ export const fetchProducts = createAsyncThunk(
         category,
         search,
         brand,
+        isAliExpress, // NEW
       );
       return response.data;
     } catch (error) {
@@ -29,7 +37,14 @@ export const fetchProducts = createAsyncThunk(
 export const fetchAdminProducts = createAsyncThunk(
   "products/fetchAdminAll",
   async (
-    { page = 1, limit = 50, category = "", search = "", brand = "" },
+    {
+      page = 1,
+      limit = 50,
+      category = "",
+      search = "",
+      brand = "",
+      isAliExpress = "", // NEW
+    },
     { rejectWithValue },
   ) => {
     try {
@@ -39,6 +54,7 @@ export const fetchAdminProducts = createAsyncThunk(
         category,
         search,
         brand,
+        isAliExpress, // NEW
       );
       return response.data;
     } catch (error) {

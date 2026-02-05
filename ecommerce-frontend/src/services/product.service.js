@@ -7,6 +7,7 @@ const productService = {
     category = "",
     search = "",
     brand = "",
+    isAliExpress = "", // NEW
   ) => {
     const params = new URLSearchParams();
     if (page) params.append("page", page);
@@ -14,6 +15,7 @@ const productService = {
     if (category) params.append("category", category);
     if (search) params.append("search", search);
     if (brand) params.append("brand", brand);
+    if (isAliExpress) params.append("isAliExpress", isAliExpress); // NEW
 
     return api.get(`/products?${params.toString()}`);
   },
@@ -25,6 +27,7 @@ const productService = {
     category = "",
     search = "",
     brand = "",
+    isAliExpress = "", // NEW
   ) => {
     const params = new URLSearchParams();
     if (page) params.append("page", page);
@@ -32,6 +35,7 @@ const productService = {
     if (category) params.append("category", category);
     if (search) params.append("search", search);
     if (brand) params.append("brand", brand);
+    if (isAliExpress) params.append("isAliExpress", isAliExpress); // NEW
 
     return api.get(`/products/admin/products?${params.toString()}`);
   },

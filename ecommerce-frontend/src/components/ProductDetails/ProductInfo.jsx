@@ -20,6 +20,8 @@ import {
   Star,
   ShoppingBag,
   Zap,
+  Clock,
+  Phone,
 } from "lucide-react";
 
 const ProductInfo = ({
@@ -174,6 +176,60 @@ const ProductInfo = ({
       )
     : 0;
 
+  // AliExpress delivery notice component
+  const AliExpressDeliveryNotice = () => (
+    <div className="mb-8 animate-fadeIn">
+      <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300 rounded-2xl p-6 shadow-sm">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <div className="p-3 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl">
+              <Globe className="h-8 w-8 text-orange-600" />
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-orange-800 mb-3">
+              ⚠️ AliExpress Product - Special Delivery Instructions
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-1">
+                  <Clock className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-orange-800">
+                    Delivery Time
+                  </h4>
+                  <p className="text-orange-700">10–20 days for delivery</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-1">
+                  <Phone className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-orange-800">
+                    Order Confirmation
+                  </h4>
+                  <p className="text-orange-700">
+                    Our team will call you to confirm
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-orange-100/50 border border-orange-200 rounded-lg p-4">
+              <p className="text-sm text-orange-800 font-medium">
+                📞 <span className="font-bold">Important:</span> Please ensure
+                your phone number is correct in your profile. Our customer
+                service team will contact you within 24 hours to confirm your
+                order details.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-10">
       {/* Product Header */}
@@ -187,9 +243,15 @@ const ProductInfo = ({
           <span className="inline-flex items-center px-4 py-2 bg-primary-50 text-primary-700 text-sm font-medium rounded-full">
             {product.category}
           </span>
+          {product.isAliExpress && (
+            <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold rounded-full shadow-sm">
+              <Globe className="h-3.5 w-3.5 mr-2" />
+              AliExpress
+            </span>
+          )}
           {product.isFeatured && (
             <span className="inline-flex items-center px-4 py-2 bg-yellow-50 text-yellow-700 text-sm font-medium rounded-full">
-              <Star className="h-3 w-3 mr-2" />
+              <Star className="h-3.5 w-3.5 mr-2" />
               Featured
             </span>
           )}
@@ -251,6 +313,9 @@ const ProductInfo = ({
           </div>
         </div>
       </div>
+
+      {/* AliExpress Delivery Notice */}
+      {product.isAliExpress && <AliExpressDeliveryNotice />}
 
       {/* Pricing Section */}
       <div className="space-y-4">
@@ -414,7 +479,7 @@ const ProductInfo = ({
               </div>
             </div>
 
-            {/* Action Buttons - Updated with Buy Now */}
+            {/* Action Buttons */}
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Add to Cart Button */}
@@ -507,6 +572,29 @@ const ProductInfo = ({
                   </div>
                 </div>
               </div>
+
+              {/* AliExpress Phone Confirmation Reminder */}
+              {product.isAliExpress && (
+                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0">
+                      <div className="h-8 w-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <Phone className="h-4 w-4 text-orange-600" />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-orange-900 mb-1">
+                        Phone Confirmation Required
+                      </h4>
+                      <p className="text-xs text-orange-700">
+                        For AliExpress products, our team will call you within
+                        24 hours to confirm your order. Please ensure your phone
+                        number is up-to-date in your profile.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

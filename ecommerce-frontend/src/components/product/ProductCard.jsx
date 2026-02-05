@@ -6,7 +6,7 @@ import {
   removeFromWishlist,
 } from "../../redux/slices/wishlist.slice";
 import { formatPrice } from "../../utils/formatPrice";
-import { FaShoppingCart, FaEye, FaHeart } from "react-icons/fa";
+import { FaShoppingCart, FaEye, FaHeart, FaGlobe } from "react-icons/fa";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -28,7 +28,7 @@ const ProductCard = ({ product }) => {
         product: product._id,
         name: product.name,
         price: product.discountPrice || product.price,
-        shippingFee: product.shippingFee || 0, // FIXED: Add shipping fee here
+        shippingFee: product.shippingFee || 0,
         image: product.images?.[0]?.url || "",
         quantity: 1,
       }),
@@ -84,9 +84,21 @@ const ProductCard = ({ product }) => {
 
   const hasLowStock = product.stock > 0 && product.stock <= 5;
 
+  // AliExpress badge component
+  const AliExpressBadge = () => (
+    <div className="absolute top-4 left-4 z-10">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full shadow-lg">
+        <FaGlobe className="w-3 h-3" />
+        <span>AliExpress</span>
+      </div>
+    </div>
+  );
+
   return (
     <div
-      className="group relative bg-white rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
+      className={`group relative bg-white rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl ${
+        product.isAliExpress ? "border border-orange-300" : ""
+      }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -95,6 +107,7 @@ const ProductCard = ({ product }) => {
         <Link to={`/product/${product._id}`} className="block">
           {/* Main Image */}
           <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-50 to-white">
+
             <img
               src={product.images?.[0]?.url || ""}
               alt={product.name}
@@ -131,7 +144,7 @@ const ProductCard = ({ product }) => {
 
               {/* Discount Badge */}
               {discountPercentage > 0 && (
-                <div className="bg-primary-600 text-white text-xs font-medium px-3 py-1.5 rounded-full">
+                <div className="bg-red-600 text-white text-xs font-medium px-3 py-1.5 rounded-full">
                   {discountPercentage}% OFF
                 </div>
               )}
@@ -178,8 +191,16 @@ const ProductCard = ({ product }) => {
       <div className="p-4">
         {/* Category & Brand */}
         <div className="mb-2">
-          <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-            {product.category}
+          <div className="flex items-center gap-2">
+            <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+              {product.category}
+            </div>
+            {product.isAliExpress && (
+              <div className="flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+                <FaGlobe className="w-2.5 h-2.5" />
+                <span>AliExpress</span>
+              </div>
+            )}
           </div>
           {product.brand && (
             <div className="text-xs text-primary-600 font-medium mt-1">
@@ -321,8 +342,16 @@ const ProductCard = ({ product }) => {
                   <div className="space-y-4">
                     {/* Header */}
                     <div>
-                      <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">
-                        {product.category}
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="text-xs text-gray-500 uppercase tracking-wide">
+                          {product.category}
+                        </div>
+                        {product.isAliExpress && (
+                          <div className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full">
+                            <FaGlobe className="w-3 h-3" />
+                            <span>AliExpress</span>
+                          </div>
+                        )}
                       </div>
                       <h2 className="text-2xl font-light text-gray-900 mb-2">
                         {product.name}
@@ -333,6 +362,42 @@ const ProductCard = ({ product }) => {
                         </div>
                       )}
                     </div>
+
+                    {/* AliExpress Delivery Notice in Quick View */}
+                    {product.isAliExpress && (
+                      <div className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0">
+                            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                              <FaGlobe className="h-5 w-5 text-orange-600" />
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-orange-800 mb-2">
+                              Important Delivery Information
+                            </h4>
+                            <ul className="space-y-1 text-sm text-orange-700">
+                              <li className="flex items-center gap-2">
+                                <span className="font-medium">
+                                  • Delivery Time:
+                                </span>
+                                10–20 days
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <span className="font-medium">
+                                  • Order Confirmation:
+                                </span>
+                                Phone call required
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <span className="font-medium">• Contact:</span>
+                                Ensure your phone is updated
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Price */}
                     <div className="flex items-baseline gap-3">

@@ -88,8 +88,16 @@ const getProducts = asyncHandler(async (req, res) => {
   const category = req.query.category;
   const search = req.query.search;
   const brand = req.query.brand;
+  const isAliExpress = req.query.isAliExpress; // NEW
 
   let filter = { isVisible: true };
+
+  // Handle AliExpress filter
+  if (isAliExpress === "true") {
+    filter.isAliExpress = true;
+  } else if (isAliExpress === "false") {
+    filter.isAliExpress = false;
+  }
 
   if (category && productCategories.includes(category)) {
     filter.category = category;
@@ -138,8 +146,15 @@ const getAdminProducts = asyncHandler(async (req, res) => {
   const category = req.query.category;
   const search = req.query.search;
   const brand = req.query.brand;
+  const isAliExpress = req.query.isAliExpress;
 
   let filter = {};
+
+  if (isAliExpress === "true") {
+    filter.isAliExpress = true;
+  } else if (isAliExpress === "false") {
+    filter.isAliExpress = false;
+  }
 
   if (category && productCategories.includes(category)) {
     filter.category = category;
@@ -240,6 +255,7 @@ const createProduct = asyncHandler(async (req, res) => {
     isFeatured,
     isVisible,
     tags,
+    isAliExpress,
   } = req.body;
 
   // Check for required images
@@ -297,6 +313,7 @@ const createProduct = asyncHandler(async (req, res) => {
       video: videoUrl,
       isFeatured: isFeatured === "true" || isFeatured === true,
       isVisible: isVisible !== "false",
+      isAliExpress: isAliExpress === "true" || isAliExpress === true,
     });
 
     console.log("Product created successfully:", product._id);
@@ -361,6 +378,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     isFeatured,
     isVisible,
     tags,
+    isAliExpress,
   } = req.body;
 
   // Validate category if provided
@@ -489,7 +507,6 @@ const updateProduct = asyncHandler(async (req, res) => {
           ? null
           : Number(discountPrice)
         : product.discountPrice,
-    // ADDED: Handle shipping fee update
     shippingFee:
       shippingFee !== undefined && shippingFee !== ""
         ? Number(shippingFee)
@@ -508,6 +525,11 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   if (isVisible !== undefined) {
     updateData.isVisible = isVisible !== "false";
+  }
+
+  // NEW: Handle isAliExpress update
+  if (isAliExpress !== undefined) {
+    updateData.isAliExpress = isAliExpress === "true" || isAliExpress === true;
   }
 
   console.log("Updating product with data:", updateData);

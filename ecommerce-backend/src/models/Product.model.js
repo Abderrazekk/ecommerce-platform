@@ -115,6 +115,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isAliExpress: {
+      type: Boolean,
+      default: false,
+    },
     createdAt: {
       type: Date,
       default: Date.now,
