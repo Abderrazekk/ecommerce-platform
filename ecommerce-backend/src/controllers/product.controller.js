@@ -429,14 +429,22 @@ const updateProduct = asyncHandler(async (req, res) => {
         `Uploading ${req.files.images.length} new images to Cloudinary...`,
       );
       const uploadedImages = await uploadImagesToCloudinary(req.files.images);
-      newImages = uploadedImages;
 
-      if (oldImages.length > 0) {
-        console.log(
-          `Deleting ${oldImages.length} old images from Cloudinary...`,
+      // APPEND new images to existing images
+      newImages = [...oldImages, ...uploadedImages];
+
+      // Validate total images don't exceed 6
+      if (newImages.length > 6) {
+        // Clean up the newly uploaded images
+        await deleteImagesFromCloudinary(uploadedImages);
+        throw new Error(
+          "Total images cannot exceed 6. You already have " +
+            oldImages.length +
+            " images.",
         );
-        await deleteImagesFromCloudinary(oldImages);
       }
+
+      console.log(`Total images after appending: ${newImages.length}`);
     } catch (uploadError) {
       console.error("Error uploading new images:", uploadError);
       throw new Error("Failed to upload new images");

@@ -26,6 +26,7 @@ const categories = [
 const Products = () => {
   const dispatch = useDispatch();
   const { products, loading } = useSelector((state) => state.products);
+  const [imagesToRemove, setImagesToRemove] = useState([]);
 
   // States
   const [showModal, setShowModal] = useState(false);
@@ -69,7 +70,6 @@ const Products = () => {
       );
     });
   }, [products, searchQuery]);
-
   const handleOpenModal = (product = null) => {
     if (product) {
       setEditingProduct(product);
@@ -79,7 +79,7 @@ const Products = () => {
         description: product.description,
         price: product.price,
         discountPrice: product.discountPrice || "",
-        shippingFee: product.shippingFee || "", // NEW: Include shipping fee
+        shippingFee: product.shippingFee || "",
         category: product.category,
         stock: product.stock,
         tags: product.tags ? product.tags.join(", ") : "",
@@ -93,6 +93,7 @@ const Products = () => {
       setVideoFile(null);
       setVideoPreview(product.video || null);
       setRemoveExistingVideo(false);
+      setImagesToRemove([]); // Reset images to remove
     } else {
       setEditingProduct(null);
       setFormData({
@@ -113,6 +114,7 @@ const Products = () => {
       setVideoFile(null);
       setVideoPreview(null);
       setRemoveExistingVideo(false);
+      setImagesToRemove([]);
     }
     setShowModal(true);
   };
@@ -152,9 +154,13 @@ const Products = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const totalFiles = imageFiles.length + files.length;
-    if (totalFiles > 6) {
-      toast.error("Maximum 6 images allowed");
+
+    // Calculate total images (existing previews + new files)
+    const totalImages = imagePreviews.length + files.length;
+    if (totalImages > 6) {
+      toast.error(
+        `Maximum 6 images allowed. You already have ${imagePreviews.length} images.`,
+      );
       return;
     }
 
@@ -183,6 +189,8 @@ const Products = () => {
     }
 
     setImageFiles((prev) => [...prev, ...validFiles]);
+
+    // Add previews for new files
     validFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -230,7 +238,21 @@ const Products = () => {
   };
 
   const removeImage = (index) => {
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    // Check if this is an existing image (from product.images) or a new one
+    const isExistingImage =
+      editingProduct && index < (editingProduct.images?.length || 0);
+
+    if (isExistingImage) {
+      // For existing images, mark them for removal
+      const imageId = editingProduct.images[index].public_id;
+      setImagesToRemove((prev) => [...prev, imageId]);
+    } else {
+      // For new images, remove from imageFiles
+      const adjustedIndex = index - (editingProduct?.images?.length || 0);
+      setImageFiles((prev) => prev.filter((_, i) => i !== adjustedIndex));
+    }
+
+    // Remove from previews
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -330,7 +352,7 @@ const Products = () => {
       productData.append("discountPrice", "");
     }
 
-    // NEW: Add shipping fee to FormData
+    // Shipping fee
     const shippingFeeNum = parseFloat(shippingFeeStr) || 0;
     productData.append("shippingFee", String(shippingFeeNum));
 
@@ -340,10 +362,17 @@ const Products = () => {
     productData.append("isFeatured", formData.isFeatured);
     productData.append("isVisible", formData.isVisible);
 
+    // Add only NEW images (existing ones are already in product.images)
     imageFiles.forEach((file) => {
       productData.append("images", file);
     });
 
+    // Add images to remove if any
+    imagesToRemove.forEach((publicId, idx) => {
+      productData.append(`removeImages[${idx}]`, publicId);
+    });
+
+    // Video handling (unchanged)
     if (videoFile) productData.append("video", videoFile);
     if (editingProduct && removeExistingVideo && !videoFile)
       productData.append("removeVideo", "true");
@@ -530,22 +559,46 @@ const Products = () => {
                     </label>
                     {imagePreviews.length > 0 && (
                       <div className="grid grid-cols-3 gap-2 mb-3">
-                        {imagePreviews.map((preview, index) => (
-                          <div key={index} className="relative">
-                            <img
-                              src={preview}
-                              alt={`Preview ${index + 1}`}
-                              className="h-24 w-full object-cover rounded"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeImage(index)}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </div>
-                        ))}
+                        {imagePreviews.map((preview, index) => {
+                          const isExisting =
+                            editingProduct &&
+                            editingProduct.images &&
+                            index < editingProduct.images.length;
+                          const isMarkedForRemoval =
+                            isExisting &&
+                            imagesToRemove.includes(
+                              editingProduct.images[index].public_id,
+                            );
+
+                          return (
+                            <div key={index} className="relative">
+                              <img
+                                src={preview}
+                                alt={`Preview ${index + 1}`}
+                                className={`h-24 w-full object-cover rounded ${isMarkedForRemoval ? "opacity-50" : ""}`}
+                              />
+                              {isMarkedForRemoval && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-red-500/50 rounded">
+                                  <span className="text-white text-xs font-bold">
+                                    To be removed
+                                  </span>
+                                </div>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => removeImage(index)}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                              {index === 0 && (
+                                <div className="absolute bottom-1 left-1 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                                  Main
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                     <input
