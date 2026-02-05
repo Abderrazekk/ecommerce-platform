@@ -676,6 +676,56 @@ const getUserMetrics = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Delete user permanently
+// @route   DELETE /api/admin/users/:id
+// @access  Private/Admin
+const deleteUser = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+
+  // Find the user
+  const user = await User.findById(userId);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  // Prevent self-deletion
+  if (user._id.toString() === req.user._id.toString()) {
+    res.status(400);
+    throw new Error("Cannot delete your own account");
+  }
+
+  // Optional: Check if user has active orders before deletion
+  const activeOrders = await Order.countDocuments({
+    user: userId,
+    status: { $nin: ["delivered", "cancelled"] },
+  });
+
+  if (activeOrders > 0) {
+    res.status(400);
+    throw new Error(`Cannot delete user with ${activeOrders} active orders`);
+  }
+
+  // Delete user's orders (optional: you might want to keep orders for records)
+  await Order.deleteMany({ user: userId });
+
+  // Delete user's wishlist references
+  // Note: Products will remain, just remove user's reference
+
+  // Delete user's comments (if you have comments system)
+  // await Comment.deleteMany({ user: userId });
+
+  // Finally, delete the user
+  await User.findByIdAndDelete(userId);
+
+  res.json({
+    success: true,
+    message: `User ${user.email} has been permanently deleted`,
+    deletedUserId: userId,
+  });
+});
+
 module.exports = {
   getDashboardStats,
   getAllUsers,
@@ -688,4 +738,5 @@ module.exports = {
   getProductPerformance,
   getRevenueReport,
   getUserMetrics,
+  deleteUser,
 };

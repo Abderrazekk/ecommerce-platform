@@ -11,7 +11,8 @@ const {
   exportAnalytics,
   getProductPerformance,
   getRevenueReport,
-  getUserMetrics
+  getUserMetrics,
+  deleteUser,
 } = require("../controllers/admin.controller");
 const { protect } = require("../middlewares/auth.middleware");
 const { adminOnly } = require("../middlewares/admin.middleware");
@@ -34,5 +35,6 @@ router.get("/orders", getAllOrders);
 router.put("/order/:id/status", updateOrderStatus);
 router.post("/users", createAdmin);
 router.put("/users/:id/ban", toggleUserBan);
+router.delete('/users/:id', deleteUser);
 
 module.exports = router;
