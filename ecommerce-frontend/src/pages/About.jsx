@@ -6,9 +6,9 @@ const About = () => {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">About E-Shop</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">About Shoppina</h1>
           <p className="text-xl text-gray-200 max-w-3xl mx-auto">
-            Your trusted destination for quality products and exceptional shopping experience since 2020.
+            Your trusted destination for quality products and exceptional shopping experience since 2025.
           </p>
         </div>
       </div>
@@ -21,7 +21,7 @@ const About = () => {
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
               <div className="space-y-4 text-gray-600">
                 <p>
-                  Founded in 2020, E-Shop began with a simple mission: to make quality products accessible to everyone at affordable prices. 
+                  Founded in 2025, Shoppina began with a simple mission: to make quality products accessible to everyone at affordable prices. 
                   What started as a small online store has grown into a comprehensive e-commerce platform serving thousands of customers worldwide.
                 </p>
                 <p>
@@ -88,30 +88,6 @@ const About = () => {
               <p className="text-gray-600">
                 We strive for excellence in every aspect of our service, from product selection to customer support.
               </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="bg-primary-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold mb-2">10,000+</div>
-              <div className="text-primary-200">Happy Customers</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">500+</div>
-              <div className="text-primary-200">Products</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">9</div>
-              <div className="text-primary-200">Categories</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">24/7</div>
-              <div className="text-primary-200">Support</div>
             </div>
           </div>
         </div>
