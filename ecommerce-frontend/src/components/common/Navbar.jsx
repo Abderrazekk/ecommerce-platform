@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/slices/auth.slice";
 import { clearCart } from "../../redux/slices/cart.slice";
 import { fetchWishlist } from "../../redux/slices/wishlist.slice";
+import productService from "../../services/product.service";
 import {
   FaShoppingCart,
   FaUser,
@@ -30,6 +31,11 @@ const Navbar = () => {
   const [shopDropdown, setShopDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const [activeResultIndex, setActiveResultIndex] = useState(-1);
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.cart);
   const { itemCount: wishlistCount, wishlistItems } = useSelector(
@@ -40,6 +46,10 @@ const Navbar = () => {
 
   // Ref for mobile menu container
   const mobileMenuRef = useRef(null);
+  const desktopSearchContainerRef = useRef(null);
+  const mobileSearchContainerRef = useRef(null);
+  const desktopSearchInputRef = useRef(null);
+  const mobileSearchInputRef = useRef(null);
 
   // Synchronize wishlist on auth change and periodically
   useEffect(() => {
@@ -70,6 +80,64 @@ const Navbar = () => {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (isSearchVisible && mobileSearchInputRef.current) {
+      mobileSearchInputRef.current.focus();
+    }
+  }, [isSearchVisible]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const clickedDesktop = desktopSearchContainerRef.current?.contains(
+        event.target,
+      );
+      const clickedMobile = mobileSearchContainerRef.current?.contains(
+        event.target,
+      );
+
+      if (!clickedDesktop && !clickedMobile) {
+        setIsSearchDropdownOpen(false);
+        setActiveResultIndex(-1);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const query = searchQuery.trim();
+    setSearchError("");
+
+    if (!query) {
+      setSearchResults([]);
+      setIsSearching(false);
+      setActiveResultIndex(-1);
+      return;
+    }
+
+    setIsSearching(true);
+    const debounceTimer = setTimeout(async () => {
+      try {
+        const response = await productService.getProducts(1, 6, "", query, "");
+        const products = response?.data?.products || [];
+        setSearchResults(products);
+        setIsSearchDropdownOpen(true);
+      } catch (error) {
+        setSearchError(
+          error?.response?.data?.message || "Unable to load search results.",
+        );
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
   // Shop categories
   const shopCategories = [
     { name: "All Products", path: "/shop" },
@@ -98,11 +166,60 @@ const Navbar = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+    const query = searchQuery.trim();
+    if (query) {
+      navigate(`/shop?search=${encodeURIComponent(query)}`);
       setSearchQuery("");
+      setSearchResults([]);
+      setIsSearchDropdownOpen(false);
       setIsSearchVisible(false);
       setIsOpen(false);
+    }
+  };
+
+  const handleResultSelect = (product) => {
+    if (!product?._id) return;
+    navigate(`/product/${product._id}`);
+    setSearchQuery("");
+    setSearchResults([]);
+    setActiveResultIndex(-1);
+    setIsSearchDropdownOpen(false);
+    setIsSearchVisible(false);
+    setIsOpen(false);
+  };
+
+  const handleSearchKeyDown = (event) => {
+    if (!searchResults.length) {
+      if (event.key === "Escape") {
+        setIsSearchDropdownOpen(false);
+      }
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveResultIndex((prev) =>
+        prev < searchResults.length - 1 ? prev + 1 : 0,
+      );
+      setIsSearchDropdownOpen(true);
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveResultIndex((prev) =>
+        prev > 0 ? prev - 1 : searchResults.length - 1,
+      );
+      setIsSearchDropdownOpen(true);
+    }
+
+    if (event.key === "Enter" && activeResultIndex >= 0) {
+      event.preventDefault();
+      handleResultSelect(searchResults[activeResultIndex]);
+    }
+
+    if (event.key === "Escape") {
+      setIsSearchDropdownOpen(false);
+      setActiveResultIndex(-1);
     }
   };
 
@@ -130,6 +247,79 @@ const Navbar = () => {
   ];
 
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const activeResultId =
+    activeResultIndex >= 0 && searchResults[activeResultIndex]
+      ? `search-result-${searchResults[activeResultIndex]._id}`
+      : undefined;
+
+  const renderSearchDropdown = () => {
+    if (!isSearchDropdownOpen || (!isSearching && !searchQuery.trim())) {
+      return null;
+    }
+
+    return (
+      <div
+        className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-20"
+        role="listbox"
+        id="navbar-search-results"
+        aria-label="Search suggestions"
+      >
+        {isSearching && (
+          <div className="px-4 py-3 text-sm text-gray-500">
+            Searching products...
+          </div>
+        )}
+        {!isSearching && searchError && (
+          <div className="px-4 py-3 text-sm text-red-500">{searchError}</div>
+        )}
+        {!isSearching && !searchError && searchResults.length === 0 && (
+          <div className="px-4 py-3 text-sm text-gray-500">
+            No products found. Try another keyword.
+          </div>
+        )}
+        {!isSearching &&
+          !searchError &&
+          searchResults.map((product, index) => (
+            <button
+              key={product._id}
+              type="button"
+              role="option"
+              id={`search-result-${product._id}`}
+              aria-selected={activeResultIndex === index}
+              onClick={() => handleResultSelect(product)}
+              className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-all duration-150 ${
+                activeResultIndex === index
+                  ? "bg-primary-50 text-primary-700"
+                  : "hover:bg-gray-50"
+              }`}
+            >
+              <div className="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center">
+                {product.images?.[0]?.url ? (
+                  <img
+                    src={product.images[0].url}
+                    alt={product.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-xs text-gray-400">No image</span>
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">
+                  {product.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {product.brand || "Brand"} · {product.category || "Category"}
+                </p>
+              </div>
+              <span className="text-xs font-semibold text-primary-600">
+                View
+              </span>
+            </button>
+          ))}
+      </div>
+    );
+  };
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -372,12 +562,40 @@ const Navbar = () => {
             </div>
           </div>
 
+          {/* Desktop Search */}
+          <div className="hidden md:flex flex-1 justify-center px-6">
+            <form
+              onSubmit={handleSearch}
+              className="w-full max-w-md"
+              ref={desktopSearchContainerRef}
+            >
+              <div className="relative">
+                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  ref={desktopSearchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchDropdownOpen(true)}
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder="Search products, brands, categories..."
+                  aria-label="Search products"
+                  aria-expanded={isSearchDropdownOpen}
+                  aria-controls="navbar-search-results"
+                  aria-activedescendant={activeResultId}
+                  className="w-full rounded-full border border-gray-200 bg-gray-50 py-2.5 pl-11 pr-4 text-sm text-gray-700 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition-all duration-200"
+                />
+                {renderSearchDropdown()}
+              </div>
+            </form>
+          </div>
+
           {/* Right side icons */}
           <div className="flex items-center space-x-4">
             {/* Search Icon - Mobile & Desktop */}
             <button
               onClick={() => setIsSearchVisible(!isSearchVisible)}
-              className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+              className="md:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
               aria-label="Search"
             >
               <FaSearch className="h-5 w-5" />
@@ -571,16 +789,23 @@ const Navbar = () => {
         {isSearchVisible && (
           <div className="md:hidden py-3 border-t border-gray-100">
             <form onSubmit={handleSearch} className="w-full">
-              <div className="relative">
+              <div className="relative" ref={mobileSearchContainerRef}>
+                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
+                  ref={mobileSearchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products..."
-                  className="w-full px-4 py-3 pl-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200"
-                  autoFocus
+                  onFocus={() => setIsSearchDropdownOpen(true)}
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder="Search products, brands, categories..."
+                  aria-label="Search products"
+                  aria-expanded={isSearchDropdownOpen}
+                  aria-controls="navbar-search-results"
+                  aria-activedescendant={activeResultId}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pl-12 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200"
                 />
-                <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                {renderSearchDropdown()}
               </div>
             </form>
           </div>

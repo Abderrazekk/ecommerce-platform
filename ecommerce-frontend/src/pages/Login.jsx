@@ -274,242 +274,279 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Welcome Back
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to your account or{" "}
-            <Link
-              to="/register"
-              className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
-            >
-              create a new account
-            </Link>
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="relative w-full max-w-5xl">
+        <div className="absolute -top-10 -left-8 h-32 w-32 rounded-full bg-primary-100 blur-3xl opacity-70" />
+        <div className="absolute -bottom-12 -right-6 h-40 w-40 rounded-full bg-indigo-100 blur-3xl opacity-70" />
+        <div className="relative grid gap-8 overflow-hidden rounded-3xl border border-white/60 bg-white/80 p-6 shadow-2xl backdrop-blur md:grid-cols-[1.05fr_1fr] md:p-10">
+          <div className="hidden flex-col justify-between rounded-2xl bg-gradient-to-br from-primary-600 via-indigo-600 to-purple-600 p-8 text-white shadow-lg md:flex">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-white/80">
+                Welcome back
+              </p>
+              <h2 className="mt-4 text-3xl font-semibold leading-tight">
+                Sign in to manage orders, save favorites, and check out faster.
+              </h2>
+              <p className="mt-4 text-sm text-white/80">
+                Access curated deals, personalized picks, and exclusive member
+                rewards on every purchase.
+              </p>
+            </div>
+            <div className="space-y-3 text-sm text-white/90">
+              <div className="flex items-center gap-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-white/90" />
+                Secure checkout and saved carts
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-white/90" />
+                Personalized product recommendations
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-white/90" />
+                Track orders in real time
+              </div>
+            </div>
+          </div>
 
-        {/* Google Sign-In Section */}
-        <div className="space-y-4">
-          {/* Google button container */}
-          <div
-            ref={googleButtonContainerRef}
-            className="min-h-[42px] flex items-center justify-center"
-          >
-            {!googleScriptLoaded && (
-              <div className="flex items-center justify-center w-full py-3 px-4 border border-gray-300 rounded-lg bg-gray-50">
-                <div className="flex items-center space-x-2 text-gray-500">
-                  <div className="w-5 h-5 border-2 border-gray-300 border-t-primary-600 rounded-full animate-spin"></div>
-                  <span className="text-sm">Loading Google Sign-In...</span>
+          <div className="space-y-8 rounded-2xl bg-white/90 p-6 shadow-xl md:p-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
+              <p className="mt-2 text-sm text-gray-600">
+                Sign in to your account or{" "}
+                <Link
+                  to="/register"
+                  className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
+                >
+                  create a new account
+                </Link>
+              </p>
+            </div>
+
+            {/* Google Sign-In Section */}
+            <div className="space-y-4">
+              {/* Google button container */}
+              <div
+                ref={googleButtonContainerRef}
+                className="min-h-[42px] flex items-center justify-center"
+              >
+                {!googleScriptLoaded && (
+                  <div className="flex items-center justify-center w-full py-3 px-4 border border-gray-200 rounded-xl bg-gray-50">
+                    <div className="flex items-center space-x-2 text-gray-500">
+                      <div className="w-5 h-5 border-2 border-gray-300 border-t-primary-600 rounded-full animate-spin"></div>
+                      <span className="text-sm">Loading Google Sign-In...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Fallback button (hidden when Google button is loaded) */}
+              {googleScriptLoaded && (
+                <button
+                  onClick={handleManualGoogleSignIn}
+                  disabled={isGoogleLoading || !googleInitializedRef.current}
+                  className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isGoogleLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-gray-300 border-t-primary-600 rounded-full animate-spin"></div>
+                      <span className="text-sm text-gray-600">
+                        Signing in...
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <FaGoogle className="h-5 w-5 text-red-600" />
+                      <span className="text-gray-700 font-medium">
+                        Sign in with Google
+                      </span>
+                    </>
+                  )}
+                </button>
+              )}
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-gray-500">
+                    Or continue with email
+                  </span>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Fallback button (hidden when Google button is loaded) */}
-          {googleScriptLoaded && (
-            <button
-              onClick={handleManualGoogleSignIn}
-              disabled={isGoogleLoading || !googleInitializedRef.current}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isGoogleLoading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-gray-300 border-t-primary-600 rounded-full animate-spin"></div>
-                  <span className="text-sm text-gray-600">Signing in...</span>
-                </>
-              ) : (
-                <>
-                  <FaGoogle className="h-5 w-5 text-red-600" />
-                  <span className="text-gray-700 font-medium">
-                    Sign in with Google
-                  </span>
-                </>
-              )}
-            </button>
-          )}
-
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">
-                Or continue with email
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Email/Password Form */}
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
-                placeholder="you@example.com"
-                disabled={loading || isGoogleLoading}
-              />
             </div>
 
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="text-sm text-primary-600 hover:text-primary-500 font-medium"
-                  disabled={loading || isGoogleLoading}
-                >
-                  Forgot password?
-                </button>
+            {/* Email/Password Form */}
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Email address
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:ring-2 focus:ring-primary-500"
+                    placeholder="you@example.com"
+                    disabled={loading || isGoogleLoading}
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Password
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      className="text-sm text-primary-600 hover:text-primary-500 font-medium"
+                      disabled={loading || isGoogleLoading}
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      required
+                      minLength="6"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:ring-2 focus:ring-primary-500 pr-12"
+                      placeholder="••••••••"
+                      disabled={loading || isGoogleLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                      disabled={loading || isGoogleLoading}
+                    >
+                      {showPassword ? (
+                        <FaEyeSlash className="h-5 w-5" />
+                      ) : (
+                        <FaEye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  minLength="6"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all pr-12"
-                  placeholder="••••••••"
-                  disabled={loading || isGoogleLoading}
-                />
+
+              {/* Admin Credentials Button */}
+              {process.env.NODE_ENV === "development" && (
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleAdminLogin}
+                    className="text-sm text-primary-600 hover:text-primary-500 font-medium border border-primary-200 px-4 py-2 rounded-xl hover:bg-primary-50 transition-colors"
+                    disabled={loading || isGoogleLoading}
+                  >
+                    Load Admin Credentials
+                  </button>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <div>
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                  type="submit"
                   disabled={loading || isGoogleLoading}
+                  className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-medium rounded-xl text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
                 >
-                  {showPassword ? (
-                    <FaEyeSlash className="h-5 w-5" />
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                      Signing in...
+                    </>
                   ) : (
-                    <FaEye className="h-5 w-5" />
+                    "Sign in with Email"
                   )}
                 </button>
               </div>
+            </form>
+
+            {/* Registration Prompt */}
+            <div className="text-center pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{" "}
+                <Link
+                  to="/register"
+                  className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
+                >
+                  Sign up here
+                </Link>
+              </p>
             </div>
-          </div>
 
-          {/* Admin Credentials Button */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={handleAdminLogin}
-                className="text-sm text-primary-600 hover:text-primary-500 font-medium border border-primary-200 px-4 py-2 rounded-lg hover:bg-primary-50 transition-colors"
-                disabled={loading || isGoogleLoading}
-              >
-                Load Admin Credentials
-              </button>
-            </div>
-          )}
+            {/* Development Info Banner */}
+            {process.env.NODE_ENV === "development" && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
+                <p className="text-sm text-blue-800">
+                  <strong className="font-semibold">Development Mode:</strong>
+                  <br />
+                  • Default Admin: admin@example.com / admin123
+                  <br />
+                  • Google Sign-In: Use any Google account
+                  <br />• Test Email: test@example.com / test123
+                </p>
+              </div>
+            )}
 
-          {/* Submit Button */}
-          <div>
-            <button
-              type="submit"
-              disabled={loading || isGoogleLoading}
-              className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                  Signing in...
-                </>
-              ) : (
-                "Sign in with Email"
-              )}
-            </button>
-          </div>
-        </form>
+            {/* Ban Warning */}
+            {isBanned && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <div className="flex items-center">
+                  <FaExclamationTriangle className="h-5 w-5 text-red-500 mr-2" />
+                  <p className="text-sm text-red-800 font-medium">
+                    Your account has been banned. Please contact support.
+                  </p>
+                </div>
+              </div>
+            )}
 
-        {/* Registration Prompt */}
-        <div className="text-center pt-4 border-t border-gray-200">
-          <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link
-              to="/register"
-              className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
-            >
-              Sign up here
-            </Link>
-          </p>
-        </div>
-
-        {/* Development Info Banner */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
-            <p className="text-sm text-blue-800">
-              <strong className="font-semibold">Development Mode:</strong>
-              <br />
-              • Default Admin: admin@example.com / admin123
-              <br />
-              • Google Sign-In: Use any Google account
-              <br />• Test Email: test@example.com / test123
-            </p>
-          </div>
-        )}
-
-        {/* Ban Warning */}
-        {isBanned && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-            <div className="flex items-center">
-              <FaExclamationTriangle className="h-5 w-5 text-red-500 mr-2" />
-              <p className="text-sm text-red-800 font-medium">
-                Your account has been banned. Please contact support.
+            {/* Privacy Notice */}
+            <div className="text-center text-xs text-gray-500 pt-4">
+              <p>
+                By signing in, you agree to our{" "}
+                <Link to="/terms" className="underline hover:text-gray-700">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link to="/privacy" className="underline hover:text-gray-700">
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+              <p className="mt-1">
+                Google Sign-In is subject to Google's{" "}
+                <a
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-gray-700"
+                >
+                  Privacy Policy
+                </a>
+                .
               </p>
             </div>
           </div>
-        )}
-
-        {/* Privacy Notice */}
-        <div className="text-center text-xs text-gray-500 pt-4">
-          <p>
-            By signing in, you agree to our{" "}
-            <Link to="/terms" className="underline hover:text-gray-700">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link to="/privacy" className="underline hover:text-gray-700">
-              Privacy Policy
-            </Link>
-          </p>
-          <p className="mt-1">
-            Google Sign-In is subject to Google's{" "}
-            <a
-              href="https://policies.google.com/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-gray-700"
-            >
-              Privacy Policy
-            </a>
-          </p>
         </div>
       </div>
     </div>
