@@ -80,7 +80,7 @@ const Sponsors = () => {
       {/* Text content container - still centered but full width background */}
       <div className="w-full text-center mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-          Trusted by Top Brands
+          Our Sponsors
         </h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
           We partner with industry leaders to bring you the best products

@@ -32,9 +32,6 @@ const FeaturedProducts = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-16">
-          <span className="inline-block px-4 py-2 bg-indigo-100 text-indigo-600 rounded-full text-sm font-semibold mb-4">
-            TOP PICKS
-          </span>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Featured Products
           </h2>
