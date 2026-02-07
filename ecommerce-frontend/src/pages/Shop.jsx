@@ -259,59 +259,52 @@ const Shop = () => {
           </div>
         )}
 
-        {/* Header with Search */}
-        <div className="mb-12 mx-2 sm:mx-4">
-          <div className="relative mb-8">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-50 to-transparent rounded-3xl -z-10" />
-            <div className="p-8 rounded-3xl border border-gray-100 bg-white/80 backdrop-blur-sm">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-primary-100 to-primary-50 rounded-xl">
-                      <Sparkles className="h-6 w-6 text-primary-600" />
-                    </div>
-                    <h1 className="text-4xl font-bold text-gray-900 bg-clip-text">
-                      Discover Products
-                    </h1>
-                  </div>
-                  <p className="text-gray-600 text-lg">
-                    Explore our curated collection of{" "}
-                    <span className="font-semibold text-primary-700">
-                      {pagination.total}
-                    </span>{" "}
-                    premium products
-                  </p>
-                </div>
+       { /* Header with Search */}
+          <div className="mb-12 mx-2 sm:mx-4">
+            <div className="relative mb-8">
+              <div className="p-8 rounded-3xl border border-gray-100 bg-white">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <h1 className="text-4xl font-bold text-gray-900">
+                  Discover Products
+                </h1>
+              </div>
+              <p className="text-gray-600 text-lg">
+                Explore our curated collection of{" "}
+                <span className="font-semibold text-gray-900">
+                  {pagination.total}
+                </span>{" "}
+                premium products
+              </p>
+            </div>
 
-                <form onSubmit={handleSearch} className="w-full lg:w-1/2 xl:w-2/5">
-                  <div className="relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-400 to-primary-600 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-500" />
-                    <div className="relative">
-                      <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 transition-colors duration-200" />
-                      <input
-                        type="text"
-                        placeholder="Search for products, brands, or keywords..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-10 py-3.5 rounded-2xl border border-gray-200 bg-white/90 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all duration-200 placeholder-gray-400 shadow-sm hover:shadow-md"
-                      />
-                      {searchTerm && (
-                        <button
-                          type="button"
-                          onClick={() => setSearchTerm("")}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </form>
+            <form onSubmit={handleSearch} className="w-full lg:w-1/2 xl:w-2/5">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  type="text"
+                  placeholder="Search for products, brands, or keywords..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-10 py-3.5 rounded-2xl border border-gray-200 bg-white"
+                />
+                {searchTerm && (
+                  <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  >
+              <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </form>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Active Filters Bar */}
+            {/* Active Filters Bar */}
           {activeFiltersCount > 0 && (
             <div className="mb-8 p-5 bg-gradient-to-r from-white to-gray-50 rounded-2xl border border-gray-100 shadow-sm">
               <div className="flex flex-wrap items-center gap-3">
@@ -497,7 +490,7 @@ const Shop = () => {
                       </label>
                       <div className="relative group">
                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                          $
+                          DT
                         </span>
                         <input
                           type="number"
@@ -516,7 +509,7 @@ const Shop = () => {
                       </label>
                       <div className="relative group">
                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                          $
+                          DT
                         </span>
                         <input
                           type="number"
@@ -541,8 +534,8 @@ const Shop = () => {
                       />
                     </div>
                     <div className="flex justify-between text-xs text-gray-500 mt-2">
-                      <span>${priceRange.min}</span>
-                      <span>${priceRange.max}</span>
+                      <span>DT {priceRange.min}</span>
+                      <span>DT {priceRange.max}</span>
                     </div>
                   </div>
                 </div>,
