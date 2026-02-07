@@ -50,8 +50,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Our Address</h3>
-                    <p className="text-gray-600">123 Commerce Street</p>
-                    <p className="text-gray-600">Digital City, DC 12345</p>
+                    <p className="text-gray-600">Kalaat Andalous, Ariana, Tunisia</p>
                   </div>
                 </div>
                 
@@ -61,7 +60,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Phone Number</h3>
-                    <p className="text-gray-600">+1 (555) 123-4567</p>
+                    <p className="text-gray-600">+216 22 333 444</p>
                     <p className="text-gray-600">Mon-Fri: 9AM-6PM</p>
                   </div>
                 </div>
@@ -72,18 +71,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Email Address</h3>
-                    <p className="text-gray-600">support@eshop.com</p>
+                    <p className="text-gray-600">support@shoppina.com</p>
                     <p className="text-gray-600">We'll respond within 24 hours</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Map Placeholder */}
-              <div className="mt-8">
-                <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Interactive Map</p>
                   </div>
                 </div>
               </div>
@@ -175,25 +164,6 @@ const Contact = () => {
                   </button>
                 </form>
               )}
-              
-              {/* FAQ */}
-              <div className="mt-8 pt-8 border-t">
-                <h3 className="font-semibold text-gray-900 mb-4">Frequently Asked Questions</h3>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium text-gray-800">What's your return policy?</h4>
-                    <p className="text-sm text-gray-600">
-                      We offer a 30-day return policy for all products in original condition.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-800">How long does shipping take?</h4>
-                    <p className="text-sm text-gray-600">
-                      Standard shipping: 3-5 business days. Express: 1-2 business days.
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

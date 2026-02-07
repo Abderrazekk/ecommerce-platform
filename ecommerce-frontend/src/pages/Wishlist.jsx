@@ -336,33 +336,6 @@ const Wishlist = () => {
                 Save items you love for later. Click the heart icon on any
                 product to add it here.
               </p>
-
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-2xl mx-auto">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl">
-                  <div className="text-3xl font-bold text-blue-600">
-                    {cartItems.length}
-                  </div>
-                  <div className="text-sm text-blue-700 font-medium mt-2">
-                    Items in Cart
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl">
-                  <div className="text-3xl font-bold text-green-600">
-                    {featuredProducts?.length || 0}
-                  </div>
-                  <div className="text-sm text-green-700 font-medium mt-2">
-                    Featured Items
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl">
-                  <div className="text-3xl font-bold text-purple-600">0</div>
-                  <div className="text-sm text-purple-700 font-medium mt-2">
-                    Wishlist Items
-                  </div>
-                </div>
-              </div>
-
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                 <button
