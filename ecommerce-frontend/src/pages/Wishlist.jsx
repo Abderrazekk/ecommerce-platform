@@ -32,6 +32,10 @@ import {
   Download,
   ShoppingBag,
   Sparkles,
+  Menu,
+  Grid,
+  List,
+  Smartphone,
 } from "lucide-react";
 
 const Wishlist = () => {
@@ -53,6 +57,8 @@ const Wishlist = () => {
   const [sortBy, setSortBy] = useState("recent"); // recent, name, price-low, price-high
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(false);
+  const [viewMode, setViewMode] = useState("list"); // 'list' or 'grid' for mobile
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Fetch wishlist and featured products
   useEffect(() => {
@@ -260,7 +266,7 @@ const Wishlist = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader size="lg" />
           <p className="mt-6 text-gray-600">Loading your wishlist...</p>
@@ -273,26 +279,26 @@ const Wishlist = () => {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-12 text-center">
-          <div className="w-32 h-32 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-8">
-            <Heart className="h-16 w-16 text-rose-500" />
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-6 sm:p-8 md:p-12 text-center">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-6 sm:mb-8">
+            <Heart className="h-10 w-10 sm:h-16 sm:w-16 text-rose-500" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
             Sign In Required
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 text-sm sm:text-base mb-6 sm:mb-8">
             Please sign in to view and manage your wishlist.
           </p>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <button
               onClick={() => navigate("/login")}
-              className="w-full py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 font-semibold shadow-lg"
+              className="w-full py-3 sm:py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 font-semibold shadow-lg text-sm sm:text-base"
             >
               Sign In to Your Account
             </button>
             <button
               onClick={() => navigate("/shop")}
-              className="w-full py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 font-medium"
+              className="w-full py-3 sm:py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 font-medium text-sm sm:text-base"
             >
               Continue Shopping
             </button>
@@ -306,43 +312,43 @@ const Wishlist = () => {
   if (itemCount === 0 && !loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
           {/* Back Navigation */}
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-12 group"
+            className="flex items-center text-gray-600 hover:text-gray-900 mb-8 sm:mb-12 group"
           >
             <div className="p-2 rounded-full group-hover:bg-gray-100 transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </div>
-            <span className="ml-2 font-medium">Back</span>
+            <span className="ml-2 font-medium text-sm sm:text-base">Back</span>
           </button>
 
           {/* Empty State */}
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-            <div className="p-12 text-center">
-              <div className="relative mx-auto w-64 h-64 mb-8">
+          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden">
+            <div className="p-6 sm:p-8 md:p-12 text-center">
+              <div className="relative mx-auto w-48 h-48 sm:w-64 sm:h-64 mb-6 sm:mb-8">
                 <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full animate-pulse"></div>
-                <div className="absolute inset-10 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center">
-                  <Heart className="h-24 w-24 text-rose-500" />
+                <div className="absolute inset-8 sm:inset-10 bg-gradient-to-br from-pink-200 to-rose-200 rounded-full flex items-center justify-center">
+                  <Heart className="h-16 w-16 sm:h-24 sm:w-24 text-rose-500" />
                 </div>
               </div>
 
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
                 Your Wishlist is Empty
               </h1>
 
-              <p className="text-gray-600 mb-10 max-w-md mx-auto text-lg">
+              <p className="text-gray-600 text-sm sm:text-base mb-8 sm:mb-10 max-w-md mx-auto">
                 Save items you love for later. Click the heart icon on any
                 product to add it here.
               </p>
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12">
                 <button
                   onClick={() => navigate("/shop")}
-                  className="px-8 py-4 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:opacity-90 transition-all duration-300 font-semibold shadow-lg flex items-center justify-center"
+                  className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:opacity-90 transition-all duration-300 font-semibold shadow-lg flex items-center justify-center text-sm sm:text-base"
                 >
-                  <ShoppingBag className="h-5 w-5 mr-3" />
+                  <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
                   Start Shopping
                 </button>
               </div>
@@ -355,58 +361,74 @@ const Wishlist = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 md:py-8">
+        {/* Header Section - Mobile Optimized */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
             <div className="flex-1">
               <div className="flex items-center mb-4">
                 <button
                   onClick={() => navigate(-1)}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors mr-4"
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors mr-3"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
                     My Wishlist
                   </h1>
-                  <p className="text-gray-600 mt-2">
+                  <p className="text-gray-600 text-xs sm:text-sm md:text-base mt-1">
                     {itemCount} item{itemCount !== 1 ? "s" : ""} • Last updated
                     today
                   </p>
                 </div>
               </div>
 
-              {/* Search Bar */}
-              <div className="max-w-md">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              {/* Search Bar & Mobile Controls */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search in wishlist..."
-                    className="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    className="w-full pl-9 sm:pl-12 pr-4 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-sm sm:text-base"
                   />
+                </div>
+
+                {/* Mobile View Toggle */}
+                <div className="flex gap-2 sm:hidden">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`p-2 rounded-lg ${viewMode === "grid" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600"}`}
+                  >
+                    <Grid className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`p-2 rounded-lg ${viewMode === "list" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600"}`}
+                  >
+                    <List className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex flex-wrap gap-3">
+            {/* Desktop Actions */}
+            <div className="hidden sm:flex flex-wrap gap-3">
               {selectedItems.length > 0 && (
                 <>
                   <button
                     onClick={removeSelectedItems}
-                    className="px-4 py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 flex items-center shadow-lg"
+                    className="px-4 py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 flex items-center shadow-lg text-sm"
                   >
-                    <Trash2 className="h-5 w-5 mr-2" />
+                    <Trash2 className="h-4 w-4 mr-2" />
                     Remove ({selectedItems.length})
                   </button>
                   <button
                     onClick={deselectAllItems}
-                    className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-300"
+                    className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 text-sm"
                   >
                     Deselect All
                   </button>
@@ -415,33 +437,59 @@ const Wishlist = () => {
 
               <button
                 onClick={handleAddAllToCart}
-                className="px-4 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 flex items-center shadow-lg"
+                className="px-4 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 flex items-center shadow-lg text-sm"
               >
-                <ShoppingCart className="h-5 w-5 mr-2" />
+                <ShoppingCart className="h-4 w-4 mr-2" />
                 Add All to Cart
               </button>
             </div>
           </div>
         </div>
 
-        {/* Stats & Controls */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Mobile Actions */}
+        <div className="sm:hidden mb-4">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleAddAllToCart}
+              className="flex-1 px-3 py-2.5 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 flex items-center justify-center text-xs font-medium"
+            >
+              <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+              Add All
+            </button>
+            {selectedItems.length > 0 && (
+              <button
+                onClick={removeSelectedItems}
+                className="flex-1 px-3 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 flex items-center justify-center text-xs font-medium"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                Remove ({selectedItems.length})
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Stats & Controls - Mobile Optimized */}
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
             {/* Stats */}
-            <div className="text-center p-4 border-r border-gray-100">
-              <div className="text-3xl font-bold text-rose-600">
+            <div className="text-center p-3 sm:p-4">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-rose-600">
                 {itemCount}
               </div>
-              <div className="text-sm text-gray-600 mt-1">Total Items</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                Total Items
+              </div>
             </div>
-            <div className="text-center p-4 border-r border-gray-100">
-              <div className="text-3xl font-bold text-emerald-600">
+            <div className="text-center p-3 sm:p-4">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-emerald-600">
                 {wishlistItems.filter((item) => item.product?.stock > 0).length}
               </div>
-              <div className="text-sm text-gray-600 mt-1">In Stock</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                In Stock
+              </div>
             </div>
-            <div className="text-center p-4 border-r border-gray-100">
-              <div className="text-3xl font-bold text-amber-600">
+            <div className="text-center p-3 sm:p-4">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-amber-600">
                 {
                   wishlistItems.filter(
                     (item) =>
@@ -450,46 +498,58 @@ const Wishlist = () => {
                   ).length
                 }
               </div>
-              <div className="text-sm text-gray-600 mt-1">On Sale</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                On Sale
+              </div>
             </div>
 
-            {/* Sort */}
-            <div className="text-center p-4">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+            {/* Sort - Mobile */}
+            <div className="col-span-2 sm:col-span-1 text-center p-3 sm:p-4">
+              <button
+                onClick={() => setShowMobileFilters(!showMobileFilters)}
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 flex items-center justify-center text-xs sm:text-sm"
               >
-                <option value="recent">Recently Added</option>
-                <option value="name">Name A-Z</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
-              <div className="text-sm text-gray-600 mt-2">Sort By</div>
+                <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
+                Sort & Filter
+              </button>
+              {showMobileFilters && (
+                <div className="absolute mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-48">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border-none focus:outline-none"
+                  >
+                    <option value="recent">Recently Added</option>
+                    <option value="name">Name A-Z</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Bulk Actions */}
+          {/* Bulk Actions - Mobile */}
           {selectedItems.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-gray-100">
+            <div className="mt-4 pt-4 border-t border-gray-100">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3">
                   <button
                     onClick={selectAllItems}
-                    className="text-sm text-rose-600 hover:text-rose-700 font-medium"
+                    className="text-xs sm:text-sm text-rose-600 hover:text-rose-700 font-medium"
                   >
                     Select All
                   </button>
                   <span className="text-gray-400">•</span>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-xs sm:text-sm text-gray-600">
                     {selectedItems.length} of {itemCount} selected
                   </span>
                 </div>
                 <button
                   onClick={() => setShowClearConfirm(true)}
-                  className="px-4 py-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors flex items-center"
+                  className="px-3 py-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors flex items-center text-xs sm:text-sm"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
                   Clear All
                 </button>
               </div>
@@ -497,28 +557,30 @@ const Wishlist = () => {
           )}
         </div>
 
-        {/* Products List */}
+        {/* Products List - Mobile Optimized */}
         {filteredItems.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Search className="h-12 w-12 text-gray-400" />
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 md:p-12 text-center">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Search className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400" />
             </div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-3 sm:mb-4">
               No matching items found
             </h3>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-600 text-sm sm:text-base mb-6 sm:mb-8">
               Try adjusting your search or filter to find what you're looking
               for.
             </p>
             <button
               onClick={() => setSearchQuery("")}
-              className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors"
+              className="px-4 py-2.5 sm:px-6 sm:py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors text-sm sm:text-base"
             >
               Clear Search
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div
+            className={`space-y-3 sm:space-y-4 ${viewMode === "grid" ? "grid grid-cols-2 gap-3 sm:hidden" : ""}`}
+          >
             {filteredItems.map((item) => {
               const product = item.product;
               if (!product) return null;
@@ -530,39 +592,106 @@ const Wishlist = () => {
                   )
                 : 0;
 
+              // Grid View for Mobile
+              if (viewMode === "grid") {
+                return (
+                  <div
+                    key={product._id}
+                    className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
+                  >
+                    <Link
+                      to={`/product/${product._id}`}
+                      className="relative block"
+                    >
+                      <div className="aspect-square relative overflow-hidden">
+                        <img
+                          src={product.images?.[0]?.url || ""}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                        {discountPercentage > 0 && (
+                          <div className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                            {discountPercentage}% OFF
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+
+                    <div className="p-3">
+                      <div className="text-xs text-gray-500 truncate mb-1">
+                        {product.category}
+                      </div>
+                      <Link to={`/product/${product._id}`}>
+                        <h3 className="font-medium text-gray-900 text-sm line-clamp-2 mb-2">
+                          {product.name}
+                        </h3>
+                      </Link>
+
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-gray-900 text-sm">
+                          {formatPrice(product.discountPrice || product.price)}
+                        </span>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleRemoveItem(product._id)}
+                            className="p-1 text-gray-400 hover:text-rose-600"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleMoveToCart(item)}
+                        disabled={product.stock === 0}
+                        className={`w-full py-1.5 rounded-lg font-medium text-xs flex items-center justify-center ${
+                          product.stock === 0
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:opacity-90"
+                        }`}
+                      >
+                        <ShoppingCart className="h-3 w-3 mr-1" />
+                        {product.stock === 0 ? "Out" : "Add"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+
+              // List View (Default)
               return (
                 <div
                   key={product._id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 flex"
+                  className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row"
                 >
                   {/* Checkbox */}
-                  <div className="absolute top-4 left-4 z-10">
+                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10">
                     <input
                       type="checkbox"
                       checked={selectedItems.includes(product._id)}
                       onChange={() => toggleSelectItem(product._id)}
-                      className="h-5 w-5 rounded border-gray-300 text-rose-600 focus:ring-rose-500 cursor-pointer"
+                      className="h-4 w-4 sm:h-5 sm:w-5 rounded border-gray-300 text-rose-600 focus:ring-rose-500 cursor-pointer"
                     />
                   </div>
 
-                  {/* Image */}
+                  {/* Image - Mobile Stacked */}
                   <Link
                     to={`/product/${product._id}`}
-                    className="relative block overflow-hidden w-1/3"
+                    className="relative block overflow-hidden w-full sm:w-1/3 h-48 sm:h-auto"
                   >
                     <div className="relative h-full bg-gradient-to-br from-gray-50 to-gray-100">
                       <img
                         src={product.images?.[0]?.url || ""}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                        className="w-full h-full object-cover"
                       />
 
                       {/* Overlays */}
                       {product.stock === 0 && (
                         <div className="absolute inset-0 bg-white/90 flex items-center justify-center">
                           <div className="text-center p-4">
-                            <Package className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                            <div className="text-gray-900 font-semibold">
+                            <Package className="h-6 w-6 text-gray-400 mx-auto mb-1" />
+                            <div className="text-gray-900 font-semibold text-sm">
                               Out of Stock
                             </div>
                           </div>
@@ -570,30 +699,30 @@ const Wishlist = () => {
                       )}
 
                       {discountPercentage > 0 && (
-                        <div className="absolute top-4 right-4 bg-gradient-to-r from-red-500 to-rose-500 text-white text-sm font-bold px-3 py-1 rounded-full shadow-lg">
+                        <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-rose-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                           {discountPercentage}% OFF
                         </div>
                       )}
                     </div>
                   </Link>
 
-                  {/* Details */}
-                  <div className="p-6 w-2/3">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
+                  {/* Details - Mobile Stacked */}
+                  <div className="p-4 sm:p-6 w-full">
+                    <div className="flex justify-between items-start mb-3 sm:mb-4">
+                      <div className="flex-1 mr-2">
+                        <div className="flex flex-wrap gap-1 mb-2">
                           {product.brand && (
-                            <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                            <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                               {product.brand}
                             </span>
                           )}
-                          <span className="text-xs font-medium text-rose-600 bg-rose-50 px-2 py-1 rounded">
+                          <span className="text-xs text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
                             {product.category}
                           </span>
                         </div>
 
                         <Link to={`/product/${product._id}`}>
-                          <h3 className="font-semibold text-gray-900 hover:text-rose-600 transition-colors line-clamp-2">
+                          <h3 className="font-semibold text-gray-900 hover:text-rose-600 transition-colors line-clamp-2 text-sm sm:text-base">
                             {product.name}
                           </h3>
                         </Link>
@@ -601,25 +730,25 @@ const Wishlist = () => {
 
                       <button
                         onClick={() => handleRemoveItem(product._id)}
-                        className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors sm:p-2"
                         title="Remove from wishlist"
                       >
-                        <Trash2 className="h-5 w-5" />
+                        <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
                       </button>
                     </div>
 
                     {/* Price */}
-                    <div className="mb-4">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-bold text-gray-900">
+                    <div className="mb-3 sm:mb-4">
+                      <div className="flex items-baseline gap-1 sm:gap-2">
+                        <span className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
                           {formatPrice(product.discountPrice || product.price)}
                         </span>
                         {product.discountPrice && (
                           <>
-                            <span className="text-lg text-gray-400 line-through">
+                            <span className="text-sm sm:text-base text-gray-400 line-through">
                               {formatPrice(product.price)}
                             </span>
-                            <span className="text-sm font-medium text-emerald-600">
+                            <span className="text-xs sm:text-sm font-medium text-emerald-600">
                               Save{" "}
                               {formatPrice(
                                 product.price - product.discountPrice,
@@ -631,11 +760,11 @@ const Wishlist = () => {
                     </div>
 
                     {/* Stock Status */}
-                    <div className="flex items-center gap-2 mb-6">
+                    <div className="flex items-center gap-1.5 mb-4 sm:mb-6">
                       <div
-                        className={`w-2 h-2 rounded-full ${product.stock === 0 ? "bg-red-500" : product.stock <= 5 ? "bg-amber-500" : "bg-emerald-500"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${product.stock === 0 ? "bg-red-500" : product.stock <= 5 ? "bg-amber-500" : "bg-emerald-500"}`}
                       />
-                      <span className="text-sm text-gray-600">
+                      <span className="text-xs sm:text-sm text-gray-600">
                         {product.stock === 0
                           ? "Out of stock"
                           : product.stock <= 5
@@ -644,26 +773,26 @@ const Wishlist = () => {
                       </span>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-3">
+                    {/* Actions - Mobile Stacked */}
+                    <div className="flex gap-2 sm:gap-3">
                       <button
                         onClick={() => handleMoveToCart(item)}
                         disabled={product.stock === 0}
-                        className={`flex-1 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center ${
+                        className={`flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm ${
                           product.stock === 0
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                            : "bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:opacity-90 shadow-lg"
+                            : "bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:opacity-90"
                         }`}
                       >
-                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                         {product.stock === 0 ? "Out of Stock" : "Move to Cart"}
                       </button>
 
                       <Link
                         to={`/product/${product._id}`}
-                        className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center"
+                        className="px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 text-gray-700 rounded-lg sm:rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center"
                       >
-                        <Eye className="h-5 w-5" />
+                        <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </Link>
                     </div>
                   </div>
@@ -673,34 +802,36 @@ const Wishlist = () => {
           </div>
         )}
 
-        {/* Featured Products */}
+        {/* Featured Products - Mobile Optimized */}
         {featuredProducts && featuredProducts.length > 0 && (
-          <div className="mt-16 pt-12 border-t border-gray-200">
-            <div className="flex items-center justify-between mb-8">
+          <div className="mt-8 sm:mt-12 md:mt-16 pt-6 sm:pt-8 md:pt-12 border-t border-gray-200">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
                   You might also like
                 </h2>
-                <p className="text-gray-600 mt-2">Based on your wishlist</p>
+                <p className="text-gray-600 text-xs sm:text-sm mt-1">
+                  Based on your wishlist
+                </p>
               </div>
               <Link
                 to="/shop"
-                className="text-rose-600 hover:text-rose-700 font-medium flex items-center group"
+                className="text-rose-600 hover:text-rose-700 font-medium flex items-center text-sm sm:text-base group"
               >
                 View all
-                <ChevronRight className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
 
             {isLoadingFeatured ? (
-              <div className="flex justify-center py-12">
+              <div className="flex justify-center py-8 sm:py-12">
                 <Loader />
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {featuredProducts.slice(0, 4).map((product) => (
                   <div key={product._id} className="group">
-                    <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300">
+                    <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300">
                       <Link to={`/product/${product._id}`} className="block">
                         <div className="aspect-square relative overflow-hidden">
                           <img
@@ -708,30 +839,29 @@ const Wishlist = () => {
                             alt={product.name}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>
                       </Link>
 
-                      <div className="p-4">
-                        <div className="text-xs text-gray-500 uppercase mb-2">
+                      <div className="p-3 sm:p-4">
+                        <div className="text-xs text-gray-500 uppercase mb-1 sm:mb-2 truncate">
                           {product.category}
                         </div>
                         <Link to={`/product/${product._id}`}>
-                          <h4 className="font-medium text-gray-900 line-clamp-2 mb-2 group-hover:text-rose-600 transition-colors">
+                          <h4 className="font-medium text-gray-900 line-clamp-2 mb-1.5 sm:mb-2 text-sm sm:text-base group-hover:text-rose-600 transition-colors">
                             {product.name}
                           </h4>
                         </Link>
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-gray-900">
+                          <span className="font-bold text-gray-900 text-sm sm:text-base">
                             {formatPrice(
                               product.discountPrice || product.price,
                             )}
                           </span>
                           <button
                             onClick={() => dispatch(addToWishlist(product._id))}
-                            className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            className="p-1.5 sm:p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                           >
-                            <Heart className="h-5 w-5" />
+                            <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
                           </button>
                         </div>
                       </div>
@@ -743,16 +873,16 @@ const Wishlist = () => {
           </div>
         )}
 
-        {/* Wishlist Summary */}
+        {/* Wishlist Summary - Mobile Optimized */}
         {wishlistItems.length > 0 && (
-          <div className="mt-12">
-            <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl p-8">
+          <div className="mt-6 sm:mt-8 md:mt-12">
+            <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                <div className="mb-4 sm:mb-0">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
                     Wishlist Summary
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-sm sm:text-base">
                     You have {itemCount} items saved. Total value:{" "}
                     <span className="font-bold text-gray-900">
                       {formatPrice(
@@ -767,10 +897,10 @@ const Wishlist = () => {
                     </span>
                   </p>
                 </div>
-                <div className="flex gap-4 mt-6 lg:mt-0">
+                <div className="flex gap-3 sm:gap-4">
                   <button
                     onClick={() => navigate("/shop")}
-                    className="px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-lg"
+                    className="flex-1 sm:flex-none px-4 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-lg text-sm sm:text-base"
                   >
                     Continue Shopping
                   </button>
@@ -781,37 +911,37 @@ const Wishlist = () => {
         )}
       </div>
 
-      {/* Clear Confirmation Modal */}
+      {/* Clear Confirmation Modal - Mobile Optimized */}
       {showClearConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowClearConfirm(false)}
           />
-          <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform transition-all duration-300 scale-100">
+          <div className="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-sm sm:max-w-md w-full p-6 sm:p-8 transform transition-all duration-300 scale-100">
             <div className="flex items-center mb-6">
-              <div className="p-3 bg-gradient-to-r from-red-100 to-rose-100 rounded-full mr-4">
-                <AlertCircle className="h-8 w-8 text-rose-600" />
+              <div className="p-3 bg-gradient-to-r from-red-100 to-rose-100 rounded-full mr-3 sm:mr-4">
+                <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 text-rose-600" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900">
                   Clear Entire Wishlist
                 </h3>
-                <p className="text-gray-600 mt-1">
+                <p className="text-gray-600 text-sm sm:text-base mt-1">
                   Are you sure? This will remove all {itemCount} items.
                 </p>
               </div>
             </div>
-            <div className="flex justify-end space-x-4">
+            <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-4">
               <button
                 onClick={() => setShowClearConfirm(false)}
-                className="px-6 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-xl font-medium transition-colors"
+                className="px-6 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-xl font-medium transition-colors text-sm sm:text-base"
               >
                 Cancel
               </button>
               <button
                 onClick={handleClearWishlist}
-                className="px-6 py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white hover:opacity-90 rounded-xl font-medium transition-all duration-300 shadow-lg"
+                className="px-6 py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white hover:opacity-90 rounded-xl font-medium transition-all duration-300 shadow-lg text-sm sm:text-base"
               >
                 Clear All Items
               </button>
@@ -820,14 +950,12 @@ const Wishlist = () => {
         </div>
       )}
 
-      {/* Success Toast Container */}
-      <div className="fixed bottom-6 right-6 z-40 space-y-3">
+      {/* Mobile Floating Action Button */}
+      <div className="fixed bottom-6 right-6 z-40 md:hidden">
         {selectedItems.length > 0 && (
-          <div className="bg-gradient-to-r from-emerald-500 to-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center animate-slide-up">
-            <CheckCircle className="h-5 w-5 mr-3" />
-            <span className="font-medium">
-              {selectedItems.length} items selected
-            </span>
+          <div className="bg-gradient-to-r from-emerald-500 to-green-500 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center animate-slide-up text-sm">
+            <CheckCircle className="h-4 w-4 mr-2" />
+            <span>{selectedItems.length} selected</span>
           </div>
         )}
       </div>
