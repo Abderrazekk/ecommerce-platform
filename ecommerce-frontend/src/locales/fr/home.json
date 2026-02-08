@@ -1,0 +1,16 @@
+{
+  "features": {
+    "fastDelivery": {
+      "title": "Livraison Rapide",
+      "description": "Recevez vos produits rapidement et en toute sécurité."
+    },
+    "securePayment": {
+      "title": "Paiement Sécurisé",
+      "description": "Méthodes de paiement 100% sécurisées."
+    },
+    "easyReturns": {
+      "title": "Retours Faciles",
+      "description": "Politique de retour simple et sans tracas."
+    }
+  }
+}

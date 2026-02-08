@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { fetchFeaturedProducts } from "../../redux/slices/product.slice";
 import ProductCard from "./ProductCard";
 import Loader from "../common/Loader";
 
 const FeaturedProducts = () => {
+  const { t } = useTranslation('featured');
   const dispatch = useDispatch();
   const { featuredProducts, loading } = useSelector((state) => state.products);
 
@@ -18,7 +20,7 @@ const FeaturedProducts = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Featured Products
+              {t('loading.title')}
             </h2>
           </div>
           <Loader />
@@ -33,10 +35,10 @@ const FeaturedProducts = () => {
         {/* Header Section */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Bestsellers
+            {t('title')}
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover our most popular products, carefully selected just for you
+            {t('subtitle')}
           </p>
         </div>
 
@@ -65,10 +67,10 @@ const FeaturedProducts = () => {
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              No Featured Products Yet
+              {t('noProducts.title')}
             </h3>
             <p className="text-gray-500">
-              Check back soon for exciting new products!
+              {t('noProducts.message')}
             </p>
           </div>
         )}

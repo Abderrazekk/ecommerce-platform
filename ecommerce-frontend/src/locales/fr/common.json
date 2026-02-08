@@ -1,0 +1,26 @@
+{
+  "buttons": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "confirm": "Confirmer",
+    "view": "Voir",
+    "search": "Rechercher"
+  },
+  "labels": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "brand": "Marque",
+    "category": "Catégorie",
+    "description": "Description",
+    "price": "Prix",
+    "quantity": "Quantité"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire",
+    "email": "Adresse e-mail invalide",
+    "minLength": "Doit comporter au moins {{count}} caractères"
+  }
+}

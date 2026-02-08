@@ -1,0 +1,86 @@
+{
+  "header": {
+    "title": "Découvrir des Produits",
+    "subtitle": "Explorez notre collection sélectionnée de {{count}} produits premium"
+  },
+  "search": {
+    "placeholder": "Rechercher des produits, marques ou mots-clés...",
+    "button": "Rechercher"
+  },
+  "filters": {
+    "title": "Filtres",
+    "activeFilters": "Filtres Actifs ({{count}})",
+    "clearAll": "Tout Effacer",
+    "resetFilters": "Réinitialiser Tous les Filtres",
+    "sections": {
+      "categories": "Catégories",
+      "priceRange": "Plage de Prix",
+      "brands": "Marques",
+      "features": "Caractéristiques"
+    },
+    "price": {
+      "min": "Prix Minimum",
+      "max": "Prix Maximum"
+    },
+    "currency": "DT"
+  },
+  "categories": {
+    "all": "Toutes les Catégories",
+    "electronics": "Électronique & Gadgets",
+    "fashion": "Mode & Vêtements",
+    "beauty": "Beauté & Soins Personnels",
+    "home": "Maison & Cuisine",
+    "fitness": "Fitness & Plein Air",
+    "baby": "Bébé & Enfants",
+    "pets": "Animaux de Compagnie",
+    "automotive": "Automobile & Outils",
+    "lifestyle": "Style de Vie & Loisirs",
+    "aliexpress": "AliExpress"
+  },
+  "features": {
+    "inStock": "En Stock Seulement",
+    "onSale": "En Solde Seulement",
+    "featured": "Produits en Vedette",
+    "aliexpress": "Produits AliExpress Seulement",
+    "freeShipping": "Livraison Gratuite"
+  },
+  "aliexpress": {
+    "warning": {
+      "title": "⚠️ Informations Importantes pour les Commandes AliExpress",
+      "deliveryTime": "Délai de Livraison : 10 à 20 jours pour la livraison",
+      "orderConfirmation": "Confirmation de Commande : Notre équipe vous appellera pour confirmer la commande",
+      "contactRequired": "Contact Requis : Veuillez vous assurer que votre numéro de téléphone est correct dans votre profil",
+      "note": "Note : Ces produits sont expédiés directement par des fournisseurs internationaux. Veuillez prévoir un temps supplémentaire pour le dédouanement."
+    }
+  },
+  "sort": {
+    "label": "Trier par :",
+    "newest": "Nouveautés",
+    "priceLow": "Prix : Croissant",
+    "priceHigh": "Prix : Décroissant",
+    "name": "Nom : A à Z"
+  },
+  "products": {
+    "showing": "Affichage de {{showing}} sur {{total}} produits",
+    "total": "{{count}} produits au total",
+    "noProducts": "Aucun produit trouvé",
+    "noProductsMessage": "Essayez d'ajuster vos filtres ou termes de recherche pour découvrir des produits incroyables",
+    "noBrands": "Aucune marque trouvée",
+    "allBrands": "Toutes les Marques"
+  },
+  "pagination": {
+    "page": "Page {{current}} sur {{total}}",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "first": "Première",
+    "last": "Dernière"
+  },
+  "filterTags": {
+    "inStock": "En Stock",
+    "onSale": "En Solde",
+    "featured": "En Vedette",
+    "aliexpress": "AliExpress",
+    "aliexpressOnly": "AliExpress Seulement",
+    "price": "${{min}} - ${{max}}"
+  }
+}

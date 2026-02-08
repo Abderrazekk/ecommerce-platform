@@ -1,0 +1,113 @@
+{
+  "header": {
+    "address": "أريانة، تونس",
+    "phone": "+216 55999444",
+    "email": "Contact@shoppina.com",
+    "social": {
+      "facebook": "فيسبوك",
+      "instagram": "إنستغرام",
+      "tiktok": "تيك توك"
+    }
+  },
+  "menu": {
+    "home": "الرئيسية",
+    "shop": "المتجر",
+    "about": "من نحن",
+    "contact": "اتصل بنا",
+    "shopCategories": "فئات المتجر",
+    "browseCollection": "تصفح مجموعتنا",
+    "viewAll": "عرض الكل →",
+    "quickLinks": {
+      "onSale": "في العرض",
+      "featured": "مميز",
+      "newArrivals": "وصل حديثاً"
+    }
+  },
+  "shopCategories": {
+    "electronics": {
+      "name": "الإلكترونيات",
+      "description": "هواتف، حواسيب محمولة، أجهزة لوحية"
+    },
+    "homeKitchen": {
+      "name": "المنزل والمطبخ",
+      "description": "أجهزة كهربائية، أثاث"
+    },
+    "automotive": {
+      "name": "السيارات",
+      "description": "أدوات، إكسسوارات"
+    },
+    "fashion": {
+      "name": "الموضة",
+      "description": "ملابس، أحذية، حقائب"
+    },
+    "fitness": {
+      "name": "اللياقة البدنية والهواء الطلق",
+      "description": "رياضة، تخييم، يوجا"
+    },
+    "pets": {
+      "name": "الحيوانات الأليفة",
+      "description": "طعام، ألعاب، إكسسوارات"
+    },
+    "beauty": {
+      "name": "التجميل والعناية",
+      "description": "العناية بالبشرة، مستحضرات تجميل"
+    },
+    "babyKids": {
+      "name": "الأطفال والرضع",
+      "description": "ألعاب، ملابس، مستلزمات"
+    },
+    "lifestyle": {
+      "name": "نمط الحياة والهوايات",
+      "description": "كتب، ألعاب، موسيقى"
+    }
+  },
+  "search": {
+    "placeholder": "ابحث عن منتجات، ماركات، فئات...",
+    "searching": "جاري البحث عن المنتجات...",
+    "noResults": "لم يتم العثور على منتجات. جرب كلمة أخرى.",
+    "error": "تعذر تحميل نتائج البحث.",
+    "view": "عرض",
+    "brand": "ماركة",
+    "category": "فئة",
+    "noImage": "لا توجد صورة"
+  },
+  "user": {
+    "admin": "المسؤول",
+    "myWishlist": "قائمة أمنياتي",
+    "myOrders": "طلباتي",
+    "myProfile": "ملفي الشخصي",
+    "logout": "تسجيل الخروج",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "welcome": "مرحباً بكم في شوبينا",
+    "pleaseLogin": "يرجى تسجيل الدخول للمتابعة",
+    "loginToAccount": "تسجيل الدخول إلى الحساب",
+    "createAccount": "إنشاء حساب جديد"
+  },
+  "cart": {
+    "shoppingCart": "عربة التسوق",
+    "items_one": "{{count}} عنصر",
+    "items_few": "{{count}} عناصر",
+    "items_many": "{{count}} عنصراً",
+    "items_other": "{{count}} عنصر"
+  },
+  "wishlist": {
+    "wishlist": "قائمة الأمنيات",
+    "items_one": "{{count}} عنصر",
+    "items_few": "{{count}} عناصر",
+    "items_many": "{{count}} عنصراً",
+    "items_other": "{{count}} عنصر"
+  },
+  "admin": {
+    "panel": "لوحة المسؤول",
+    "dashboard": "لوحة التحكم",
+    "hero": "القسم الرئيسي",
+    "products": "المنتجات",
+    "orders": "الطلبات",
+    "users": "المستخدمين",
+    "sponsors": "الرعاة"
+  },
+  "footer": {
+    "copyright": "© {{year}} شوبينا. جميع الحقوق محفوظة."
+  }
+}

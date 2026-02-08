@@ -1,0 +1,11 @@
+{
+  "title": "Meilleures Ventes",
+  "subtitle": "Découvrez nos produits les plus populaires, soigneusement sélectionnés pour vous",
+  "noProducts": {
+    "title": "Aucun Produit en Vedette pour le Moment",
+    "message": "Revenez bientôt pour découvrir de nouveaux produits passionnants !"
+  },
+  "loading": {
+    "title": "Produits en Vedette"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "features": {
+    "fastDelivery": {
+      "title": "توصيل سريع",
+      "description": "احصل على منتجاتك بسرعة وأمان."
+    },
+    "securePayment": {
+      "title": "دفع آمن",
+      "description": "طرق دفع آمنة بنسبة 100%."
+    },
+    "easyReturns": {
+      "title": "إرجاع سهل",
+      "description": "سياسة إرجاع بسيطة وخالية من المتاعب."
+    }
+  }
+}

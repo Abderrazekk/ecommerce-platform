@@ -1,19 +1,22 @@
+import { useTranslation } from "react-i18next";
 import Hero from "../components/hero/Hero";
 import FeaturedProducts from "../components/product/FeaturedProducts";
 import Sponsors from "../components/sponsors/Sponsors";
 
 const Home = () => {
+  const { t } = useTranslation('home');
+
   return (
     <div>
       <Hero />
       <FeaturedProducts />
-
       <Sponsors />
 
       {/* Features Section */}
       <div className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Fast Delivery */}
             <div className="text-center">
               <div className="inline-block p-3 bg-primary-100 rounded-full mb-4">
                 <svg
@@ -30,12 +33,15 @@ const Home = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Fast Delivery</h3>
+              <h3 className="text-xl font-semibold mb-2">
+                {t('features.fastDelivery.title')}
+              </h3>
               <p className="text-gray-600">
-                Get your products delivered quickly and safely.
+                {t('features.fastDelivery.description')}
               </p>
             </div>
 
+            {/* Secure Payment */}
             <div className="text-center">
               <div className="inline-block p-3 bg-primary-100 rounded-full mb-4">
                 <svg
@@ -52,10 +58,15 @@ const Home = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Secure Payment</h3>
-              <p className="text-gray-600">100% secure payment methods.</p>
+              <h3 className="text-xl font-semibold mb-2">
+                {t('features.securePayment.title')}
+              </h3>
+              <p className="text-gray-600">
+                {t('features.securePayment.description')}
+              </p>
             </div>
 
+            {/* Easy Returns */}
             <div className="text-center">
               <div className="inline-block p-3 bg-primary-100 rounded-full mb-4">
                 <svg
@@ -72,9 +83,11 @@ const Home = () => {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Easy Returns</h3>
+              <h3 className="text-xl font-semibold mb-2">
+                {t('features.easyReturns.title')}
+              </h3>
               <p className="text-gray-600">
-                Simple and hassle-free return policy.
+                {t('features.easyReturns.description')}
               </p>
             </div>
           </div>

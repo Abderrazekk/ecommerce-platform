@@ -1,10 +1,11 @@
-// File: e-commerce-frontend/src/components/sponsors/Sponsors.jsx
 import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { fetchVisibleSponsors } from "../../redux/slices/sponsor.slice";
 import Loader from "../common/Loader";
 
 const Sponsors = () => {
+  const { t } = useTranslation('sponsors');
   const dispatch = useDispatch();
   const { visibleSponsors, loading } = useSelector((state) => state.sponsors);
   const containerRef = useRef(null);
@@ -80,10 +81,10 @@ const Sponsors = () => {
       {/* Text content container - still centered but full width background */}
       <div className="w-full text-center mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-          Our Sponsors
+          {t('title')}
         </h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          We partner with industry leaders to bring you the best products
+          {t('description')}
         </p>
       </div>
 
@@ -107,32 +108,32 @@ const Sponsors = () => {
           style={visibleSponsors.length > 2 ? { willChange: "transform" } : {}}
         >
           {displayItems.map((sponsor, index) => (
-            <SponsorItem key={`${sponsor._id}-${index}`} sponsor={sponsor} />
+            <div 
+              key={`${sponsor._id}-${index}`}
+              className="flex-shrink-0 relative w-64 h-32 md:w-72 md:h-36 lg:w-80 lg:h-40 xl:w-96 xl:h-48"
+            >
+              {/* Sponsor Image - Simple display with rounded corners */}
+              <div className="relative w-full h-full rounded-xl overflow-hidden">
+                <img
+                  src={sponsor.image?.url || ""}
+                  alt={sponsor.name || t('altText')}
+                  className="w-full h-full object-contain"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src =
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-size='14' text-anchor='middle' dy='.3em' fill='%236b7280'%3E" + 
+                      encodeURIComponent(t('brandFallback')) + 
+                      "%3C/text%3E%3C/svg%3E";
+                  }}
+                />
+              </div>
+            </div>
           ))}
         </div>
       </div>
     </div>
   );
 };
-
-// SponsorItem component - With rounded corners
-const SponsorItem = ({ sponsor }) => (
-  <div className="flex-shrink-0 relative w-64 h-32 md:w-72 md:h-36 lg:w-80 lg:h-40 xl:w-96 xl:h-48">
-    {/* Sponsor Image - Simple display with rounded corners */}
-    <div className="relative w-full h-full rounded-xl overflow-hidden">
-      <img
-        src={sponsor.image?.url || ""}
-        alt={sponsor.name || "Sponsor"}
-        className="w-full h-full object-contain"
-        loading="lazy"
-        onError={(e) => {
-          e.target.onerror = null;
-          e.target.src =
-            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Ctext x='50' y='50' font-size='14' text-anchor='middle' dy='.3em' fill='%236b7280'%3EBrand%3C/text%3E%3C/svg%3E";
-        }}
-      />
-    </div>
-  </div>
-);
 
 export default Sponsors;

@@ -1,0 +1,16 @@
+{
+  "features": {
+    "fastDelivery": {
+      "title": "Fast Delivery",
+      "description": "Get your products delivered quickly and safely."
+    },
+    "securePayment": {
+      "title": "Secure Payment",
+      "description": "100% secure payment methods."
+    },
+    "easyReturns": {
+      "title": "Easy Returns",
+      "description": "Simple and hassle-free return policy."
+    }
+  }
+}

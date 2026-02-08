@@ -1,0 +1,109 @@
+{
+  "header": {
+    "address": "Ariana, Tunisie",
+    "phone": "+216 55999444",
+    "email": "Contact@shoppina.com",
+    "social": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "tiktok": "TikTok"
+    }
+  },
+  "menu": {
+    "home": "Accueil",
+    "shop": "Boutique",
+    "about": "À propos",
+    "contact": "Contact",
+    "shopCategories": "Catégories de produits",
+    "browseCollection": "Parcourez notre collection",
+    "viewAll": "Voir tout →",
+    "quickLinks": {
+      "onSale": "En solde",
+      "featured": "En vedette",
+      "newArrivals": "Nouveautés"
+    }
+  },
+  "shopCategories": {
+    "electronics": {
+      "name": "Électronique",
+      "description": "Téléphones, Ordinateurs portables, Tablettes"
+    },
+    "homeKitchen": {
+      "name": "Maison & Cuisine",
+      "description": "Appareils électroménagers, Meubles"
+    },
+    "automotive": {
+      "name": "Automobile",
+      "description": "Outils, Accessoires"
+    },
+    "fashion": {
+      "name": "Mode",
+      "description": "Vêtements, Chaussures, Sacs"
+    },
+    "fitness": {
+      "name": "Fitness & Plein air",
+      "description": "Sports, Camping, Yoga"
+    },
+    "pets": {
+      "name": "Animaux domestiques",
+      "description": "Nourriture, Jouets, Accessoires"
+    },
+    "beauty": {
+      "name": "Beauté & Soins",
+      "description": "Soins de la peau, Cosmétiques"
+    },
+    "babyKids": {
+      "name": "Bébé & Enfants",
+      "description": "Jouets, Vêtements, Équipement"
+    },
+    "lifestyle": {
+      "name": "Style de vie & Loisirs",
+      "description": "Livres, Jeux, Musique"
+    }
+  },
+  "search": {
+    "placeholder": "Rechercher des produits, marques, catégories...",
+    "searching": "Recherche de produits...",
+    "noResults": "Aucun produit trouvé. Essayez un autre mot-clé.",
+    "error": "Impossible de charger les résultats de recherche.",
+    "view": "Voir",
+    "brand": "Marque",
+    "category": "Catégorie",
+    "noImage": "Pas d'image"
+  },
+  "user": {
+    "admin": "Administrateur",
+    "myWishlist": "Ma liste de souhaits",
+    "myOrders": "Mes commandes",
+    "myProfile": "Mon profil",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "welcome": "Bienvenue sur Shoppina",
+    "pleaseLogin": "Veuillez vous connecter pour continuer",
+    "loginToAccount": "Se connecter au compte",
+    "createAccount": "Créer un nouveau compte"
+  },
+  "cart": {
+    "shoppingCart": "Panier d'achat",
+    "items_one": "{{count}} article",
+    "items_other": "{{count}} articles"
+  },
+  "wishlist": {
+    "wishlist": "Liste de souhaits",
+    "items_one": "{{count}} article",
+    "items_other": "{{count}} articles"
+  },
+  "admin": {
+    "panel": "Panneau d'administration",
+    "dashboard": "Tableau de bord",
+    "hero": "Héros",
+    "products": "Produits",
+    "orders": "Commandes",
+    "users": "Utilisateurs",
+    "sponsors": "Sponsors"
+  },
+  "footer": {
+    "copyright": "© {{year}} Shoppina. Tous droits réservés."
+  }
+}

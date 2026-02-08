@@ -1,0 +1,86 @@
+{
+  "header": {
+    "title": "Discover Products",
+    "subtitle": "Explore our curated collection of {{count}} premium products"
+  },
+  "search": {
+    "placeholder": "Search for products, brands, or keywords...",
+    "button": "Search"
+  },
+  "filters": {
+    "title": "Filters",
+    "activeFilters": "Active Filters ({{count}})",
+    "clearAll": "Clear All",
+    "resetFilters": "Reset All Filters",
+    "sections": {
+      "categories": "Categories",
+      "priceRange": "Price Range",
+      "brands": "Brands",
+      "features": "Features"
+    },
+    "price": {
+      "min": "Min Price",
+      "max": "Max Price"
+    },
+    "currency": "DT"
+  },
+  "categories": {
+    "all": "All Categories",
+    "electronics": "Electronics & Gadgets",
+    "fashion": "Fashion & Apparel",
+    "beauty": "Beauty & Personal Care",
+    "home": "Home & Kitchen",
+    "fitness": "Fitness & Outdoors",
+    "baby": "Baby & Kids",
+    "pets": "Pets",
+    "automotive": "Automotive & Tools",
+    "lifestyle": "Lifestyle & Hobbies",
+    "aliexpress": "AliExpress"
+  },
+  "features": {
+    "inStock": "In Stock Only",
+    "onSale": "On Sale Only",
+    "featured": "Featured Products",
+    "aliexpress": "AliExpress Products Only",
+    "freeShipping": "Free Shipping"
+  },
+  "aliexpress": {
+    "warning": {
+      "title": "⚠️ Important Information for AliExpress Orders",
+      "deliveryTime": "Delivery Time: 10–20 days for delivery",
+      "orderConfirmation": "Order Confirmation: Our team will call you to confirm the order",
+      "contactRequired": "Contact Required: Please ensure your phone number is correct in your profile",
+      "note": "Note: These products are shipped directly from international suppliers. Please allow extra time for customs clearance."
+    }
+  },
+  "sort": {
+    "label": "Sort by:",
+    "newest": "Newest Arrivals",
+    "priceLow": "Price: Low to High",
+    "priceHigh": "Price: High to Low",
+    "name": "Name: A to Z"
+  },
+  "products": {
+    "showing": "Showing {{showing}} of {{total}} products",
+    "total": "{{count}} total products",
+    "noProducts": "No products found",
+    "noProductsMessage": "Try adjusting your filters or search terms to discover amazing products",
+    "noBrands": "No brands found",
+    "allBrands": "All Brands"
+  },
+  "pagination": {
+    "page": "Page {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "first": "First",
+    "last": "Last"
+  },
+  "filterTags": {
+    "inStock": "In Stock",
+    "onSale": "On Sale",
+    "featured": "Featured",
+    "aliexpress": "AliExpress",
+    "aliexpressOnly": "AliExpress Only",
+    "price": "${{min}} - ${{max}}"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "brand": {
+    "name": "Shoppina",
+    "tagline": "Commerce Premium",
+    "description": "L'excellence sélectionnée livrée à votre porte. Découvrez le shopping premium réinventé. Découvrez la plus belle collection de produits avec une qualité exceptionnelle et un service client hors pair."
+  },
+  "quickLinks": {
+    "title": "Liens Rapides",
+    "home": "Accueil",
+    "shopAll": "Tout Acheter",
+    "newArrivals": "Nouveautés",
+    "bestSellers": "Meilleures Ventes",
+    "aboutUs": "À Propos"
+  },
+  "support": {
+    "title": "Support",
+    "helpFAQ": "Aide & FAQ",
+    "customerService": "Service Client",
+    "deliveryPayment": "Livraison & Paiement",
+    "orderTracking": "Suivi de Commande",
+    "returnPolicy": "Politique de Retour"
+  },
+  "legal": {
+    "title": "Légal",
+    "termsConditions": "Conditions Générales",
+    "privacyPolicy": "Politique de Confidentialité",
+    "legalNotice": "Mentions Légales"
+  },
+  "contact": {
+    "title": "Contactez-Nous",
+    "email": "Contact@shoppina.com",
+    "phone": "+216 55999444",
+    "address": "Ariana, Tunisie"
+  },
+  "social": {
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "tiktok": "TikTok"
+  },
+  "copyright": "© {{year}} Shoppina. Tous droits réservés.",
+  "backToTop": "Retour en haut"
+}

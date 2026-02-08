@@ -1,0 +1,11 @@
+{
+  "title": "Bestsellers",
+  "subtitle": "Discover our most popular products, carefully selected just for you",
+  "noProducts": {
+    "title": "No Featured Products Yet",
+    "message": "Check back soon for exciting new products!"
+  },
+  "loading": {
+    "title": "Featured Products"
+  }
+}

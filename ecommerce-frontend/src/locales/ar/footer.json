@@ -1,0 +1,42 @@
+{
+  "brand": {
+    "name": "شوبينا",
+    "tagline": "بيع بالتجزئة مميز",
+    "description": "تميز منتقى يُسلم إلى عتبة دارك. اختبر التسوق المتميز بأسلوب جديد. اكتشف أجمل مجموعة من المنتجات بجودة استثنائية وخدمة عملاء متميزة."
+  },
+  "quickLinks": {
+    "title": "روابط سريعة",
+    "home": "الرئيسية",
+    "shopAll": "تسوق الكل",
+    "newArrivals": "وصل حديثاً",
+    "bestSellers": "الأكثر مبيعاً",
+    "aboutUs": "من نحن"
+  },
+  "support": {
+    "title": "الدعم",
+    "helpFAQ": "المساعدة والأسئلة الشائعة",
+    "customerService": "خدمة العملاء",
+    "deliveryPayment": "التسليم والدفع",
+    "orderTracking": "تتبع الطلب",
+    "returnPolicy": "سياسة الإرجاع"
+  },
+  "legal": {
+    "title": "قانوني",
+    "termsConditions": "الشروط والأحكام",
+    "privacyPolicy": "سياسة الخصوصية",
+    "legalNotice": "إشعار قانوني"
+  },
+  "contact": {
+    "title": "اتصل بنا",
+    "email": "Contact@shoppina.com",
+    "phone": "+216 55999444",
+    "address": "أريانة، تونس"
+  },
+  "social": {
+    "facebook": "فيسبوك",
+    "instagram": "إنستغرام",
+    "tiktok": "تيك توك"
+  },
+  "copyright": "© {{year}} شوبينا. جميع الحقوق محفوظة.",
+  "backToTop": "العودة للأعلى"
+}

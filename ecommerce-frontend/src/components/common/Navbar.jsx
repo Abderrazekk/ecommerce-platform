@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { logout } from "../../redux/slices/auth.slice";
 import { clearCart } from "../../redux/slices/cart.slice";
 import { fetchWishlist } from "../../redux/slices/wishlist.slice";
@@ -22,11 +23,11 @@ import {
   FaSignOutAlt,
   FaHeart,
   FaPhone,
-  FaClock,
   FaMapMarkerAlt,
   FaFacebook,
   FaInstagram,
   FaTiktok,
+  FaGlobe,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -34,6 +35,7 @@ const Navbar = () => {
   const [adminDropdown, setAdminDropdown] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
   const [shopDropdown, setShopDropdown] = useState(false);
+  const [languageDropdown, setLanguageDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
@@ -41,65 +43,75 @@ const Navbar = () => {
   const [searchError, setSearchError] = useState("");
   const [activeResultIndex, setActiveResultIndex] = useState(-1);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+
+  const { t, i18n } = useTranslation("navbar");
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.cart);
-  const { itemCount: wishlistCount, wishlistItems } = useSelector(
-    (state) => state.wishlist,
-  );
+  const { itemCount: wishlistCount } = useSelector((state) => state.wishlist);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Ref for mobile menu container
+  // Refs for dropdowns
+  const languageDropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const desktopSearchContainerRef = useRef(null);
   const mobileSearchContainerRef = useRef(null);
   const desktopSearchInputRef = useRef(null);
   const mobileSearchInputRef = useRef(null);
 
-  // Synchronize wishlist on auth change and periodically
-  useEffect(() => {
-    if (isAuthenticated) {
-      // Fetch wishlist when user logs in
-      dispatch(fetchWishlist());
+  // Language configuration
+  const languages = [
+    { code: "en", name: "English", flag: "🇺🇸", dir: "ltr" },
+    { code: "fr", name: "Français", flag: "🇫🇷", dir: "ltr" },
+    { code: "ar", name: "العربية", flag: "🇹🇳", dir: "rtl" },
+  ];
 
-      // Set up periodic sync (every 30 seconds) to ensure count is accurate
-      const syncInterval = setInterval(() => {
-        dispatch(fetchWishlist());
-      }, 30000);
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    setLanguageDropdown(false);
 
-      return () => clearInterval(syncInterval);
-    }
-  }, [dispatch, isAuthenticated]);
-
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
+    // Force set direction immediately
+    if (lng === "ar") {
+      document.documentElement.dir = "rtl";
+      document.documentElement.lang = "ar";
+      document.body.classList.add("rtl");
+      document.body.classList.remove("ltr");
+      localStorage.setItem("direction", "rtl");
     } else {
-      document.body.style.overflow = "unset";
+      document.documentElement.dir = "ltr";
+      document.body.classList.add("ltr");
+      document.body.classList.remove("rtl");
+      localStorage.setItem("direction", "ltr");
     }
 
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+    // Force a small delay and check
+    setTimeout(() => {
+      const currentDir = document.documentElement.dir;
+      if (lng === "ar" && currentDir !== "rtl") {
+        document.documentElement.dir = "rtl";
+        document.body.classList.add("rtl");
+      }
+    }, 100);
+  };
 
-  useEffect(() => {
-    if (isSearchVisible && mobileSearchInputRef.current) {
-      mobileSearchInputRef.current.focus();
-    }
-  }, [isSearchVisible]);
-
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Handle language dropdown
+      if (
+        languageDropdownRef.current &&
+        !languageDropdownRef.current.contains(event.target)
+      ) {
+        setLanguageDropdown(false);
+      }
+
+      // Handle search dropdowns
       const clickedDesktop = desktopSearchContainerRef.current?.contains(
         event.target,
       );
       const clickedMobile = mobileSearchContainerRef.current?.contains(
         event.target,
       );
-
       if (!clickedDesktop && !clickedMobile) {
         setIsSearchDropdownOpen(false);
         setActiveResultIndex(-1);
@@ -111,6 +123,35 @@ const Navbar = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Synchronize wishlist on auth change and periodically
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchWishlist());
+      const syncInterval = setInterval(() => {
+        dispatch(fetchWishlist());
+      }, 30000);
+      return () => clearInterval(syncInterval);
+    }
+  }, [dispatch, isAuthenticated]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isSearchVisible && mobileSearchInputRef.current) {
+      mobileSearchInputRef.current.focus();
+    }
+  }, [isSearchVisible]);
 
   useEffect(() => {
     const query = searchQuery.trim();
@@ -131,9 +172,7 @@ const Navbar = () => {
         setSearchResults(products);
         setIsSearchDropdownOpen(true);
       } catch (error) {
-        setSearchError(
-          error?.response?.data?.message || "Unable to load search results.",
-        );
+        setSearchError(error?.response?.data?.message || t("search.error"));
         setSearchResults([]);
       } finally {
         setIsSearching(false);
@@ -141,26 +180,55 @@ const Navbar = () => {
     }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
+  }, [searchQuery, t]);
 
   // Shop categories
   const shopCategories = [
-    { name: "All Products", path: "/shop" },
     {
-      name: "Electronics & Gadgets",
+      name: t("shopCategories.electronics.name"),
       path: "/shop?category=Electronics & Gadgets",
+      desc: t("shopCategories.electronics.description"),
     },
-    { name: "Fashion & Apparel", path: "/shop?category=Fashion & Apparel" },
     {
-      name: "Beauty & Personal Care",
-      path: "/shop?category=Beauty & Personal Care",
+      name: t("shopCategories.fashion.name"),
+      path: "/shop?category=Fashion & Apparel",
+      desc: t("shopCategories.fashion.description"),
     },
-    { name: "Home & Kitchen", path: "/shop?category=Home & Kitchen" },
-    { name: "Fitness & Outdoors", path: "/shop?category=Fitness & Outdoors" },
-    { name: "Baby & Kids", path: "/shop?category=Baby & Kids" },
-    { name: "Pets", path: "/shop?category=Pets" },
-    { name: "Automotive & Tools", path: "/shop?category=Automotive & Tools" },
-    { name: "Lifestyle & Hobbies", path: "/shop?category=Lifestyle & Hobbies" },
+    {
+      name: t("shopCategories.beauty.name"),
+      path: "/shop?category=Beauty & Personal Care",
+      desc: t("shopCategories.beauty.description"),
+    },
+    {
+      name: t("shopCategories.homeKitchen.name"),
+      path: "/shop?category=Home & Kitchen",
+      desc: t("shopCategories.homeKitchen.description"),
+    },
+    {
+      name: t("shopCategories.fitness.name"),
+      path: "/shop?category=Fitness & Outdoors",
+      desc: t("shopCategories.fitness.description"),
+    },
+    {
+      name: t("shopCategories.babyKids.name"),
+      path: "/shop?category=Baby & Kids",
+      desc: t("shopCategories.babyKids.description"),
+    },
+    {
+      name: t("shopCategories.pets.name"),
+      path: "/shop?category=Pets",
+      desc: t("shopCategories.pets.description"),
+    },
+    {
+      name: t("shopCategories.automotive.name"),
+      path: "/shop?category=Automotive & Tools",
+      desc: t("shopCategories.automotive.description"),
+    },
+    {
+      name: t("shopCategories.lifestyle.name"),
+      path: "/shop?category=Lifestyle & Hobbies",
+      desc: t("shopCategories.lifestyle.description"),
+    },
   ];
 
   const handleLogout = () => {
@@ -229,26 +297,26 @@ const Navbar = () => {
   };
 
   const menuItems = [
-    { name: "Home", path: "/", icon: <FaHome className="h-4 w-4" /> },
+    { name: t("menu.home"), path: "/", icon: <FaHome className="h-4 w-4" /> },
     {
-      name: "About",
+      name: t("menu.about"),
       path: "/about",
       icon: <FaInfoCircle className="h-4 w-4" />,
     },
     {
-      name: "Contact",
+      name: t("menu.contact"),
       path: "/contact",
       icon: <FaEnvelope className="h-4 w-4" />,
     },
   ];
 
   const adminMenuItems = [
-    { name: "Dashboard", path: "/admin/dashboard" },
-    { name: "Hero", path: "/admin/hero" },
-    { name: "Products", path: "/admin/products" },
-    { name: "Orders", path: "/admin/orders" },
-    { name: "Users", path: "/admin/users" },
-    { name: "Sponsors", path: "/admin/sponsors" },
+    { name: t("admin.dashboard"), path: "/admin/dashboard" },
+    { name: t("admin.hero"), path: "/admin/hero" },
+    { name: t("admin.products"), path: "/admin/products" },
+    { name: t("admin.orders"), path: "/admin/orders" },
+    { name: t("admin.users"), path: "/admin/users" },
+    { name: t("admin.sponsors"), path: "/admin/sponsors" },
   ];
 
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -271,7 +339,7 @@ const Navbar = () => {
       >
         {isSearching && (
           <div className="px-4 py-3 text-sm text-gray-500">
-            Searching products...
+            {t("search.searching")}
           </div>
         )}
         {!isSearching && searchError && (
@@ -279,7 +347,7 @@ const Navbar = () => {
         )}
         {!isSearching && !searchError && searchResults.length === 0 && (
           <div className="px-4 py-3 text-sm text-gray-500">
-            No products found. Try another keyword.
+            {t("search.noResults")}
           </div>
         )}
         {!isSearching &&
@@ -306,7 +374,9 @@ const Navbar = () => {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <span className="text-xs text-gray-400">No image</span>
+                  <span className="text-xs text-gray-400">
+                    {t("search.noImage")}
+                  </span>
                 )}
               </div>
               <div className="flex-1">
@@ -314,11 +384,13 @@ const Navbar = () => {
                   {product.name}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {product.brand || "Brand"} · {product.category || "Category"}
+                  {(product.brand || t("search.brand")) +
+                    " · " +
+                    (product.category || t("search.category"))}
                 </p>
               </div>
               <span className="text-xs font-semibold text-primary-600">
-                View
+                {t("search.view")}
               </span>
             </button>
           ))}
@@ -336,7 +408,7 @@ const Navbar = () => {
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 text-xs md:text-sm">
               <div className="flex items-center gap-2">
                 <FaMapMarkerAlt className="h-3 w-3" />
-                <span>Ariana, Tunisia</span>
+                <span>{t("header.address")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <FaPhone className="h-3 w-3" />
@@ -344,7 +416,7 @@ const Navbar = () => {
                   href="tel:+21655999444"
                   className="hover:text-primary-200 transition-colors"
                 >
-                  +216 55999444
+                  {t("header.phone")}
                 </a>
               </div>
               <div className="flex items-center gap-2">
@@ -353,19 +425,19 @@ const Navbar = () => {
                   href="mailto:Contact@shoppina.com"
                   className="hover:text-primary-200 transition-colors"
                 >
-                  Contact@shoppina.com
+                  {t("header.email")}
                 </a>
               </div>
             </div>
 
-            {/* Right side - Social Media Icons */}
+            {/* Right side - Social Media Only (Language switcher moved to main nav) */}
             <div className="flex items-center space-x-4">
               <a
                 href="https://www.facebook.com/profile.php?id=61585767552922"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-blue-300 transition-colors"
-                aria-label="Facebook"
+                aria-label={t("header.social.facebook")}
               >
                 <FaFacebook className="h-4 w-4" />
               </a>
@@ -374,7 +446,7 @@ const Navbar = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-pink-300 transition-colors"
-                aria-label="Instagram"
+                aria-label={t("header.social.instagram")}
               >
                 <FaInstagram className="h-4 w-4" />
               </a>
@@ -383,7 +455,7 @@ const Navbar = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-gray-300 transition-colors"
-                aria-label="TikTok"
+                aria-label={t("header.social.tiktok")}
               >
                 <FaTiktok className="h-4 w-4" />
               </a>
@@ -436,13 +508,13 @@ const Navbar = () => {
                   to="/shop"
                   className="flex items-center px-4 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium"
                 >
-                  <span>Shop</span>
+                  <span>{t("menu.shop")}</span>
                   <FaChevronDown
                     className={`ml-1 h-3 w-3 transition-transform duration-200 ${shopDropdown ? "rotate-180" : ""}`}
                   />
                 </Link>
 
-                {/* Shop Dropdown Menu - Clean Minimalist Design */}
+                {/* Shop Dropdown Menu */}
                 {shopDropdown && (
                   <div
                     className="absolute left-0 mt-0 w-[700px] bg-white rounded-lg shadow-lg py-4 border border-gray-200 z-10"
@@ -453,10 +525,10 @@ const Navbar = () => {
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            Shop Categories
+                            {t("menu.shopCategories")}
                           </h3>
                           <p className="text-sm text-gray-500 mt-1">
-                            Browse our collection
+                            {t("menu.browseCollection")}
                           </p>
                         </div>
                         <Link
@@ -464,7 +536,7 @@ const Navbar = () => {
                           className="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200"
                           onClick={() => setShopDropdown(false)}
                         >
-                          View All →
+                          {t("menu.viewAll")}
                         </Link>
                       </div>
                     </div>
@@ -474,128 +546,59 @@ const Navbar = () => {
                       <div className="grid grid-cols-3 gap-4">
                         {/* Column 1 */}
                         <div className="space-y-2">
-                          <Link
-                            to="/shop?category=Electronics & Gadgets"
-                            className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                            onClick={() => setShopDropdown(false)}
-                          >
-                            <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
-                              Electronics
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Phones, Laptops, Tablets
-                            </div>
-                          </Link>
-
-                          <Link
-                            to="/shop?category=Home & Kitchen"
-                            className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                            onClick={() => setShopDropdown(false)}
-                          >
-                            <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
-                              Home & Kitchen
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Appliances, Furniture
-                            </div>
-                          </Link>
-
-                          <Link
-                            to="/shop?category=Automotive & Tools"
-                            className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                            onClick={() => setShopDropdown(false)}
-                          >
-                            <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
-                              Automotive
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Tools, Accessories
-                            </div>
-                          </Link>
+                          {shopCategories.slice(0, 3).map((category) => (
+                            <Link
+                              key={category.name}
+                              to={category.path}
+                              className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
+                              onClick={() => setShopDropdown(false)}
+                            >
+                              <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
+                                {category.name}
+                              </div>
+                              <div className="text-sm text-gray-500 mt-1">
+                                {category.desc}
+                              </div>
+                            </Link>
+                          ))}
                         </div>
 
                         {/* Column 2 */}
                         <div className="space-y-2">
-                          <Link
-                            to="/shop?category=Fashion & Apparel"
-                            className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                            onClick={() => setShopDropdown(false)}
-                          >
-                            <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
-                              Fashion
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Clothing, Shoes, Bags
-                            </div>
-                          </Link>
-
-                          <Link
-                            to="/shop?category=Fitness & Outdoors"
-                            className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                            onClick={() => setShopDropdown(false)}
-                          >
-                            <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
-                              Fitness & Outdoors
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Sports, Camping, Yoga
-                            </div>
-                          </Link>
-
-                          <Link
-                            to="/shop?category=Pets"
-                            className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                            onClick={() => setShopDropdown(false)}
-                          >
-                            <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
-                              Pets
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Food, Toys, Accessories
-                            </div>
-                          </Link>
+                          {shopCategories.slice(3, 6).map((category) => (
+                            <Link
+                              key={category.name}
+                              to={category.path}
+                              className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
+                              onClick={() => setShopDropdown(false)}
+                            >
+                              <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
+                                {category.name}
+                              </div>
+                              <div className="text-sm text-gray-500 mt-1">
+                                {category.desc}
+                              </div>
+                            </Link>
+                          ))}
                         </div>
 
                         {/* Column 3 */}
                         <div className="space-y-2">
-                          <Link
-                            to="/shop?category=Beauty & Personal Care"
-                            className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                            onClick={() => setShopDropdown(false)}
-                          >
-                            <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
-                              Beauty & Care
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Skincare, Cosmetics
-                            </div>
-                          </Link>
-
-                          <Link
-                            to="/shop?category=Baby & Kids"
-                            className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                            onClick={() => setShopDropdown(false)}
-                          >
-                            <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
-                              Baby & Kids
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Toys, Clothing, Gear
-                            </div>
-                          </Link>
-
-                          <Link
-                            to="/shop?category=Lifestyle & Hobbies"
-                            className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                            onClick={() => setShopDropdown(false)}
-                          >
-                            <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
-                              Lifestyle & Hobbies
-                            </div>
-                            <div className="text-sm text-gray-500 mt-1">
-                              Books, Games, Music
-                            </div>
-                          </Link>
+                          {shopCategories.slice(6, 9).map((category) => (
+                            <Link
+                              key={category.name}
+                              to={category.path}
+                              className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
+                              onClick={() => setShopDropdown(false)}
+                            >
+                              <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
+                                {category.name}
+                              </div>
+                              <div className="text-sm text-gray-500 mt-1">
+                                {category.desc}
+                              </div>
+                            </Link>
+                          ))}
                         </div>
                       </div>
 
@@ -607,7 +610,7 @@ const Navbar = () => {
                             className="px-3 py-1.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
                             onClick={() => setShopDropdown(false)}
                           >
-                            On Sale
+                            {t("menu.quickLinks.onSale")}
                           </Link>
                           <span className="text-gray-300">•</span>
                           <Link
@@ -615,7 +618,7 @@ const Navbar = () => {
                             className="px-3 py-1.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
                             onClick={() => setShopDropdown(false)}
                           >
-                            Featured
+                            {t("menu.quickLinks.featured")}
                           </Link>
                           <span className="text-gray-300">•</span>
                           <Link
@@ -623,7 +626,7 @@ const Navbar = () => {
                             className="px-3 py-1.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
                             onClick={() => setShopDropdown(false)}
                           >
-                            New Arrivals
+                            {t("menu.quickLinks.newArrivals")}
                           </Link>
                         </div>
                       </div>
@@ -649,7 +652,7 @@ const Navbar = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchDropdownOpen(true)}
                     onKeyDown={handleSearchKeyDown}
-                    placeholder="Search products, brands, categories..."
+                    placeholder={t("search.placeholder")}
                     aria-label="Search products"
                     aria-expanded={isSearchDropdownOpen}
                     aria-controls="navbar-search-results"
@@ -662,7 +665,7 @@ const Navbar = () => {
             </div>
 
             {/* Right side icons */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               {/* Search Icon - Mobile & Desktop */}
               <button
                 onClick={() => setIsSearchVisible(!isSearchVisible)}
@@ -672,31 +675,82 @@ const Navbar = () => {
                 <FaSearch className="h-5 w-5" />
               </button>
 
-              {/* Wishlist Icon - Optimized */}
+              {/* Language Switcher - Moved to main navbar */}
+              <div className="relative" ref={languageDropdownRef}>
+                <button
+                  onClick={() => setLanguageDropdown(!languageDropdown)}
+                  className="flex items-center space-x-1 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                  aria-label="Change language"
+                >
+                  <FaGlobe className="h-5 w-5" />
+                  <span className="hidden md:inline text-sm font-medium">
+                    {i18n.language === "en"
+                      ? "EN"
+                      : i18n.language === "fr"
+                        ? "FR"
+                        : "AR"}
+                  </span>
+                  <FaChevronDown
+                    className={`h-3 w-3 transition-transform duration-200 ${languageDropdown ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {languageDropdown && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50">
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => changeLanguage(lang.code)}
+                        className={`flex items-center space-x-3 w-full px-4 py-2.5 text-sm hover:bg-gray-50 transition-all duration-200 ${
+                          i18n.language === lang.code
+                            ? "text-primary-600 bg-primary-50"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        <span className="text-lg">{lang.flag}</span>
+                        <span className="font-medium">{lang.name}</span>
+                        {i18n.language === lang.code && (
+                          <span className="ml-auto text-primary-600">
+                            <svg
+                              className="h-4 w-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Wishlist Icon */}
               <Link
                 to="/wishlist"
                 className="relative p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
                 onClick={() => {
-                  // Refresh wishlist count when navigating to wishlist page
                   if (isAuthenticated) {
                     dispatch(fetchWishlist());
                   }
                 }}
               >
                 <FaHeart className="h-5 w-5" />
-                {/* Animated badge for better UX */}
                 <span
                   className={`absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 ${
                     wishlistCount > 0
                       ? "bg-red-500 scale-100 opacity-100"
                       : "scale-0 opacity-0"
                   }`}
-                  key={`wishlist-badge-${wishlistCount}`} // Force re-animation on count change
+                  key={`wishlist-badge-${wishlistCount}`}
                 >
                   {wishlistCount > 9 ? "9+" : wishlistCount}
                 </span>
-
-                {/* Pulse animation when count changes */}
                 {wishlistCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5">
                     <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping"></span>
@@ -720,8 +774,6 @@ const Navbar = () => {
                 >
                   {cartItemCount > 9 ? "9+" : cartItemCount}
                 </span>
-
-                {/* Pulse animation for cart */}
                 {cartItemCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5">
                     <span className="absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75 animate-ping"></span>
@@ -729,9 +781,9 @@ const Navbar = () => {
                 )}
               </Link>
 
-              {/* Desktop User Menu - Hidden on mobile */}
+              {/* Desktop User Menu */}
               {isAuthenticated ? (
-                <div className="hidden md:flex items-center space-x-2">
+                <div className="hidden md:flex items-center">
                   {user?.role === "admin" && (
                     <div className="relative">
                       <button
@@ -739,7 +791,7 @@ const Navbar = () => {
                         className="flex items-center space-x-1 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium"
                       >
                         <FaUserCog className="h-4 w-4" />
-                        <span>Admin</span>
+                        <span>{t("user.admin")}</span>
                         <FaChevronDown
                           className={`h-3 w-3 transition-transform duration-200 ${adminDropdown ? "rotate-180" : ""}`}
                         />
@@ -782,12 +834,11 @@ const Navbar = () => {
                           className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
                           onClick={() => {
                             setUserDropdown(false);
-                            // Refresh wishlist when navigating
                             dispatch(fetchWishlist());
                           }}
                         >
                           <FaHeart className="h-4 w-4" />
-                          <span>My Wishlist</span>
+                          <span>{t("user.myWishlist")}</span>
                           {wishlistCount > 0 && (
                             <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                               {wishlistCount}
@@ -800,7 +851,7 @@ const Navbar = () => {
                           onClick={() => setUserDropdown(false)}
                         >
                           <FaBox className="h-4 w-4" />
-                          <span>My Orders</span>
+                          <span>{t("user.myOrders")}</span>
                         </Link>
                         <Link
                           to="/profile"
@@ -808,7 +859,7 @@ const Navbar = () => {
                           onClick={() => setUserDropdown(false)}
                         >
                           <FaUser className="h-4 w-4" />
-                          <span>My Profile</span>
+                          <span>{t("user.myProfile")}</span>
                         </Link>
                         <button
                           onClick={() => {
@@ -818,7 +869,7 @@ const Navbar = () => {
                           className="flex items-center space-x-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-all duration-200"
                         >
                           <FaSignOutAlt className="h-4 w-4" />
-                          <span>Logout</span>
+                          <span>{t("user.logout")}</span>
                         </button>
                       </div>
                     )}
@@ -830,13 +881,13 @@ const Navbar = () => {
                     to="/login"
                     className="px-4 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium"
                   >
-                    Login
+                    {t("user.login")}
                   </Link>
                   <Link
                     to="/register"
                     className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all duration-200 font-medium shadow-sm"
                   >
-                    Register
+                    {t("user.register")}
                   </Link>
                 </div>
               )}
@@ -869,7 +920,7 @@ const Navbar = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchDropdownOpen(true)}
                     onKeyDown={handleSearchKeyDown}
-                    placeholder="Search products, brands, categories..."
+                    placeholder={t("search.placeholder")}
                     aria-label="Search products"
                     aria-expanded={isSearchDropdownOpen}
                     aria-controls="navbar-search-results"
@@ -882,16 +933,48 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Mobile Menu Dropdown - SCROLLABLE VERSION */}
+          {/* Mobile Menu Dropdown */}
           {isOpen && (
             <div
               ref={mobileMenuRef}
               className="md:hidden fixed inset-0 top-16 bg-white z-40 overflow-y-auto"
               style={{
-                height: "calc(100vh - 4rem)", // Full height minus navbar
-                WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
+                height: "calc(100vh - 4rem)",
+                WebkitOverflowScrolling: "touch",
               }}
             >
+              {/* Language Switcher in Mobile Menu */}
+              <div className="border-b border-gray-100">
+                <div className="px-4 py-3 bg-gray-50">
+                  <p className="text-sm font-semibold text-gray-700">
+                    Language / Langue / اللغة
+                  </p>
+                </div>
+                <div className="px-4 py-2">
+                  <div className="flex space-x-2">
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          changeLanguage(lang.code);
+                          setIsOpen(false);
+                        }}
+                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          i18n.language === lang.code
+                            ? "bg-primary-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        <div className="flex flex-col items-center">
+                          <span className="text-lg">{lang.flag}</span>
+                          <span>{lang.name}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               {/* Navigation Links */}
               <div className="py-2">
                 <Link
@@ -900,7 +983,7 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   <FaHome className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">Home</span>
+                  <span className="font-medium">{t("menu.home")}</span>
                 </Link>
 
                 <Link
@@ -909,14 +992,14 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   <FaStore className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">Shop</span>
+                  <span className="font-medium">{t("menu.shop")}</span>
                 </Link>
 
-                {/* Shop Categories in Mobile - SCROLLABLE SECTION */}
+                {/* Shop Categories in Mobile */}
                 <div className="border-b border-gray-50">
                   <div className="px-4 py-3 bg-gray-50">
                     <p className="text-sm font-medium text-gray-700">
-                      Shop Categories
+                      {t("menu.shopCategories")}
                     </p>
                   </div>
                   <div className="max-h-64 overflow-y-auto">
@@ -940,7 +1023,7 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   <FaInfoCircle className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">About</span>
+                  <span className="font-medium">{t("menu.about")}</span>
                 </Link>
 
                 <Link
@@ -949,7 +1032,7 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   <FaEnvelope className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">Contact</span>
+                  <span className="font-medium">{t("menu.contact")}</span>
                 </Link>
               </div>
 
@@ -959,7 +1042,6 @@ const Navbar = () => {
                 className="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
                 onClick={() => {
                   setIsOpen(false);
-                  // Refresh wishlist when navigating
                   if (isAuthenticated) {
                     dispatch(fetchWishlist());
                   }
@@ -967,11 +1049,11 @@ const Navbar = () => {
               >
                 <div className="flex items-center space-x-3">
                   <FaHeart className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">Wishlist</span>
+                  <span className="font-medium">{t("wishlist.wishlist")}</span>
                 </div>
                 {wishlistCount > 0 && (
                   <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full animate-pulse">
-                    {wishlistCount} item{wishlistCount !== 1 ? "s" : ""}
+                    {t("wishlist.items", { count: wishlistCount })}
                   </span>
                 )}
               </Link>
@@ -984,11 +1066,11 @@ const Navbar = () => {
               >
                 <div className="flex items-center space-x-3">
                   <FaShoppingCart className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">Shopping Cart</span>
+                  <span className="font-medium">{t("cart.shoppingCart")}</span>
                 </div>
                 {cartItemCount > 0 && (
                   <span className="bg-primary-600 text-white text-sm font-bold px-3 py-1 rounded-full animate-pulse">
-                    {cartItemCount} item{cartItemCount !== 1 ? "s" : ""}
+                    {t("cart.items", { count: cartItemCount })}
                   </span>
                 )}
               </Link>
@@ -1023,7 +1105,7 @@ const Navbar = () => {
                     }}
                   >
                     <FaHeart className="h-5 w-5 text-primary-600" />
-                    <span className="font-medium">My Wishlist</span>
+                    <span className="font-medium">{t("user.myWishlist")}</span>
                     {wishlistCount > 0 && (
                       <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                         {wishlistCount}
@@ -1038,7 +1120,7 @@ const Navbar = () => {
                     onClick={() => setIsOpen(false)}
                   >
                     <FaBox className="h-5 w-5 text-primary-600" />
-                    <span className="font-medium">My Orders</span>
+                    <span className="font-medium">{t("user.myOrders")}</span>
                   </Link>
 
                   {/* My Profile */}
@@ -1048,7 +1130,7 @@ const Navbar = () => {
                     onClick={() => setIsOpen(false)}
                   >
                     <FaUser className="h-5 w-5 text-primary-600" />
-                    <span className="font-medium">My Profile</span>
+                    <span className="font-medium">{t("user.myProfile")}</span>
                   </Link>
 
                   {/* Admin Panel */}
@@ -1056,7 +1138,7 @@ const Navbar = () => {
                     <>
                       <div className="px-4 py-2 bg-gray-50 border-b border-gray-50">
                         <p className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                          Admin Panel
+                          {t("admin.panel")}
                         </p>
                       </div>
                       <div className="max-h-48 overflow-y-auto">
@@ -1084,17 +1166,17 @@ const Navbar = () => {
                     className="flex items-center space-x-3 w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-all duration-200 border-b border-gray-50"
                   >
                     <FaSignOutAlt className="h-5 w-5" />
-                    <span className="font-medium">Logout</span>
+                    <span className="font-medium">{t("user.logout")}</span>
                   </button>
                 </>
               ) : (
                 <>
                   <div className="px-4 py-3 border-b border-gray-50 bg-primary-50">
                     <p className="font-semibold text-gray-900">
-                      Welcome to Shoppina
+                      {t("user.welcome")}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Please login to continue
+                      {t("user.pleaseLogin")}
                     </p>
                   </div>
 
@@ -1104,7 +1186,9 @@ const Navbar = () => {
                     onClick={() => setIsOpen(false)}
                   >
                     <FaUser className="h-5 w-5" />
-                    <span className="font-semibold">Login to Account</span>
+                    <span className="font-semibold">
+                      {t("user.loginToAccount")}
+                    </span>
                   </Link>
 
                   <Link
@@ -1112,15 +1196,17 @@ const Navbar = () => {
                     className="flex items-center justify-center px-4 py-3 bg-primary-600 text-white hover:bg-primary-700 transition-all duration-200"
                     onClick={() => setIsOpen(false)}
                   >
-                    <span className="font-semibold">Create New Account</span>
+                    <span className="font-semibold">
+                      {t("user.createAccount")}
+                    </span>
                   </Link>
                 </>
               )}
 
-              {/* Footer Info - Stays at bottom */}
+              {/* Footer Info */}
               <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 sticky bottom-0">
                 <p className="text-xs text-gray-500 text-center">
-                  © {new Date().getFullYear()} Shoppina. All rights reserved.
+                  {t("footer.copyright", { year: new Date().getFullYear() })}
                 </p>
               </div>
             </div>

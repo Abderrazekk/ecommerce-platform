@@ -56,3 +56,96 @@
 /* @apply bg-gray-50 text-gray-900;*/
 /*  }*/
 /*}*/
+/* RTL Support - Force these styles for Arabic */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Body classes for RTL/LTR */
+body.rtl {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+body.ltr {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* Fix for common layout issues in RTL */
+[dir="rtl"] .text-left {
+  text-align: right !important;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left !important;
+}
+
+[dir="rtl"] .ml-auto {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: 0 !important;
+  margin-left: auto !important;
+}
+
+[dir="rtl"] .space-x-4 > * + * {
+  margin-left: 0 !important;
+  margin-right: 1rem !important;
+}
+
+[dir="rtl"] .pl-4 {
+  padding-left: 0 !important;
+  padding-right: 1rem !important;
+}
+
+[dir="rtl"] .pr-4 {
+  padding-right: 0 !important;
+  padding-left: 1rem !important;
+}
+
+[dir="rtl"] .left-0 {
+  left: auto !important;
+  right: 0 !important;
+}
+
+[dir="rtl"] .right-0 {
+  right: auto !important;
+  left: 0 !important;
+}
+
+/* Flexbox fixes for RTL */
+[dir="rtl"] .flex-row-reverse {
+  flex-direction: row !important;
+}
+
+[dir="rtl"] .space-x-reverse > * + * {
+  margin-right: 0.5rem !important;
+  margin-left: 0 !important;
+}
+
+/* Grid fixes for RTL */
+[dir="rtl"] .grid {
+  direction: rtl;
+}
+
+/* Input placeholder alignment */
+[dir="rtl"] input::placeholder,
+[dir="rtl"] textarea::placeholder {
+  text-align: right;
+}
+
+/* Fix for dropdown menus */
+[dir="rtl"] .dropdown-menu {
+  right: auto !important;
+  left: 0 !important;
+  text-align: right;
+}

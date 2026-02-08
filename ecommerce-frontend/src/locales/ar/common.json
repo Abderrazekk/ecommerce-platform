@@ -1,0 +1,26 @@
+{
+  "buttons": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "confirm": "تأكيد",
+    "view": "عرض",
+    "search": "بحث"
+  },
+  "labels": {
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجاح",
+    "brand": "ماركة",
+    "category": "فئة",
+    "description": "وصف",
+    "price": "السعر",
+    "quantity": "الكمية"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "email": "عنوان البريد الإلكتروني غير صالح",
+    "minLength": "يجب أن يحتوي على {{count}} أحرف على الأقل"
+  }
+}

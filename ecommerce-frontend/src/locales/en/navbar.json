@@ -1,0 +1,109 @@
+{
+  "header": {
+    "address": "Ariana, Tunisia",
+    "phone": "+216 55999444",
+    "email": "Contact@shoppina.com",
+    "social": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "tiktok": "TikTok"
+    }
+  },
+  "menu": {
+    "home": "Home",
+    "shop": "Shop",
+    "about": "About",
+    "contact": "Contact",
+    "shopCategories": "Shop Categories",
+    "browseCollection": "Browse our collection",
+    "viewAll": "View All →",
+    "quickLinks": {
+      "onSale": "On Sale",
+      "featured": "Featured",
+      "newArrivals": "New Arrivals"
+    }
+  },
+  "shopCategories": {
+    "electronics": {
+      "name": "Electronics",
+      "description": "Phones, Laptops, Tablets"
+    },
+    "homeKitchen": {
+      "name": "Home & Kitchen",
+      "description": "Appliances, Furniture"
+    },
+    "automotive": {
+      "name": "Automotive",
+      "description": "Tools, Accessories"
+    },
+    "fashion": {
+      "name": "Fashion",
+      "description": "Clothing, Shoes, Bags"
+    },
+    "fitness": {
+      "name": "Fitness & Outdoors",
+      "description": "Sports, Camping, Yoga"
+    },
+    "pets": {
+      "name": "Pets",
+      "description": "Food, Toys, Accessories"
+    },
+    "beauty": {
+      "name": "Beauty & Care",
+      "description": "Skincare, Cosmetics"
+    },
+    "babyKids": {
+      "name": "Baby & Kids",
+      "description": "Toys, Clothing, Gear"
+    },
+    "lifestyle": {
+      "name": "Lifestyle & Hobbies",
+      "description": "Books, Games, Music"
+    }
+  },
+  "search": {
+    "placeholder": "Search products, brands, categories...",
+    "searching": "Searching products...",
+    "noResults": "No products found. Try another keyword.",
+    "error": "Unable to load search results.",
+    "view": "View",
+    "brand": "Brand",
+    "category": "Category",
+    "noImage": "No image"
+  },
+  "user": {
+    "admin": "Admin",
+    "myWishlist": "My Wishlist",
+    "myOrders": "My Orders",
+    "myProfile": "My Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "welcome": "Welcome to Shoppina",
+    "pleaseLogin": "Please login to continue",
+    "loginToAccount": "Login to Account",
+    "createAccount": "Create New Account"
+  },
+  "cart": {
+    "shoppingCart": "Shopping Cart",
+    "items_one": "{{count}} item",
+    "items_other": "{{count}} items"
+  },
+  "wishlist": {
+    "wishlist": "Wishlist",
+    "items_one": "{{count}} item",
+    "items_other": "{{count}} items"
+  },
+  "admin": {
+    "panel": "Admin Panel",
+    "dashboard": "Dashboard",
+    "hero": "Hero",
+    "products": "Products",
+    "orders": "Orders",
+    "users": "Users",
+    "sponsors": "Sponsors"
+  },
+  "footer": {
+    "copyright": "© {{year}} Shoppina. All rights reserved."
+  }
+}
