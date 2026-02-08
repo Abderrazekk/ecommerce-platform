@@ -380,11 +380,11 @@ const AdminSponsors = () => {
                 {adminSponsors.map((sponsor) => (
                   <tr key={sponsor._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="w-16 h-16 border border-gray-200 rounded-lg overflow-hidden bg-white p-2">
+                      <div className="w-20 h-20 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 p-2 flex items-center justify-center">
                         <img
                           src={sponsor.image.url}
                           alt={sponsor.name || "Sponsor"}
-                          className="w-full h-full object-contain"
+                          className="max-w-full max-h-full object-contain"
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src =

@@ -121,7 +121,7 @@ const SponsorItem = ({ sponsor }) => (
     {/* Sponsor Image - Simple display with rounded corners */}
     <div className="relative w-full h-full rounded-xl overflow-hidden">
       <img
-        src={sponsor.image.url}
+        src={sponsor.image?.url || ""}
         alt={sponsor.name || "Sponsor"}
         className="w-full h-full object-contain"
         loading="lazy"
