@@ -298,7 +298,7 @@ const Navbar = () => {
 
   const menuItems = [
     { name: t("menu.home"), path: "/", icon: <FaHome className="h-4 w-4" /> },
-    {
+   {/* {
       name: t("menu.about"),
       path: "/about",
       icon: <FaInfoCircle className="h-4 w-4" />,
@@ -307,7 +307,7 @@ const Navbar = () => {
       name: t("menu.contact"),
       path: "/contact",
       icon: <FaEnvelope className="h-4 w-4" />,
-    },
+    },*/ }
   ];
 
   const adminMenuItems = [
@@ -402,7 +402,7 @@ const Navbar = () => {
     <>
       {/* Top Header Bar */}
       <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">{/* 7xl*/}
           <div className="flex flex-col md:flex-row justify-between items-center py-2 space-y-1 md:space-y-0">
             {/* Left side - Contact Info */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 text-xs md:text-sm">
@@ -462,7 +462,7 @@ const Navbar = () => {
 
       {/* Main Navigation */}
       <nav className="bg-white shadow-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
