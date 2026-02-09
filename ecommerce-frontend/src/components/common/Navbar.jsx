@@ -407,10 +407,6 @@ const Navbar = () => {
             {/* Left side - Contact Info */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 text-xs md:text-sm">
               <div className="flex items-center gap-2">
-                <FaMapMarkerAlt className="h-3 w-3" />
-                <span>{t("header.address")}</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <FaPhone className="h-3 w-3" />
                 <a
                   href="tel:+21655999444"

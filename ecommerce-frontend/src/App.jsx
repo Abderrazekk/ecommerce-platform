@@ -25,6 +25,17 @@ import Checkout from "./pages/Checkout";
 import MyOrders from "./pages/MyOrders";
 import Profile from "./pages/Profile";
 
+// Support Pages
+import HelpFAQ from "./pages/footer/HelpFAQ";
+import CustomerService from "./pages/footer/CustomerService";
+import DeliveryPayment from "./pages/footer/DeliveryPayment";
+import ReturnPolicy from "./pages/footer/ReturnPolicy";
+
+// Legal Pages
+import TermsConditions from "./pages/footer/TermsConditions";
+import PrivacyPolicy from "./pages/footer/PrivacyPolicy";
+import LegalNotice from "./pages/footer/LegalNotice";
+
 // Admin Pages
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
@@ -66,6 +77,17 @@ function App() {
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+
+            {/* Support Routes */}
+            <Route path="/help-faq" element={<HelpFAQ />} />
+            <Route path="/customer-service" element={<CustomerService />} />
+            <Route path="/delivery-payment" element={<DeliveryPayment />} />
+            <Route path="/return-policy" element={<ReturnPolicy />} />
+
+            {/* Legal Routes */}
+            <Route path="/terms-conditions" element={<TermsConditions />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/legal-notice" element={<LegalNotice />} />
 
             {/* User Protected Routes */}
             <Route

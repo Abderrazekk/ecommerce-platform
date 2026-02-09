@@ -5,13 +5,14 @@ const Footer = () => {
   const { t } = useTranslation("footer");
   const currentYear = new Date().getFullYear();
 
-  // Support links
+  // Support links - now includes About Us and Contact
   const supportLinks = [
     { name: t("support.helpFAQ"), path: "/help-faq" },
     { name: t("support.customerService"), path: "/customer-service" },
     { name: t("support.deliveryPayment"), path: "/delivery-payment" },
-    { name: t("support.orderTracking"), path: "/order-tracking" },
     { name: t("support.returnPolicy"), path: "/return-policy" },
+    { name: t("support.aboutUs"), path: "/about" }, // Added
+    { name: t("support.contact"), path: "/contact" }, // Added
   ];
 
   // Legal links
@@ -21,15 +22,6 @@ const Footer = () => {
     { name: t("legal.legalNotice"), path: "/legal-notice" },
   ];
 
-  // Quick links
-  const quickLinks = [
-    { name: t("quickLinks.home"), path: "/" },
-    { name: t("quickLinks.shopAll"), path: "/shop" },
-    { name: t("quickLinks.newArrivals"), path: "/shop?new=true" },
-    { name: t("quickLinks.bestSellers"), path: "/shop?best=true" },
-    { name: t("quickLinks.aboutUs"), path: "/about" },
-  ];
-
   return (
     <>
       <footer className="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white">
@@ -37,26 +29,14 @@ const Footer = () => {
         <div className="h-0.5 w-full bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600"></div>
 
         <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
-          {/* Main content grid - Now using full width with 4 columns */}
+          {/* Main content grid - Now 4 columns: Brand, Support, Legal, Contact */}
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
-              {/* Brand Column - Takes more width */}
+              {/* Brand Column */}
               <div className="space-y-6">
                 {/* Logo */}
                 <div className="flex items-center">
                   <Link to="/" className="flex items-center space-x-3">
-                    <div className="relative">
-                      <img
-                        src="/shoppina1.jpg"
-                        alt="Shoppina Logo"
-                        className="h-12 w-auto object-contain"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src =
-                            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2310b981'/%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dy='.3em' fill='white' font-family='Arial'%3ES%3C/text%3E%3C/svg%3E";
-                        }}
-                      />
-                    </div>
                     <div>
                       <h2 className="text-2xl font-bold text-white">
                         {t("brand.name")}
@@ -106,28 +86,7 @@ const Footer = () => {
                 </div>
               </div>
 
-              {/* Quick Links - Updated */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-white relative inline-block">
-                  {t("quickLinks.title")}
-                  <span className="absolute -bottom-2 left-0 w-10 h-0.5 bg-gradient-to-r from-primary-400 to-primary-500"></span>
-                </h3>
-                <ul className="space-y-3">
-                  {quickLinks.map((link) => (
-                    <li key={link.name}>
-                      <Link
-                        to={link.path}
-                        className="text-gray-400 hover:text-white transition-colors duration-200 group flex items-center text-sm hover:translate-x-1"
-                      >
-                        <span className="w-0 h-px bg-primary-400 group-hover:w-3 mr-2 transition-all duration-300"></span>
-                        {link.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Support Section - New */}
+              {/* Support Column */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-white relative inline-block">
                   {t("support.title")}
@@ -148,54 +107,51 @@ const Footer = () => {
                 </ul>
               </div>
 
-              {/* Legal + Contact combined in one column */}
+              {/* Legal Column */}
               <div className="space-y-6">
-                {/* Legal Section */}
-                <div>
-                  <h3 className="text-lg font-semibold text-white relative inline-block">
-                    {t("legal.title")}
-                    <span className="absolute -bottom-2 left-0 w-10 h-0.5 bg-gradient-to-r from-primary-400 to-primary-500"></span>
-                  </h3>
-                  <ul className="space-y-3 mt-4">
-                    {legalLinks.map((link) => (
-                      <li key={link.name}>
-                        <Link
-                          to={link.path}
-                          className="text-gray-400 hover:text-white transition-colors duration-200 group flex items-center text-sm hover:translate-x-1"
-                        >
-                          <span className="w-0 h-px bg-primary-400 group-hover:w-3 mr-2 transition-all duration-300"></span>
-                          {link.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <h3 className="text-lg font-semibold text-white relative inline-block">
+                  {t("legal.title")}
+                  <span className="absolute -bottom-2 left-0 w-10 h-0.5 bg-gradient-to-r from-primary-400 to-primary-500"></span>
+                </h3>
+                <ul className="space-y-3">
+                  {legalLinks.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        to={link.path}
+                        className="text-gray-400 hover:text-white transition-colors duration-200 group flex items-center text-sm hover:translate-x-1"
+                      >
+                        <span className="w-0 h-px bg-primary-400 group-hover:w-3 mr-2 transition-all duration-300"></span>
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-                {/* Contact Section */}
-                <div className="pt-6">
-                  <h3 className="text-lg font-semibold text-white relative inline-block">
-                    {t("contact.title")}
-                    <span className="absolute -bottom-2 left-0 w-10 h-0.5 bg-gradient-to-r from-primary-400 to-primary-500"></span>
-                  </h3>
-                  <div className="space-y-3 mt-4 text-sm text-gray-400">
-                    <a
-                      href="mailto:Contact@shoppina.com"
-                      className="flex items-start group hover:text-white transition-colors duration-200 hover:translate-x-1"
-                    >
-                      <span className="text-primary-400 mr-3 mt-0.5">✉️</span>
-                      <span>{t("contact.email")}</span>
-                    </a>
-                    <a
-                      href="tel:+21655999444"
-                      className="flex items-center group hover:text-white transition-colors duration-200 hover:translate-x-1"
-                    >
-                      <span className="text-primary-400 mr-3">📞</span>
-                      <span>{t("contact.phone")}</span>
-                    </a>
-                    <div className="flex items-start group hover:translate-x-1">
-                      <span className="text-primary-400 mr-3 mt-0.5">📍</span>
-                      <span>{t("contact.address")}</span>
-                    </div>
+              {/* Contact Column */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-white relative inline-block">
+                  {t("contact.title")}
+                  <span className="absolute -bottom-2 left-0 w-10 h-0.5 bg-gradient-to-r from-primary-400 to-primary-500"></span>
+                </h3>
+                <div className="space-y-4 text-sm text-gray-400">
+                  <a
+                    href="mailto:Contact@shoppina.com"
+                    className="flex items-start group hover:text-white transition-colors duration-200 hover:translate-x-1"
+                  >
+                    <span className="text-primary-400 mr-3 mt-0.5">✉️</span>
+                    <span className="break-all">{t("contact.email")}</span>
+                  </a>
+                  <a
+                    href="tel:+21655999444"
+                    className="flex items-center group hover:text-white transition-colors duration-200 hover:translate-x-1"
+                  >
+                    <span className="text-primary-400 mr-3">📞</span>
+                    <span>{t("contact.phone")}</span>
+                  </a>
+                  <div className="flex items-start group hover:translate-x-1">
+                    <span className="text-primary-400 mr-3 mt-0.5">📍</span>
+                    <span>{t("contact.address")}</span>
                   </div>
                 </div>
               </div>
@@ -204,7 +160,7 @@ const Footer = () => {
             {/* Divider */}
             <div className="my-10 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
 
-            {/* Bottom Bar - Updated links with wider spacing */}
+            {/* Bottom Bar */}
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
               <div className="text-gray-400 text-sm">
                 <p>{t("copyright", { year: currentYear })}</p>
@@ -238,11 +194,11 @@ const Footer = () => {
       {/* Back to Top Button */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-xl shadow-primary-500/30 flex items-center justify-center text-white z-50 hover:shadow-2xl hover:shadow-primary-500/40 hover:scale-110 active:scale-95 transition-all duration-300 backdrop-blur-sm border border-primary-500/20"
+        className="fixed bottom-8 right-8 w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full shadow-xl shadow-primary-500/30 flex items-center justify-center text-white z-50 hover:shadow-2xl hover:shadow-primary-500/40 hover:scale-110 active:scale-95 transition-all duration-300 backdrop-blur-sm border border-primary-500/20"
         aria-label={t("backToTop")}
       >
         <svg
-          className="w-5 h-5"
+          className="w-4 h-4 sm:w-5 sm:h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
