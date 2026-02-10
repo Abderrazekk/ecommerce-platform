@@ -298,16 +298,6 @@ const Navbar = () => {
 
   const menuItems = [
     { name: t("menu.home"), path: "/", icon: <FaHome className="h-4 w-4" /> },
-   {/* {
-      name: t("menu.about"),
-      path: "/about",
-      icon: <FaInfoCircle className="h-4 w-4" />,
-    },
-    {
-      name: t("menu.contact"),
-      path: "/contact",
-      icon: <FaEnvelope className="h-4 w-4" />,
-    },*/ }
   ];
 
   const adminMenuItems = [
@@ -338,15 +328,15 @@ const Navbar = () => {
         aria-label="Search suggestions"
       >
         {isSearching && (
-          <div className="px-4 py-3 text-sm text-gray-500">
+          <div className="px-4 py-2 text-xs text-gray-500">
             {t("search.searching")}
           </div>
         )}
         {!isSearching && searchError && (
-          <div className="px-4 py-3 text-sm text-red-500">{searchError}</div>
+          <div className="px-4 py-2 text-xs text-red-500">{searchError}</div>
         )}
         {!isSearching && !searchError && searchResults.length === 0 && (
-          <div className="px-4 py-3 text-sm text-gray-500">
+          <div className="px-4 py-2 text-xs text-gray-500">
             {t("search.noResults")}
           </div>
         )}
@@ -360,13 +350,13 @@ const Navbar = () => {
               id={`search-result-${product._id}`}
               aria-selected={activeResultIndex === index}
               onClick={() => handleResultSelect(product)}
-              className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-all duration-150 ${
+              className={`w-full text-left px-4 py-2 flex items-center gap-3 transition-all duration-150 ${
                 activeResultIndex === index
                   ? "bg-primary-50 text-primary-700"
                   : "hover:bg-gray-50"
               }`}
             >
-              <div className="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-gray-100 overflow-hidden flex items-center justify-center">
                 {product.images?.[0]?.url ? (
                   <img
                     src={product.images[0].url}
@@ -380,7 +370,7 @@ const Navbar = () => {
                 )}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-xs font-semibold text-gray-900">
                   {product.name}
                 </p>
                 <p className="text-xs text-gray-500">
@@ -402,24 +392,24 @@ const Navbar = () => {
     <>
       {/* Top Header Bar */}
       <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white">
-        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">{/* 7xl*/}
-          <div className="flex flex-col md:flex-row justify-between items-center py-2 space-y-1 md:space-y-0">
+        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center py-1 space-y-1 md:space-y-0">
             {/* Left side - Contact Info */}
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 text-xs md:text-sm">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 text-xs">
+              <div className="flex items-center gap-1">
                 <FaPhone className="h-3 w-3" />
                 <a
                   href="tel:+21655999444"
-                  className="hover:text-primary-200 transition-colors"
+                  className="hover:text-primary-200 transition-colors text-xs"
                 >
                   {t("header.phone")}
                 </a>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <FaEnvelope className="h-3 w-3" />
                 <a
                   href="mailto:Contact@shoppina.com"
-                  className="hover:text-primary-200 transition-colors"
+                  className="hover:text-primary-200 transition-colors text-xs"
                 >
                   {t("header.email")}
                 </a>
@@ -427,7 +417,7 @@ const Navbar = () => {
             </div>
 
             {/* Right side - Social Media Only (Language switcher moved to main nav) */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <a
                 href="https://www.facebook.com/profile.php?id=61585767552922"
                 target="_blank"
@@ -463,7 +453,7 @@ const Navbar = () => {
       {/* Main Navigation */}
       <nav className="bg-white shadow-md sticky top-0 z-50">
         <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-14">
             {/* Logo */}
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
@@ -471,7 +461,7 @@ const Navbar = () => {
                   <img
                     src="/shoppina1.jpg"
                     alt="Shoppina Logo"
-                    className="h-10 w-auto object-contain"
+                    className="h-8 w-auto object-contain"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src =
@@ -483,12 +473,12 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Menu - Hidden on mobile */}
-            <div className="hidden md:flex items-center space-x-1">
+            <div className="hidden md:flex items-center space-x-1 ml-6">
               {menuItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.path}
-                  className="px-4 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium"
+                  className="px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium text-sm"
                 >
                   {item.name}
                 </Link>
@@ -502,7 +492,7 @@ const Navbar = () => {
               >
                 <Link
                   to="/shop"
-                  className="flex items-center px-4 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium"
+                  className="flex items-center px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium text-sm"
                 >
                   <span>{t("menu.shop")}</span>
                   <FaChevronDown
@@ -513,23 +503,23 @@ const Navbar = () => {
                 {/* Shop Dropdown Menu */}
                 {shopDropdown && (
                   <div
-                    className="absolute left-0 mt-0 w-[700px] bg-white rounded-lg shadow-lg py-4 border border-gray-200 z-10"
+                    className="absolute left-0 mt-0 w-[700px] bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-10"
                     onMouseEnter={() => setShopDropdown(true)}
                     onMouseLeave={() => setShopDropdown(false)}
                   >
-                    <div className="px-6 pb-3 border-b border-gray-100">
+                    <div className="px-6 pb-2 border-b border-gray-100">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-sm font-semibold text-gray-900">
                             {t("menu.shopCategories")}
                           </h3>
-                          <p className="text-sm text-gray-500 mt-1">
+                          <p className="text-xs text-gray-500 mt-1">
                             {t("menu.browseCollection")}
                           </p>
                         </div>
                         <Link
                           to="/shop"
-                          className="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                          className="px-3 py-1 text-xs font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all duration-200"
                           onClick={() => setShopDropdown(false)}
                         >
                           {t("menu.viewAll")}
@@ -537,22 +527,22 @@ const Navbar = () => {
                       </div>
                     </div>
 
-                    <div className="px-6 pt-4">
+                    <div className="px-6 pt-2">
                       {/* 3-column grid layout */}
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-3 gap-3">
                         {/* Column 1 */}
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           {shopCategories.slice(0, 3).map((category) => (
                             <Link
                               key={category.name}
                               to={category.path}
-                              className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
+                              className="block p-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
                               onClick={() => setShopDropdown(false)}
                             >
-                              <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
+                              <div className="font-medium text-sm group-hover:translate-x-1 transition-transform duration-200">
                                 {category.name}
                               </div>
-                              <div className="text-sm text-gray-500 mt-1">
+                              <div className="text-xs text-gray-500 mt-0.5">
                                 {category.desc}
                               </div>
                             </Link>
@@ -560,18 +550,18 @@ const Navbar = () => {
                         </div>
 
                         {/* Column 2 */}
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           {shopCategories.slice(3, 6).map((category) => (
                             <Link
                               key={category.name}
                               to={category.path}
-                              className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
+                              className="block p-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
                               onClick={() => setShopDropdown(false)}
                             >
-                              <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
+                              <div className="font-medium text-sm group-hover:translate-x-1 transition-transform duration-200">
                                 {category.name}
                               </div>
-                              <div className="text-sm text-gray-500 mt-1">
+                              <div className="text-xs text-gray-500 mt-0.5">
                                 {category.desc}
                               </div>
                             </Link>
@@ -579,18 +569,18 @@ const Navbar = () => {
                         </div>
 
                         {/* Column 3 */}
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           {shopCategories.slice(6, 9).map((category) => (
                             <Link
                               key={category.name}
                               to={category.path}
-                              className="block p-3 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
+                              className="block p-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
                               onClick={() => setShopDropdown(false)}
                             >
-                              <div className="font-medium group-hover:translate-x-1 transition-transform duration-200">
+                              <div className="font-medium text-sm group-hover:translate-x-1 transition-transform duration-200">
                                 {category.name}
                               </div>
-                              <div className="text-sm text-gray-500 mt-1">
+                              <div className="text-xs text-gray-500 mt-0.5">
                                 {category.desc}
                               </div>
                             </Link>
@@ -599,27 +589,27 @@ const Navbar = () => {
                       </div>
 
                       {/* Quick Links */}
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <div className="flex items-center space-x-2">
+                      <div className="mt-3 pt-2 border-t border-gray-100">
+                        <div className="flex items-center space-x-1">
                           <Link
                             to="/shop?discount=true"
-                            className="px-3 py-1.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                            className="px-2 py-1 text-xs text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
                             onClick={() => setShopDropdown(false)}
                           >
                             {t("menu.quickLinks.onSale")}
                           </Link>
-                          <span className="text-gray-300">•</span>
+                          <span className="text-gray-300 text-xs">•</span>
                           <Link
                             to="/shop?featured=true"
-                            className="px-3 py-1.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                            className="px-2 py-1 text-xs text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
                             onClick={() => setShopDropdown(false)}
                           >
                             {t("menu.quickLinks.featured")}
                           </Link>
-                          <span className="text-gray-300">•</span>
+                          <span className="text-gray-300 text-xs">•</span>
                           <Link
                             to="/shop?new=true"
-                            className="px-3 py-1.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+                            className="px-2 py-1 text-xs text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
                             onClick={() => setShopDropdown(false)}
                           >
                             {t("menu.quickLinks.newArrivals")}
@@ -633,14 +623,14 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Search */}
-            <div className="hidden md:flex flex-1 justify-center px-9">
+            <div className="hidden md:flex flex-1 justify-center px-6">
               <form
                 onSubmit={handleSearch}
                 className="w-full max-w-md"
                 ref={desktopSearchContainerRef}
               >
                 <div className="relative">
-                  <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                   <input
                     ref={desktopSearchInputRef}
                     type="text"
@@ -653,7 +643,7 @@ const Navbar = () => {
                     aria-expanded={isSearchDropdownOpen}
                     aria-controls="navbar-search-results"
                     aria-activedescendant={activeResultId}
-                    className="w-full rounded-full border border-gray-200 bg-gray-50 py-2.5 pl-11 pr-4 text-sm text-gray-700 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition-all duration-200"
+                    className="w-full rounded-full border border-gray-200 bg-gray-50 py-2 pl-10 pr-3 text-xs text-gray-700 placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-200 transition-all duration-200"
                   />
                   {renderSearchDropdown()}
                 </div>
@@ -661,25 +651,25 @@ const Navbar = () => {
             </div>
 
             {/* Right side icons */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               {/* Search Icon - Mobile & Desktop */}
               <button
                 onClick={() => setIsSearchVisible(!isSearchVisible)}
-                className="md:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                className="md:hidden p-1.5 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
                 aria-label="Search"
               >
-                <FaSearch className="h-5 w-5" />
+                <FaSearch className="h-4 w-4" />
               </button>
 
               {/* Language Switcher - Moved to main navbar */}
               <div className="relative" ref={languageDropdownRef}>
                 <button
                   onClick={() => setLanguageDropdown(!languageDropdown)}
-                  className="flex items-center space-x-1 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                  className="flex items-center space-x-1 px-2 py-1.5 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
                   aria-label="Change language"
                 >
-                  <FaGlobe className="h-5 w-5" />
-                  <span className="hidden md:inline text-sm font-medium">
+                  <FaGlobe className="h-4 w-4" />
+                  <span className="hidden md:inline text-xs font-medium">
                     {i18n.language === "en"
                       ? "EN"
                       : i18n.language === "fr"
@@ -692,23 +682,23 @@ const Navbar = () => {
                 </button>
 
                 {languageDropdown && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50">
+                  <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg py-1 border border-gray-100 z-50">
                     {languages.map((lang) => (
                       <button
                         key={lang.code}
                         onClick={() => changeLanguage(lang.code)}
-                        className={`flex items-center space-x-3 w-full px-4 py-2.5 text-sm hover:bg-gray-50 transition-all duration-200 ${
+                        className={`flex items-center space-x-2 w-full px-3 py-2 text-xs hover:bg-gray-50 transition-all duration-200 ${
                           i18n.language === lang.code
                             ? "text-primary-600 bg-primary-50"
                             : "text-gray-700"
                         }`}
                       >
-                        <span className="text-lg">{lang.flag}</span>
+                        <span className="text-base">{lang.flag}</span>
                         <span className="font-medium">{lang.name}</span>
                         {i18n.language === lang.code && (
                           <span className="ml-auto text-primary-600">
                             <svg
-                              className="h-4 w-4"
+                              className="h-3 w-3"
                               fill="currentColor"
                               viewBox="0 0 20 20"
                             >
@@ -729,16 +719,16 @@ const Navbar = () => {
               {/* Wishlist Icon */}
               <Link
                 to="/wishlist"
-                className="relative p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                className="relative p-1.5 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
                 onClick={() => {
                   if (isAuthenticated) {
                     dispatch(fetchWishlist());
                   }
                 }}
               >
-                <FaHeart className="h-5 w-5" />
+                <FaHeart className="h-4 w-4" />
                 <span
-                  className={`absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 ${
+                  className={`absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center transition-all duration-300 ${
                     wishlistCount > 0
                       ? "bg-red-500 scale-100 opacity-100"
                       : "scale-0 opacity-0"
@@ -748,7 +738,7 @@ const Navbar = () => {
                   {wishlistCount > 9 ? "9+" : wishlistCount}
                 </span>
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5">
+                  <span className="absolute -top-1 -right-1 h-4 w-4">
                     <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping"></span>
                   </span>
                 )}
@@ -757,11 +747,11 @@ const Navbar = () => {
               {/* Cart Icon */}
               <Link
                 to="/cart"
-                className="relative p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                className="relative p-1.5 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
               >
-                <FaShoppingCart className="h-5 w-5" />
+                <FaShoppingCart className="h-4 w-4" />
                 <span
-                  className={`absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 ${
+                  className={`absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center transition-all duration-300 ${
                     cartItemCount > 0
                       ? "bg-primary-500 scale-100 opacity-100"
                       : "scale-0 opacity-0"
@@ -771,7 +761,7 @@ const Navbar = () => {
                   {cartItemCount > 9 ? "9+" : cartItemCount}
                 </span>
                 {cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5">
+                  <span className="absolute -top-1 -right-1 h-4 w-4">
                     <span className="absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75 animate-ping"></span>
                   </span>
                 )}
@@ -784,21 +774,21 @@ const Navbar = () => {
                     <div className="relative">
                       <button
                         onClick={() => setAdminDropdown(!adminDropdown)}
-                        className="flex items-center space-x-1 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium"
+                        className="flex items-center space-x-1 px-2 py-1.5 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium text-xs"
                       >
-                        <FaUserCog className="h-4 w-4" />
+                        <FaUserCog className="h-3.5 w-3.5" />
                         <span>{t("user.admin")}</span>
                         <FaChevronDown
                           className={`h-3 w-3 transition-transform duration-200 ${adminDropdown ? "rotate-180" : ""}`}
                         />
                       </button>
                       {adminDropdown && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-10">
+                        <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg py-1 border border-gray-100 z-10">
                           {adminMenuItems.map((item) => (
                             <Link
                               key={item.name}
                               to={item.path}
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
+                              className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
                               onClick={() => setAdminDropdown(false)}
                             >
                               {item.name}
@@ -813,48 +803,48 @@ const Navbar = () => {
                   <div className="relative">
                     <button
                       onClick={() => setUserDropdown(!userDropdown)}
-                      className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                      className="flex items-center space-x-1 px-2 py-1.5 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
                     >
-                      <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-800 rounded-full flex items-center justify-center">
-                        <FaUser className="h-4 w-4 text-white" />
+                      <div className="w-6 h-6 bg-gradient-to-br from-primary-600 to-primary-800 rounded-full flex items-center justify-center">
+                        <FaUser className="h-3 w-3 text-white" />
                       </div>
-                      <span className="font-medium">{user?.name}</span>
+                      <span className="font-medium text-xs">{user?.name}</span>
                       <FaChevronDown
                         className={`h-3 w-3 transition-transform duration-200 ${userDropdown ? "rotate-180" : ""}`}
                       />
                     </button>
                     {userDropdown && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-10">
+                      <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg py-1 border border-gray-100 z-10">
                         <Link
                           to="/wishlist"
-                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
+                          className="flex items-center space-x-1 px-3 py-1.5 text-xs text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
                           onClick={() => {
                             setUserDropdown(false);
                             dispatch(fetchWishlist());
                           }}
                         >
-                          <FaHeart className="h-4 w-4" />
+                          <FaHeart className="h-3 w-3" />
                           <span>{t("user.myWishlist")}</span>
                           {wishlistCount > 0 && (
-                            <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                            <span className="ml-auto bg-red-500 text-white text-xs px-1 py-0.5 rounded-full">
                               {wishlistCount}
                             </span>
                           )}
                         </Link>
                         <Link
                           to="/my-orders"
-                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
+                          className="flex items-center space-x-1 px-3 py-1.5 text-xs text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
                           onClick={() => setUserDropdown(false)}
                         >
-                          <FaBox className="h-4 w-4" />
+                          <FaBox className="h-3 w-3" />
                           <span>{t("user.myOrders")}</span>
                         </Link>
                         <Link
                           to="/profile"
-                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
+                          className="flex items-center space-x-1 px-3 py-1.5 text-xs text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-all duration-200"
                           onClick={() => setUserDropdown(false)}
                         >
-                          <FaUser className="h-4 w-4" />
+                          <FaUser className="h-3 w-3" />
                           <span>{t("user.myProfile")}</span>
                         </Link>
                         <button
@@ -862,9 +852,9 @@ const Navbar = () => {
                             handleLogout();
                             setUserDropdown(false);
                           }}
-                          className="flex items-center space-x-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-all duration-200"
+                          className="flex items-center space-x-1 w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 transition-all duration-200"
                         >
-                          <FaSignOutAlt className="h-4 w-4" />
+                          <FaSignOutAlt className="h-3 w-3" />
                           <span>{t("user.logout")}</span>
                         </button>
                       </div>
@@ -872,16 +862,16 @@ const Navbar = () => {
                   </div>
                 </div>
               ) : (
-                <div className="hidden md:flex items-center space-x-3">
+                <div className="hidden md:flex items-center space-x-2">
                   <Link
                     to="/login"
-                    className="px-4 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium"
+                    className="px-3 py-1.5 text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 font-medium text-xs"
                   >
                     {t("user.login")}
                   </Link>
                   <Link
                     to="/register"
-                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all duration-200 font-medium shadow-sm"
+                    className="px-3 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all duration-200 font-medium text-xs shadow-sm"
                   >
                     {t("user.register")}
                   </Link>
@@ -891,13 +881,13 @@ const Navbar = () => {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                className="md:hidden p-1.5 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
                 aria-label="Menu"
               >
                 {isOpen ? (
-                  <FaTimes className="h-6 w-6" />
+                  <FaTimes className="h-5 w-5" />
                 ) : (
-                  <FaBars className="h-6 w-6" />
+                  <FaBars className="h-5 w-5" />
                 )}
               </button>
             </div>
@@ -905,10 +895,10 @@ const Navbar = () => {
 
           {/* Mobile Search Bar */}
           {isSearchVisible && (
-            <div className="md:hidden py-3 border-t border-gray-100">
+            <div className="md:hidden py-2 border-t border-gray-100">
               <form onSubmit={handleSearch} className="w-full">
                 <div className="relative" ref={mobileSearchContainerRef}>
-                  <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     ref={mobileSearchInputRef}
                     type="text"
@@ -921,7 +911,7 @@ const Navbar = () => {
                     aria-expanded={isSearchDropdownOpen}
                     aria-controls="navbar-search-results"
                     aria-activedescendant={activeResultId}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pl-12 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 pl-10 text-xs text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200"
                   />
                   {renderSearchDropdown()}
                 </div>
@@ -933,20 +923,20 @@ const Navbar = () => {
           {isOpen && (
             <div
               ref={mobileMenuRef}
-              className="md:hidden fixed inset-0 top-16 bg-white z-40 overflow-y-auto"
+              className="md:hidden fixed inset-0 top-14 bg-white z-40 overflow-y-auto"
               style={{
-                height: "calc(100vh - 4rem)",
+                height: "calc(100vh - 3.5rem)",
                 WebkitOverflowScrolling: "touch",
               }}
             >
               {/* Language Switcher in Mobile Menu */}
               <div className="border-b border-gray-100">
-                <div className="px-4 py-3 bg-gray-50">
-                  <p className="text-sm font-semibold text-gray-700">
+                <div className="px-4 py-2 bg-gray-50">
+                  <p className="text-xs font-semibold text-gray-700">
                     Language / Langue / اللغة
                   </p>
                 </div>
-                <div className="px-4 py-2">
+                <div className="px-4 py-1">
                   <div className="flex space-x-2">
                     {languages.map((lang) => (
                       <button
@@ -955,14 +945,14 @@ const Navbar = () => {
                           changeLanguage(lang.code);
                           setIsOpen(false);
                         }}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
                           i18n.language === lang.code
                             ? "bg-primary-600 text-white"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                       >
                         <div className="flex flex-col items-center">
-                          <span className="text-lg">{lang.flag}</span>
+                          <span className="text-base">{lang.flag}</span>
                           <span>{lang.name}</span>
                         </div>
                       </button>
@@ -972,70 +962,52 @@ const Navbar = () => {
               </div>
 
               {/* Navigation Links */}
-              <div className="py-2">
+              <div className="py-1">
                 <Link
                   to="/"
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+                  className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
                   onClick={() => setIsOpen(false)}
                 >
-                  <FaHome className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">{t("menu.home")}</span>
+                  <FaHome className="h-4 w-4 text-primary-600" />
+                  <span className="font-medium text-sm">{t("menu.home")}</span>
                 </Link>
 
                 <Link
                   to="/shop"
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+                  className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
                   onClick={() => setIsOpen(false)}
                 >
-                  <FaStore className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">{t("menu.shop")}</span>
+                  <FaStore className="h-4 w-4 text-primary-600" />
+                  <span className="font-medium text-sm">{t("menu.shop")}</span>
                 </Link>
 
                 {/* Shop Categories in Mobile */}
                 <div className="border-b border-gray-50">
-                  <div className="px-4 py-3 bg-gray-50">
-                    <p className="text-sm font-medium text-gray-700">
+                  <div className="px-3 py-2 bg-gray-50">
+                    <p className="text-xs font-medium text-gray-700">
                       {t("menu.shopCategories")}
                     </p>
                   </div>
-                  <div className="max-h-64 overflow-y-auto">
+                  <div className="max-h-48 overflow-y-auto">
                     {shopCategories.map((category) => (
                       <Link
                         key={category.name}
                         to={category.path}
-                        className="flex items-center px-4 py-3 text-sm text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50 last:border-0 pl-8"
+                        className="flex items-center px-3 py-1.5 text-xs text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50 last:border-0 pl-6"
                         onClick={() => setIsOpen(false)}
                       >
-                        <FaChevronRight className="h-3 w-3 text-gray-400 mr-2" />
+                        <FaChevronRight className="h-3 w-3 text-gray-400 mr-1.5" />
                         <span>{category.name}</span>
                       </Link>
                     ))}
                   </div>
                 </div>
-
-                <Link
-                  to="/about"
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <FaInfoCircle className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">{t("menu.about")}</span>
-                </Link>
-
-                <Link
-                  to="/contact"
-                  className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <FaEnvelope className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">{t("menu.contact")}</span>
-                </Link>
               </div>
 
               {/* Wishlist Item Count Display */}
               <Link
                 to="/wishlist"
-                className="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+                className="flex items-center justify-between px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
                 onClick={() => {
                   setIsOpen(false);
                   if (isAuthenticated) {
@@ -1043,12 +1015,12 @@ const Navbar = () => {
                   }
                 }}
               >
-                <div className="flex items-center space-x-3">
-                  <FaHeart className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">{t("wishlist.wishlist")}</span>
+                <div className="flex items-center space-x-2">
+                  <FaHeart className="h-4 w-4 text-primary-600" />
+                  <span className="font-medium text-sm">{t("wishlist.wishlist")}</span>
                 </div>
                 {wishlistCount > 0 && (
-                  <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full animate-pulse">
+                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
                     {t("wishlist.items", { count: wishlistCount })}
                   </span>
                 )}
@@ -1057,15 +1029,15 @@ const Navbar = () => {
               {/* Cart Item Count Display */}
               <Link
                 to="/cart"
-                className="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+                className="flex items-center justify-between px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
                 onClick={() => setIsOpen(false)}
               >
-                <div className="flex items-center space-x-3">
-                  <FaShoppingCart className="h-5 w-5 text-primary-600" />
-                  <span className="font-medium">{t("cart.shoppingCart")}</span>
+                <div className="flex items-center space-x-2">
+                  <FaShoppingCart className="h-4 w-4 text-primary-600" />
+                  <span className="font-medium text-sm">{t("cart.shoppingCart")}</span>
                 </div>
                 {cartItemCount > 0 && (
-                  <span className="bg-primary-600 text-white text-sm font-bold px-3 py-1 rounded-full animate-pulse">
+                  <span className="bg-primary-600 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
                     {t("cart.items", { count: cartItemCount })}
                   </span>
                 )}
@@ -1075,16 +1047,16 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <>
                   {/* User Info */}
-                  <div className="px-4 py-3 border-b border-gray-50 bg-primary-50">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-800 rounded-full flex items-center justify-center">
-                        <FaUser className="h-5 w-5 text-white" />
+                  <div className="px-3 py-2 border-b border-gray-50 bg-primary-50">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-800 rounded-full flex items-center justify-center">
+                        <FaUser className="h-4 w-4 text-white" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">
+                        <p className="font-semibold text-sm text-gray-900">
                           {user?.name}
                         </p>
-                        <p className="text-sm text-primary-600">
+                        <p className="text-xs text-primary-600">
                           {user?.email}
                         </p>
                       </div>
@@ -1094,16 +1066,16 @@ const Navbar = () => {
                   {/* My Wishlist */}
                   <Link
                     to="/wishlist"
-                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+                    className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
                     onClick={() => {
                       setIsOpen(false);
                       dispatch(fetchWishlist());
                     }}
                   >
-                    <FaHeart className="h-5 w-5 text-primary-600" />
-                    <span className="font-medium">{t("user.myWishlist")}</span>
+                    <FaHeart className="h-4 w-4 text-primary-600" />
+                    <span className="font-medium text-xs">{t("user.myWishlist")}</span>
                     {wishlistCount > 0 && (
-                      <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                      <span className="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                         {wishlistCount}
                       </span>
                     )}
@@ -1112,41 +1084,41 @@ const Navbar = () => {
                   {/* My Orders */}
                   <Link
                     to="/my-orders"
-                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+                    className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
                     onClick={() => setIsOpen(false)}
                   >
-                    <FaBox className="h-5 w-5 text-primary-600" />
-                    <span className="font-medium">{t("user.myOrders")}</span>
+                    <FaBox className="h-4 w-4 text-primary-600" />
+                    <span className="font-medium text-xs">{t("user.myOrders")}</span>
                   </Link>
 
                   {/* My Profile */}
                   <Link
                     to="/profile"
-                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+                    className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
                     onClick={() => setIsOpen(false)}
                   >
-                    <FaUser className="h-5 w-5 text-primary-600" />
-                    <span className="font-medium">{t("user.myProfile")}</span>
+                    <FaUser className="h-4 w-4 text-primary-600" />
+                    <span className="font-medium text-xs">{t("user.myProfile")}</span>
                   </Link>
 
                   {/* Admin Panel */}
                   {user?.role === "admin" && (
                     <>
-                      <div className="px-4 py-2 bg-gray-50 border-b border-gray-50">
-                        <p className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                      <div className="px-3 py-1.5 bg-gray-50 border-b border-gray-50">
+                        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           {t("admin.panel")}
                         </p>
                       </div>
-                      <div className="max-h-48 overflow-y-auto">
+                      <div className="max-h-40 overflow-y-auto">
                         {adminMenuItems.map((item) => (
                           <Link
                             key={item.name}
                             to={item.path}
-                            className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50 pl-8"
+                            className="flex items-center space-x-2 px-3 py-1.5 text-gray-700 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50 pl-6"
                             onClick={() => setIsOpen(false)}
                           >
                             <FaChevronRight className="h-3 w-3 text-gray-400" />
-                            <span className="font-medium">{item.name}</span>
+                            <span className="font-medium text-xs">{item.name}</span>
                           </Link>
                         ))}
                       </div>
@@ -1159,40 +1131,40 @@ const Navbar = () => {
                       handleLogout();
                       setIsOpen(false);
                     }}
-                    className="flex items-center space-x-3 w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-all duration-200 border-b border-gray-50"
+                    className="flex items-center space-x-2 w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 transition-all duration-200 border-b border-gray-50"
                   >
-                    <FaSignOutAlt className="h-5 w-5" />
-                    <span className="font-medium">{t("user.logout")}</span>
+                    <FaSignOutAlt className="h-4 w-4" />
+                    <span className="font-medium text-xs">{t("user.logout")}</span>
                   </button>
                 </>
               ) : (
                 <>
-                  <div className="px-4 py-3 border-b border-gray-50 bg-primary-50">
-                    <p className="font-semibold text-gray-900">
+                  <div className="px-3 py-2 border-b border-gray-50 bg-primary-50">
+                    <p className="font-semibold text-sm text-gray-900">
                       {t("user.welcome")}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs text-gray-600">
                       {t("user.pleaseLogin")}
                     </p>
                   </div>
 
                   <Link
                     to="/login"
-                    className="flex items-center justify-center space-x-2 px-4 py-3 text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
+                    className="flex items-center justify-center space-x-1 px-3 py-2 text-primary-600 hover:bg-primary-50 transition-all duration-200 border-b border-gray-50"
                     onClick={() => setIsOpen(false)}
                   >
-                    <FaUser className="h-5 w-5" />
-                    <span className="font-semibold">
+                    <FaUser className="h-4 w-4" />
+                    <span className="font-semibold text-sm">
                       {t("user.loginToAccount")}
                     </span>
                   </Link>
 
                   <Link
                     to="/register"
-                    className="flex items-center justify-center px-4 py-3 bg-primary-600 text-white hover:bg-primary-700 transition-all duration-200"
+                    className="flex items-center justify-center px-3 py-2 bg-primary-600 text-white hover:bg-primary-700 transition-all duration-200"
                     onClick={() => setIsOpen(false)}
                   >
-                    <span className="font-semibold">
+                    <span className="font-semibold text-sm">
                       {t("user.createAccount")}
                     </span>
                   </Link>
@@ -1200,7 +1172,7 @@ const Navbar = () => {
               )}
 
               {/* Footer Info */}
-              <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 sticky bottom-0">
+              <div className="px-3 py-2 bg-gray-50 border-t border-gray-100 sticky bottom-0">
                 <p className="text-xs text-gray-500 text-center">
                   {t("footer.copyright", { year: new Date().getFullYear() })}
                 </p>
