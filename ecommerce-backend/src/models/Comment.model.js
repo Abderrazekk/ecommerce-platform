@@ -1,3 +1,4 @@
+// ecommerce-backend/src/models/Comment.model.js
 const mongoose = require("mongoose");
 
 const commentSchema = new mongoose.Schema(
@@ -14,9 +15,15 @@ const commentSchema = new mongoose.Schema(
     },
     text: {
       type: String,
-      required: [true, "Comment text is required"],
+      required: [true, "Review text is required"],
       trim: true,
-      maxlength: [1000, "Comment cannot exceed 1000 characters"],
+      maxlength: [1000, "Review cannot exceed 1000 characters"],
+    },
+    rating: {
+      type: Number,
+      required: [true, "Rating is required"],
+      min: [1, "Rating must be at least 1 star"],
+      max: [5, "Rating cannot exceed 5 stars"],
     },
     isEdited: {
       type: Boolean,
@@ -25,12 +32,14 @@ const commentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Index for faster queries
 commentSchema.index({ product: 1, createdAt: -1 });
 commentSchema.index({ user: 1, createdAt: -1 });
+// New index for rating queries
+commentSchema.index({ product: 1, rating: 1 });
 
 const Comment = mongoose.model("Comment", commentSchema);
 

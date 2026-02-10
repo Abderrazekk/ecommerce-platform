@@ -1,4 +1,4 @@
-// src/pages/ProductDetails.jsx (updated)
+// ecommerce-frontend/src/pages/ProductDetails.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -8,6 +8,7 @@ import {
   addComment,
   editComment,
   removeComment,
+  fetchProductRatingSummary,
 } from "../redux/slices/comment.slice";
 import { checkInWishlist } from "../redux/slices/wishlist.slice";
 import { ArrowLeft, CheckCircle, Package } from "lucide-react";
@@ -22,7 +23,7 @@ const ProductDetails = () => {
   const dispatch = useDispatch();
 
   const { product, loading: productLoading } = useSelector(
-    (state) => state.products
+    (state) => state.products,
   );
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const {
@@ -32,7 +33,7 @@ const ProductDetails = () => {
     error,
   } = useSelector((state) => state.comments);
   const { wishlistChecked, loading: wishlistLoading } = useSelector(
-    (state) => state.wishlist
+    (state) => state.wishlist,
   );
 
   const [quantity, setQuantity] = useState(1);
@@ -42,6 +43,7 @@ const ProductDetails = () => {
   useEffect(() => {
     dispatch(fetchProductById(id));
     dispatch(fetchProductComments({ productId: id }));
+    dispatch(fetchProductRatingSummary(id));
 
     if (isAuthenticated && id) {
       dispatch(checkInWishlist(id));
@@ -128,7 +130,7 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* Comments Section */}
+        {/* Reviews Section */}
         <ProductComments
           commentsByProduct={commentsByProduct}
           id={id}
@@ -142,6 +144,7 @@ const ProductDetails = () => {
           addComment={addComment}
           editComment={editComment}
           removeComment={removeComment}
+          fetchProductComments={fetchProductComments}
         />
       </div>
     </div>

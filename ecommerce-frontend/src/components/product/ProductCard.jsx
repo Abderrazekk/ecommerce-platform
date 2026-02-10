@@ -1,3 +1,4 @@
+// ecommerce-frontend/src/components/product/ProductCard.jsx
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../redux/slices/cart.slice";
@@ -6,7 +7,13 @@ import {
   removeFromWishlist,
 } from "../../redux/slices/wishlist.slice";
 import { formatPrice } from "../../utils/formatPrice";
-import { FaShoppingCart, FaEye, FaHeart, FaGlobe } from "react-icons/fa";
+import {
+  FaShoppingCart,
+  FaEye,
+  FaHeart,
+  FaGlobe,
+  FaStar,
+} from "react-icons/fa";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -33,6 +40,7 @@ const ProductCard = ({ product }) => {
         quantity: 1,
       }),
     );
+    toast.success("Added to cart!");
   };
 
   // Toggle wishlist function
@@ -82,7 +90,42 @@ const ProductCard = ({ product }) => {
       )
     : 0;
 
-  const hasLowStock = product.stock > 0 && product.stock <= 5;
+  // Star Rating Component for Product Card - UPDATED: Remove "No reviews yet" text
+  const StarRatingDisplay = ({ rating, showCount = true, size = "sm" }) => {
+    // If rating is 0 or undefined, return null (show nothing)
+    if (!rating || rating === 0) return null;
+
+    const starSize = size === "sm" ? "w-3 h-3" : "w-4 h-4";
+
+    return (
+      <div className="flex items-center gap-1">
+        <div className="flex">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <FaStar
+              key={star}
+              className={`${starSize} ${
+                star <= Math.round(rating)
+                  ? "text-yellow-400 fill-yellow-400"
+                  : "text-gray-300"
+              }`}
+            />
+          ))}
+        </div>
+        <span
+          className={`${size === "sm" ? "text-xs" : "text-sm"} text-gray-600 ml-1`}
+        >
+          {rating.toFixed(1)}
+        </span>
+        {showCount && product.ratingsCount > 0 && (
+          <span
+            className={`${size === "sm" ? "text-xs" : "text-sm"} text-gray-400 ml-1`}
+          >
+            ({product.ratingsCount})
+          </span>
+        )}
+      </div>
+    );
+  };
 
   // AliExpress badge component
   const AliExpressBadge = () => (
@@ -107,7 +150,6 @@ const ProductCard = ({ product }) => {
         <Link to={`/product/${product._id}`} className="block">
           {/* Main Image */}
           <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-50 to-white">
-
             <img
               src={product.images?.[0]?.url || ""}
               alt={product.name}
@@ -215,6 +257,17 @@ const ProductCard = ({ product }) => {
             {product.name}
           </h3>
         </Link>
+
+        {/* Star Rating - UPDATED: Only show if there are reviews */}
+        {product.averageRating > 0 && (
+          <div className="mb-2">
+            <StarRatingDisplay
+              rating={product.averageRating}
+              showCount={true}
+              size="sm"
+            />
+          </div>
+        )}
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-3">
@@ -357,8 +410,19 @@ const ProductCard = ({ product }) => {
                         {product.name}
                       </h2>
                       {product.brand && (
-                        <div className="text-sm text-gray-600 mb-4">
+                        <div className="text-sm text-gray-600 mb-2">
                           by {product.brand}
+                        </div>
+                      )}
+
+                      {/* Star Rating in Quick View - UPDATED: Only show if there are reviews */}
+                      {product.averageRating > 0 && (
+                        <div className="flex items-center mb-4">
+                          <StarRatingDisplay
+                            rating={product.averageRating}
+                            showCount={true}
+                            size="md"
+                          />
                         </div>
                       )}
                     </div>

@@ -1,3 +1,4 @@
+// ecommerce-frontend/src/components/ProductDetails/ProductInfo.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -23,6 +24,7 @@ import {
   Clock,
   Phone,
 } from "lucide-react";
+import StarRating from "../common/StarRating";
 
 const ProductInfo = ({
   product,
@@ -260,6 +262,21 @@ const ProductInfo = ({
         <h1 className="text-4xl font-normal text-gray-900 leading-tight tracking-tight">
           {product.name}
         </h1>
+
+        {/* Product Rating Display */}
+        {product.averageRating > 0 ? (
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <StarRating rating={product.averageRating} readOnly showNumber />
+              <span className="ml-2 text-gray-600">
+                ({product.ratingsCount}{" "}
+                {product.ratingsCount === 1 ? "review" : "reviews"})
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-gray-500 text-sm">No reviews yet</div>
+        )}
 
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-4">

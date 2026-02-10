@@ -1,19 +1,22 @@
+// ecommerce-backend/src/controllers/comment.controller.js
 const { Product } = require("../models/Product.model");
 const Comment = require("../models/Comment.model");
+const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 
-// @desc    Create a comment
+// @desc    Create a review (comment with rating)
 // @route   POST /api/products/:productId/comments
 // @access  Private
 const createComment = asyncHandler(async (req, res) => {
   const { productId } = req.params;
-  const { text } = req.body;
+  const { text, rating } = req.body;
   const userId = req.user._id;
 
-  console.log("DEBUG - Creating comment:", {
+  console.log("DEBUG - Creating review:", {
     productId,
     userId,
     text,
+    rating,
     userRole: req.user.role,
   });
 
@@ -26,10 +29,26 @@ const createComment = asyncHandler(async (req, res) => {
     throw new Error("Product not found");
   }
 
-  // Validate text
+  // Validate text and rating
   if (!text || text.trim().length === 0) {
     res.status(400);
-    throw new Error("Comment text is required");
+    throw new Error("Review text is required");
+  }
+
+  if (!rating || rating < 1 || rating > 5) {
+    res.status(400);
+    throw new Error("Rating must be between 1 and 5 stars");
+  }
+
+  // Check if user has already reviewed this product
+  const existingReview = await Comment.findOne({
+    user: userId,
+    product: productId,
+  });
+
+  if (existingReview) {
+    res.status(400);
+    throw new Error("You have already reviewed this product");
   }
 
   // Check if product is visible (for non-admin users)
@@ -38,14 +57,18 @@ const createComment = asyncHandler(async (req, res) => {
     throw new Error("Product not found");
   }
 
-  // Create comment
+  // Create review
   const comment = await Comment.create({
     user: userId,
     product: productId,
     text: text.trim(),
+    rating: parseInt(rating),
   });
 
-  console.log("DEBUG - Comment created:", comment._id);
+  console.log("DEBUG - Review created:", comment._id);
+
+  // Update product rating statistics IMMEDIATELY
+  await updateProductRating(productId);
 
   // Populate user details
   const populatedComment = await Comment.findById(comment._id)
@@ -58,41 +81,50 @@ const createComment = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Update a comment
+// @desc    Update a review
 // @route   PUT /api/comments/:commentId
 // @access  Private
 const updateComment = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
-  const { text } = req.body;
+  const { text, rating } = req.body;
   const userId = req.user._id;
   const isAdmin = req.user.role === "admin";
 
-  // Validate text
+  // Validate text and rating
   if (!text || text.trim().length === 0) {
     res.status(400);
-    throw new Error("Comment text is required");
+    throw new Error("Review text is required");
+  }
+
+  if (!rating || rating < 1 || rating > 5) {
+    res.status(400);
+    throw new Error("Rating must be between 1 and 5 stars");
   }
 
   // Find comment and populate user
   const comment = await Comment.findById(commentId).populate("user", "role");
   if (!comment) {
     res.status(404);
-    throw new Error("Comment not found");
+    throw new Error("Review not found");
   }
 
   // Authorization check
   const isOwner = comment.user._id.toString() === userId.toString();
   if (!isOwner && !isAdmin) {
     res.status(403);
-    throw new Error("Not authorized to edit this comment");
+    throw new Error("Not authorized to edit this review");
   }
 
   // Update comment
   comment.text = text.trim();
+  comment.rating = parseInt(rating);
   comment.isEdited = true;
   comment.updatedAt = Date.now();
 
   await comment.save();
+
+  // Update product rating statistics
+  await updateProductRating(comment.product);
 
   // Populate user details again
   const populatedComment = await Comment.findById(comment._id)
@@ -105,7 +137,7 @@ const updateComment = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Delete a comment
+// @desc    Delete a review
 // @route   DELETE /api/comments/:commentId
 // @access  Private/Admin
 const deleteComment = asyncHandler(async (req, res) => {
@@ -114,18 +146,23 @@ const deleteComment = asyncHandler(async (req, res) => {
   const comment = await Comment.findById(commentId);
   if (!comment) {
     res.status(404);
-    throw new Error("Comment not found");
+    throw new Error("Review not found");
   }
+
+  const productId = comment.product;
 
   await comment.deleteOne();
 
+  // Update product rating statistics
+  await updateProductRating(productId);
+
   res.json({
     success: true,
-    message: "Comment deleted successfully",
+    message: "Review deleted successfully",
   });
 });
 
-// @desc    Get comments for a product
+// @desc    Get reviews for a product
 // @route   GET /api/products/:productId/comments
 // @access  Public
 const getProductComments = asyncHandler(async (req, res) => {
@@ -133,8 +170,9 @@ const getProductComments = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
+  const sortBy = req.query.sortBy || "newest"; // newest, highest, lowest
 
-  console.log("DEBUG - Fetching comments for product:", productId);
+  console.log("DEBUG - Fetching reviews for product:", productId);
 
   // Check if product exists
   const product = await Product.findById(productId);
@@ -149,13 +187,21 @@ const getProductComments = asyncHandler(async (req, res) => {
     throw new Error("Product not found");
   }
 
-  // FIXED: Properly populate user with _id field
+  // Build sort object
+  let sortObject = { createdAt: -1 }; // Default: newest first
+  if (sortBy === "highest") {
+    sortObject = { rating: -1, createdAt: -1 };
+  } else if (sortBy === "lowest") {
+    sortObject = { rating: 1, createdAt: -1 };
+  }
+
+  // Get comments
   const comments = await Comment.find({ product: productId })
     .populate({
       path: "user",
       select: "_id name email role", // Explicitly include _id
     })
-    .sort({ createdAt: -1 })
+    .sort(sortObject)
     .skip(skip)
     .limit(limit)
     .lean();
@@ -164,9 +210,9 @@ const getProductComments = asyncHandler(async (req, res) => {
   const totalPages = Math.ceil(total / limit);
 
   console.log(
-    `DEBUG - Found ${comments.length} comments for product ${productId}`,
+    `DEBUG - Found ${comments.length} reviews for product ${productId}`,
   );
-  console.log("DEBUG - Sample comment user:", comments[0]?.user);
+  console.log("DEBUG - Sample review user:", comments[0]?.user);
 
   res.json({
     success: true,
@@ -180,9 +226,133 @@ const getProductComments = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get product rating summary
+// @route   GET /api/products/:productId/rating-summary
+// @access  Public
+const getProductRatingSummary = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+
+  const ratingSummary = await Comment.aggregate([
+    { $match: { product: new mongoose.Types.ObjectId(productId) } },
+    {
+      $group: {
+        _id: "$product",
+        averageRating: { $avg: "$rating" },
+        totalReviews: { $sum: 1 },
+        ratingDistribution: {
+          $push: "$rating",
+        },
+      },
+    },
+  ]);
+
+  if (ratingSummary.length === 0) {
+    return res.json({
+      success: true,
+      summary: {
+        averageRating: 0,
+        totalReviews: 0,
+        distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+      },
+    });
+  }
+
+  // Calculate distribution
+  const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  ratingSummary[0].ratingDistribution.forEach((rating) => {
+    if (distribution[rating] !== undefined) {
+      distribution[rating] += 1;
+    }
+  });
+
+  res.json({
+    success: true,
+    summary: {
+      averageRating: parseFloat(ratingSummary[0].averageRating.toFixed(1)),
+      totalReviews: ratingSummary[0].totalReviews,
+      distribution,
+    },
+  });
+});
+
+// FIXED: Helper function to update product rating statistics
+const updateProductRating = async (productId) => {
+  try {
+    console.log(`DEBUG - Updating rating for product: ${productId}`);
+
+    const ratingSummary = await Comment.aggregate([
+      {
+        $match: {
+          product: new mongoose.Types.ObjectId(productId),
+        },
+      },
+      {
+        $group: {
+          _id: "$product",
+          averageRating: { $avg: "$rating" },
+          ratingsCount: { $sum: 1 },
+          ratingDistribution: {
+            $push: "$rating",
+          },
+        },
+      },
+    ]);
+
+    console.log("DEBUG - Rating summary result:", ratingSummary);
+
+    if (ratingSummary.length > 0) {
+      const { averageRating, ratingsCount, ratingDistribution } =
+        ratingSummary[0];
+
+      // Calculate distribution
+      const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      ratingDistribution.forEach((rating) => {
+        const ratingKey = parseInt(rating);
+        if (distribution[ratingKey] !== undefined) {
+          distribution[ratingKey] += 1;
+        }
+      });
+
+      // Update product
+      await Product.findByIdAndUpdate(
+        productId,
+        {
+          averageRating: parseFloat(averageRating.toFixed(1)),
+          ratingsCount,
+          ratingDistribution: distribution,
+        },
+        { new: true },
+      );
+
+      console.log(
+        `DEBUG - Updated product ${productId} with averageRating: ${parseFloat(averageRating.toFixed(1))}, ratingsCount: ${ratingsCount}`,
+      );
+    } else {
+      // No reviews, reset to defaults
+      await Product.findByIdAndUpdate(
+        productId,
+        {
+          averageRating: 0,
+          ratingsCount: 0,
+          ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+        },
+        { new: true },
+      );
+
+      console.log(
+        `DEBUG - Reset product ${productId} to default ratings (no reviews)`,
+      );
+    }
+  } catch (error) {
+    console.error("Error updating product rating:", error);
+    // Don't throw error here as it might break the main request
+  }
+};
+
 module.exports = {
   createComment,
   updateComment,
   deleteComment,
   getProductComments,
+  getProductRatingSummary,
 };

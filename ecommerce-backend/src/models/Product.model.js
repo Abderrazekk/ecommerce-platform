@@ -1,3 +1,4 @@
+// ecommerce-backend/src/models/Product.model.js
 const mongoose = require("mongoose");
 
 const productCategories = [
@@ -53,7 +54,6 @@ const productSchema = new mongoose.Schema(
       type: Number,
       min: [0, "Discount price cannot be negative"],
     },
-    // NEW: Shipping fee per product
     shippingFee: {
       type: Number,
       default: 0,
@@ -119,6 +119,24 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // NEW: Review statistics
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: [0, "Average rating cannot be negative"],
+      max: [5, "Average rating cannot exceed 5"],
+      set: (value) => parseFloat(value.toFixed(1)), // Store with 1 decimal place
+    },
+    ratingsCount: {
+      type: Number,
+      default: 0,
+      min: [0, "Ratings count cannot be negative"],
+    },
+    // NEW: Rating distribution for analytics
+    ratingDistribution: {
+      type: mongoose.Schema.Types.Mixed,
+      default: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    },
     createdAt: {
       type: Date,
       default: Date.now,
@@ -126,6 +144,8 @@ const productSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 
@@ -143,6 +163,7 @@ productSchema.index({ category: 1 });
 productSchema.index({ isFeatured: 1, isVisible: 1 });
 productSchema.index({ tags: 1 });
 productSchema.index({ brand: 1 });
+productSchema.index({ averageRating: -1 }); // NEW: For sorting by rating
 
 // Middleware to handle image validation on update
 productSchema.pre("save", function (next) {
