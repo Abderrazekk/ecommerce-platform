@@ -8,12 +8,10 @@ const PORT = process.env.PORT || 5000;
 // Create default admin if none exists
 const createDefaultAdmin = async () => {
   try {
-    if (!process.env.MONGO_URI) return;
-
-    const adminExists = await User.findOne({ role: 'admin' }).lean();
-
+    const adminExists = await User.findOne({ role: 'admin' });
+    
     if (!adminExists) {
-      await User.create({
+      const defaultAdmin = await User.create({
         name: process.env.DEFAULT_ADMIN_NAME || 'Admin',
         email: process.env.DEFAULT_ADMIN_EMAIL || 'admin@example.com',
         password: process.env.DEFAULT_ADMIN_PASSWORD || 'admin123',
@@ -21,15 +19,15 @@ const createDefaultAdmin = async () => {
         phone: '+1234567890',
         address: 'Default Admin Address',
       });
-
-      console.log('Default admin created');
+      
+      console.log('Default admin created successfully:', defaultAdmin.email);
+    } else {
+      console.log('Admin account already exists');
     }
   } catch (error) {
-    console.error('Default admin creation failed:', error.message);
-    // ❌ do NOT crash server
+    console.error('Error creating default admin:', error.message);
   }
 };
-
 
 // Connect to MongoDB and start server
 const startServer = async () => {
@@ -49,9 +47,9 @@ const startServer = async () => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Promise Rejection:', err);
-  // DO NOT process.exit() in production
+  console.error('Unhandled Promise Rejection:', err.message);
+  // Close server & exit process
+  process.exit(1);
 });
-
 
 startServer();
