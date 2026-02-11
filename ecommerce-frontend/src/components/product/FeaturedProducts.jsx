@@ -79,29 +79,6 @@ const FeaturedProducts = () => {
             </p>
           </div>
         )}
-
-        {/* View All Button */}
-        <div className="mt-16 lg:mt-20 text-center">
-          <a
-            href="/shop"
-            className="inline-flex items-center justify-center px-8 py-4 border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-semibold rounded-xl text-lg transition-all duration-300 transform hover:-translate-y-1"
-          >
-            View All Products
-            <svg
-              className="ml-3 w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
-          </a>
-        </div>
       </div>
     </div>
   );
