@@ -100,7 +100,7 @@ const Hero = () => {
 
   if (loading) {
     return (
-      <div className="h-[70vh] flex items-center justify-center bg-gray-100">
+      <div className="h-[70vh] md:h-[80vh] flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
         <Loader size="lg" />
       </div>
     );
@@ -108,27 +108,41 @@ const Hero = () => {
 
   if (error || !hero) {
     return (
-      <div className="relative bg-gradient-to-r from-primary-600 to-primary-800 text-white">
-        <div className="absolute inset-0 bg-black opacity-50"></div>
+      <div className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-primary-900/20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <div className="text-center md:text-left max-w-2xl">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Welcome to E-Shop
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              Welcome to{" "}
+              <span className="text-white drop-shadow-lg">Shoppina</span>
             </h1>
-            <p className="text-xl mb-8 text-gray-200">
+            <p className="text-xl mb-8 text-primary-100 leading-relaxed">
               Discover amazing products at great prices. Shop the latest trends
               in electronics, fashion, home goods, and more.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 to="/shop"
-                className="inline-block bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg text-lg transition-colors duration-200"
+                className="inline-flex items-center justify-center bg-white text-primary-600 hover:bg-gray-50 font-semibold py-4 px-10 rounded-xl text-lg transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl"
               >
                 Shop Now
+                <svg
+                  className="ml-3 w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
               </Link>
               <Link
                 to="/about"
-                className="inline-block border-2 border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-3 px-8 rounded-lg text-lg transition-colors duration-200"
+                className="inline-flex items-center justify-center border-2 border-white/30 text-white hover:bg-white/10 font-semibold py-4 px-10 rounded-xl text-lg transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-sm"
               >
                 Learn More
               </Link>
@@ -141,16 +155,16 @@ const Hero = () => {
 
   // Overlay position classes
   const overlayPositionClasses = {
-    "top-left": "top-4 left-4 text-left",
-    "top-center": "top-4 left-1/2 transform -translate-x-1/2 text-center",
-    "top-right": "top-4 right-4 text-right",
-    "center-left": "top-1/2 left-4 transform -translate-y-1/2 text-left",
+    "top-left": "top-6 left-6 text-left",
+    "top-center": "top-6 left-1/2 transform -translate-x-1/2 text-center",
+    "top-right": "top-6 right-6 text-right",
+    "center-left": "top-1/2 left-6 transform -translate-y-1/2 text-left",
     center:
       "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center",
-    "center-right": "top-1/2 right-4 transform -translate-y-1/2 text-right",
-    "bottom-left": "bottom-4 left-4 text-left",
-    "bottom-center": "bottom-4 left-1/2 transform -translate-x-1/2 text-center",
-    "bottom-right": "bottom-4 right-4 text-right",
+    "center-right": "top-1/2 right-6 transform -translate-y-1/2 text-right",
+    "bottom-left": "bottom-6 left-6 text-left",
+    "bottom-center": "bottom-6 left-1/2 transform -translate-x-1/2 text-center",
+    "bottom-right": "bottom-6 right-6 text-right",
   };
 
   // Text size classes
@@ -183,12 +197,12 @@ const Hero = () => {
           }}
         />
         {/* Gradient Overlay for image - this is only for image enhancement */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none"></div>
 
         {/* Text Overlay for image (per image overlay) */}
         {image.overlayText && (
           <div
-            className={`absolute ${overlayPositionClasses[image.overlayPosition]} ${textSizeClasses[image.textSize]} font-semibold text-white drop-shadow-lg max-w-[80%] pointer-events-none`}
+            className={`absolute ${overlayPositionClasses[image.overlayPosition]} ${textSizeClasses[image.textSize]} font-semibold text-white drop-shadow-xl backdrop-blur-sm bg-black/20 px-4 py-2 rounded-xl pointer-events-none`}
             style={{ color: image.overlayColor || "#FFFFFF" }}
           >
             <p className="break-words">{image.overlayText}</p>
@@ -201,7 +215,7 @@ const Hero = () => {
   // Render slideshow layout
   const renderSlideshowLayout = () => {
     return (
-      <div className="relative h-[70vh] md:h-[80vh] overflow-hidden">
+      <div className="relative h-[70vh] md:h-[85vh] overflow-hidden rounded-b-3xl lg:rounded-b-[4rem]">
         {hero.images.map((image, index) =>
           renderImageWithOverlay(image, index),
         )}
@@ -216,12 +230,12 @@ const Hero = () => {
     switch (effectiveLayout) {
       case "2-modern":
         return (
-          <div className="h-[70vh] md:h-[80vh]">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+          <div className="h-[70vh] md:h-[85vh]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
               {images.map((image, index) => (
                 <div
                   key={index}
-                  className="relative h-full overflow-hidden rounded-lg"
+                  className="relative h-full overflow-hidden rounded-3xl"
                 >
                   {renderImageWithOverlay(image, index)}
                 </div>
@@ -232,18 +246,18 @@ const Hero = () => {
 
       case "3-stacked":
         return (
-          <div className="h-[70vh] md:h-[80vh]">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+          <div className="h-[70vh] md:h-[85vh]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
               <div className="md:col-span-2 h-full">
-                <div className="relative h-full overflow-hidden rounded-lg">
+                <div className="relative h-full overflow-hidden rounded-3xl">
                   {images[0] && renderImageWithOverlay(images[0], 0)}
                 </div>
               </div>
-              <div className="grid grid-rows-2 gap-4 h-full">
+              <div className="grid grid-rows-2 gap-6 h-full">
                 {images.slice(1, 3).map((image, index) => (
                   <div
                     key={index + 1}
-                    className="relative overflow-hidden rounded-lg"
+                    className="relative overflow-hidden rounded-3xl"
                   >
                     {renderImageWithOverlay(image, index + 1)}
                   </div>
@@ -255,12 +269,12 @@ const Hero = () => {
 
       case "4-grid":
         return (
-          <div className="h-[70vh] md:h-[80vh]">
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-4 h-full">
+          <div className="h-[70vh] md:h-[85vh]">
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-6 h-full">
               {images.map((image, index) => (
                 <div
                   key={index}
-                  className="relative overflow-hidden rounded-lg"
+                  className="relative overflow-hidden rounded-3xl"
                 >
                   {renderImageWithOverlay(image, index)}
                 </div>
@@ -271,25 +285,25 @@ const Hero = () => {
 
       case "5-dynamic":
         return (
-          <div className="h-[70vh] md:h-[80vh]">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 h-full">
+          <div className="h-[70vh] md:h-[85vh]">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 h-full">
               {images.slice(0, 2).map((image, index) => (
                 <div key={index} className="md:col-span-1 h-full">
-                  <div className="relative h-full overflow-hidden rounded-lg">
+                  <div className="relative h-full overflow-hidden rounded-3xl">
                     {renderImageWithOverlay(image, index)}
                   </div>
                 </div>
               ))}
               {images[2] && (
                 <div className="md:col-span-1 row-span-2">
-                  <div className="relative h-full overflow-hidden rounded-lg">
+                  <div className="relative h-full overflow-hidden rounded-3xl">
                     {renderImageWithOverlay(images[2], 2)}
                   </div>
                 </div>
               )}
               {images.slice(3).map((image, index) => (
                 <div key={index + 3} className="md:col-span-1 h-full">
-                  <div className="relative h-full overflow-hidden rounded-lg">
+                  <div className="relative h-full overflow-hidden rounded-3xl">
                     {renderImageWithOverlay(image, index + 3)}
                   </div>
                 </div>
@@ -300,12 +314,12 @@ const Hero = () => {
 
       case "6-stylish":
         return (
-          <div className="h-[70vh] md:h-[80vh]">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 h-full">
+          <div className="h-[70vh] md:h-[85vh]">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 h-full">
               {images.map((image, index) => (
                 <div
                   key={index}
-                  className="relative overflow-hidden rounded-lg"
+                  className="relative overflow-hidden rounded-3xl"
                 >
                   {renderImageWithOverlay(image, index)}
                 </div>
@@ -316,8 +330,8 @@ const Hero = () => {
 
       default:
         return (
-          <div className="h-[70vh] md:h-[80vh]">
-            <div className="relative h-full w-full overflow-hidden rounded-lg">
+          <div className="h-[70vh] md:h-[85vh]">
+            <div className="relative h-full w-full overflow-hidden rounded-3xl">
               {images[0] && renderImageWithOverlay(images[0], 0)}
             </div>
           </div>
@@ -351,22 +365,22 @@ const Hero = () => {
       <div className="absolute inset-0 flex items-center z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="max-w-2xl text-white">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-fadeInUp drop-shadow-lg">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fadeInUp drop-shadow-2xl leading-tight">
               {hero.title}
             </h1>
             {hero.subtitle && (
-              <p className="text-xl md:text-2xl lg:text-3xl mb-8 text-gray-100 animate-fadeInUp animation-delay-200 drop-shadow-lg">
+              <p className="text-xl md:text-2xl lg:text-3xl mb-10 text-white/90 animate-fadeInUp animation-delay-200 drop-shadow-lg leading-relaxed">
                 {hero.subtitle}
               </p>
             )}
             <div className="flex flex-col sm:flex-row gap-4 animate-fadeInUp animation-delay-400">
               <Link
                 to="/shop"
-                className="inline-flex items-center justify-center bg-white text-primary-600 hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="inline-flex items-center justify-center bg-white text-primary-600 hover:bg-gray-50 font-semibold py-4 px-10 rounded-xl text-lg transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-2xl hover:shadow-3xl"
               >
                 Shop Now
                 <svg
-                  className="ml-2 w-5 h-5"
+                  className="ml-3 w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -381,13 +395,13 @@ const Hero = () => {
               </Link>
               <Link
                 to="/about"
-                className="inline-flex items-center justify-center border-2 border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-3 px-8 rounded-lg text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="inline-flex items-center justify-center border-2 border-white/30 text-white hover:bg-white/10 font-semibold py-4 px-10 rounded-xl text-lg transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 backdrop-blur-sm"
               >
                 Learn More
               </Link>
             </div>
-            <div className="mt-8 flex items-center space-x-4 text-sm">
-              <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full drop-shadow-md">
+            <div className="mt-12 flex items-center space-x-4 text-sm">
+              <span className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full drop-shadow-lg border border-white/10">
                 {hero.season.charAt(0).toUpperCase() + hero.season.slice(1)}{" "}
                 Collection
               </span>
@@ -395,11 +409,44 @@ const Hero = () => {
           </div>
         </div>
       </div>
+
+      {/* Navigation Controls for Slideshow */}
+      {isSlideshowMode && hero?.images?.length > 1 && (
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex items-center space-x-4">
+          <button
+            onClick={handlePrev}
+            className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300 hover:scale-110"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          <div className="flex space-x-2">
+            {hero.images.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex ? "bg-white w-8" : "bg-white/50"}`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={handleNext}
+            className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300 hover:scale-110"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
       <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(40px);
           }
           to {
             opacity: 1;

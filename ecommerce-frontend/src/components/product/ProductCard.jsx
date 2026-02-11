@@ -103,16 +103,15 @@ const ProductCard = ({ product }) => {
           {[1, 2, 3, 4, 5].map((star) => (
             <FaStar
               key={star}
-              className={`${starSize} ${
-                star <= Math.round(rating)
+              className={`${starSize} ${star <= Math.round(rating)
                   ? "text-yellow-400 fill-yellow-400"
                   : "text-gray-300"
-              }`}
+                }`}
             />
           ))}
         </div>
         <span
-          className={`${size === "sm" ? "text-xs" : "text-sm"} text-gray-600 ml-1`}
+          className={`${size === "sm" ? "text-xs" : "text-sm"} text-gray-600 ml-1 font-medium`}
         >
           {rating.toFixed(1)}
         </span>
@@ -130,7 +129,7 @@ const ProductCard = ({ product }) => {
   // AliExpress badge component
   const AliExpressBadge = () => (
     <div className="absolute top-4 left-4 z-10">
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full shadow-lg">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full shadow-lg border border-orange-400">
         <FaGlobe className="w-3 h-3" />
         <span>AliExpress</span>
       </div>
@@ -139,9 +138,8 @@ const ProductCard = ({ product }) => {
 
   return (
     <div
-      className={`group relative bg-white rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl ${
-        product.isAliExpress ? "border border-orange-300" : ""
-      }`}
+      className={`group relative bg-white rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl border border-gray-100 hover:border-primary-100 hover:-translate-y-2 ${product.isAliExpress ? "border-orange-200 hover:border-orange-300" : ""
+        }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -149,63 +147,65 @@ const ProductCard = ({ product }) => {
       <div className="relative overflow-hidden">
         <Link to={`/product/${product._id}`} className="block">
           {/* Main Image */}
-          <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-50 to-white">
+          <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
             <img
               src={product.images?.[0]?.url || ""}
               alt={product.name}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
 
-            {/* Hover Overlay */}
+            {/* Gradient Overlay */}
             <div
-              className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`}
+              className={`absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"
+                }`}
             ></div>
 
             {/* Quick Actions */}
             <div
-              className={`absolute inset-x-4 top-4 flex justify-between transition-all duration-300 ${
-                isHovered
+              className={`absolute inset-x-4 top-4 flex justify-between transition-all duration-300 ${isHovered
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 -translate-y-4"
-              }`}
+                }`}
             >
               {/* Wishlist */}
               <button
                 onClick={toggleWishlist}
                 disabled={wishlistLoading}
-                className={`p-2 rounded-full backdrop-blur-sm transition-all ${
-                  wishlistChecked[product._id] || isWishlisted
-                    ? "bg-white text-red-500"
-                    : "bg-white/90 text-gray-700 hover:bg-white"
-                }`}
+                className={`p-2.5 rounded-full backdrop-blur-md transition-all shadow-lg ${wishlistChecked[product._id] || isWishlisted
+                    ? "bg-white text-red-500 border border-red-200"
+                    : "bg-white/90 text-gray-700 hover:bg-white border border-white/20"
+                  }`}
               >
                 <FaHeart
-                  className={`w-4 h-4 ${wishlistChecked[product._id] || isWishlisted ? "fill-red-500" : ""}`}
+                  className={`w-4 h-4 ${wishlistChecked[product._id] || isWishlisted ? "fill-red-500" : ""
+                    }`}
                 />
               </button>
 
               {/* Discount Badge */}
               {discountPercentage > 0 && (
-                <div className="bg-red-600 text-white text-xs font-medium px-3 py-1.5 rounded-full">
+                <div className="bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-red-400">
                   {discountPercentage}% OFF
                 </div>
               )}
             </div>
 
+            {/* AliExpress Badge */}
+            {product.isAliExpress && <AliExpressBadge />}
+
             {/* Quick View Button */}
             <div
-              className={`absolute inset-x-4 bottom-4 transition-all duration-300 ${
-                isHovered
+              className={`absolute inset-x-4 bottom-4 transition-all duration-300 ${isHovered
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-4"
-              }`}
+                }`}
             >
               <button
                 onClick={(e) => {
                   e.preventDefault();
                   setShowQuickView(true);
                 }}
-                className="w-full bg-white text-gray-900 font-medium py-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-white text-gray-900 font-semibold py-3.5 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 border border-gray-100"
               >
                 <FaEye className="w-4 h-4" />
                 Quick View
@@ -214,12 +214,12 @@ const ProductCard = ({ product }) => {
 
             {/* Out of Stock Overlay */}
             {product.stock === 0 && (
-              <div className="absolute inset-0 bg-white/95 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-gray-900 font-bold text-lg">
+              <div className="absolute inset-0 bg-white/95 backdrop-blur-sm flex items-center justify-center">
+                <div className="text-center p-6">
+                  <div className="text-gray-900 font-bold text-lg mb-2">
                     Out of Stock
                   </div>
-                  <div className="text-gray-500 text-sm mt-1">
+                  <div className="text-gray-500 text-sm">
                     Currently Unavailable
                   </div>
                 </div>
@@ -230,22 +230,22 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Product Details */}
-      <div className="p-4">
+      <div className="p-5">
         {/* Category & Brand */}
-        <div className="mb-2">
-          <div className="flex items-center gap-2">
-            <div className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+        <div className="mb-3">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">
               {product.category}
-            </div>
+            </span>
             {product.isAliExpress && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+              <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 text-xs font-semibold rounded-full border border-orange-200">
                 <FaGlobe className="w-2.5 h-2.5" />
                 <span>AliExpress</span>
               </div>
             )}
           </div>
           {product.brand && (
-            <div className="text-xs text-primary-600 font-medium mt-1">
+            <div className="text-xs text-primary-600 font-semibold">
               {product.brand}
             </div>
           )}
@@ -253,14 +253,14 @@ const ProductCard = ({ product }) => {
 
         {/* Product Name */}
         <Link to={`/product/${product._id}`}>
-          <h3 className="text-sm font-normal text-gray-900 mb-3 line-clamp-2 leading-relaxed hover:text-primary-600 transition-colors">
+          <h3 className="text-sm font-normal text-gray-900 mb-3 line-clamp-2 leading-relaxed hover:text-primary-600 transition-colors min-h-[40px]">
             {product.name}
           </h3>
         </Link>
 
         {/* Star Rating - UPDATED: Only show if there are reviews */}
         {product.averageRating > 0 && (
-          <div className="mb-2">
+          <div className="mb-3">
             <StarRatingDisplay
               rating={product.averageRating}
               showCount={true}
@@ -271,7 +271,7 @@ const ProductCard = ({ product }) => {
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-3">
-          <span className="text-lg font-medium text-gray-900">
+          <span className="text-xl font-bold text-gray-900">
             {formatPrice(product.discountPrice || product.price)}
           </span>
           {product.discountPrice && (
@@ -283,9 +283,9 @@ const ProductCard = ({ product }) => {
 
         {/* Shipping Fee Display */}
         {product.shippingFee > 0 && (
-          <div className="flex items-center gap-1 mb-2">
+          <div className="flex items-center gap-1.5 mb-3">
             <svg
-              className="w-3 h-3 text-gray-500"
+              className="w-3.5 h-3.5 text-gray-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -304,7 +304,7 @@ const ProductCard = ({ product }) => {
                 d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
               ></path>
             </svg>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-500 font-medium">
               Shipping: {formatPrice(product.shippingFee)}
             </span>
           </div>
@@ -313,19 +313,18 @@ const ProductCard = ({ product }) => {
         {/* Stock Indicator */}
         <div className="flex items-center gap-2 mb-4">
           <div
-            className={`w-2 h-2 rounded-full ${
-              product.stock === 0
-                ? "bg-red-500"
+            className={`w-2 h-2 rounded-full ${product.stock === 0
+                ? "bg-red-500 animate-pulse"
                 : product.stock <= 5
                   ? "bg-orange-500"
-                  : "bg-primary-500"
-            }`}
+                  : "bg-green-500"
+              }`}
           />
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-gray-600 font-medium">
             {product.stock === 0
               ? "Out of stock"
               : product.stock <= 5
-                ? `${product.stock} left`
+                ? `${product.stock} left - Hurry!`
                 : "In stock"}
           </span>
         </div>
@@ -334,11 +333,10 @@ const ProductCard = ({ product }) => {
         <button
           onClick={handleAddToCart}
           disabled={product.stock === 0}
-          className={`w-full py-3 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-            product.stock === 0
+          className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${product.stock === 0
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-gray-900 text-white hover:bg-black"
-          }`}
+              : "bg-gradient-to-r from-gray-900 to-black text-white hover:from-black hover:to-gray-900 hover:shadow-lg transform hover:-translate-y-0.5"
+            }`}
         >
           <FaShoppingCart className="w-4 h-4" />
           {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
@@ -350,19 +348,19 @@ const ProductCard = ({ product }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setShowQuickView(false)}
           />
 
           {/* Modal */}
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden">
             {/* Close Button */}
             <button
               onClick={() => setShowQuickView(false)}
-              className="absolute top-4 right-4 z-10 p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+              className="absolute top-6 right-6 z-10 p-2.5 text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-colors"
             >
               <svg
-                className="w-5 h-5"
+                className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -378,10 +376,10 @@ const ProductCard = ({ product }) => {
 
             {/* Content */}
             <div className="p-8">
-              <div className="flex flex-col lg:flex-row gap-8">
+              <div className="flex flex-col lg:flex-row gap-10">
                 {/* Image */}
                 <div className="lg:w-2/5">
-                  <div className="aspect-square rounded-lg overflow-hidden bg-gray-50">
+                  <div className="aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg">
                     <img
                       src={product.images?.[0]?.url || ""}
                       alt={product.name}
@@ -392,32 +390,32 @@ const ProductCard = ({ product }) => {
 
                 {/* Details */}
                 <div className="lg:w-3/5">
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {/* Header */}
                     <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="text-xs text-gray-500 uppercase tracking-wide">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
                           {product.category}
                         </div>
                         {product.isAliExpress && (
-                          <div className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full">
+                          <div className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full border border-orange-400">
                             <FaGlobe className="w-3 h-3" />
                             <span>AliExpress</span>
                           </div>
                         )}
                       </div>
-                      <h2 className="text-2xl font-light text-gray-900 mb-2">
+                      <h2 className="text-3xl font-light text-gray-900 mb-3">
                         {product.name}
                       </h2>
                       {product.brand && (
-                        <div className="text-sm text-gray-600 mb-2">
-                          by {product.brand}
+                        <div className="text-base text-gray-600 mb-3">
+                          by <span className="font-semibold">{product.brand}</span>
                         </div>
                       )}
 
                       {/* Star Rating in Quick View - UPDATED: Only show if there are reviews */}
                       {product.averageRating > 0 && (
-                        <div className="flex items-center mb-4">
+                        <div className="flex items-center mb-5">
                           <StarRatingDisplay
                             rating={product.averageRating}
                             showCount={true}
@@ -429,32 +427,32 @@ const ProductCard = ({ product }) => {
 
                     {/* AliExpress Delivery Notice in Quick View */}
                     {product.isAliExpress && (
-                      <div className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl">
-                        <div className="flex items-start gap-3">
+                      <div className="p-5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl">
+                        <div className="flex items-start gap-4">
                           <div className="flex-shrink-0">
-                            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                              <FaGlobe className="h-5 w-5 text-orange-600" />
+                            <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center">
+                              <FaGlobe className="h-6 w-6 text-orange-600" />
                             </div>
                           </div>
                           <div>
-                            <h4 className="font-medium text-orange-800 mb-2">
+                            <h4 className="font-bold text-orange-800 mb-2">
                               Important Delivery Information
                             </h4>
-                            <ul className="space-y-1 text-sm text-orange-700">
+                            <ul className="space-y-2 text-sm text-orange-700">
                               <li className="flex items-center gap-2">
-                                <span className="font-medium">
+                                <span className="font-semibold">
                                   • Delivery Time:
                                 </span>
                                 10–20 days
                               </li>
                               <li className="flex items-center gap-2">
-                                <span className="font-medium">
+                                <span className="font-semibold">
                                   • Order Confirmation:
                                 </span>
                                 Phone call required
                               </li>
                               <li className="flex items-center gap-2">
-                                <span className="font-medium">• Contact:</span>
+                                <span className="font-semibold">• Contact:</span>
                                 Ensure your phone is updated
                               </li>
                             </ul>
@@ -464,8 +462,8 @@ const ProductCard = ({ product }) => {
                     )}
 
                     {/* Price */}
-                    <div className="flex items-baseline gap-3">
-                      <span className="text-3xl font-light text-gray-900">
+                    <div className="flex items-baseline gap-4">
+                      <span className="text-4xl font-bold text-gray-900">
                         {formatPrice(product.discountPrice || product.price)}
                       </span>
                       {product.discountPrice && (
@@ -473,7 +471,7 @@ const ProductCard = ({ product }) => {
                           <span className="text-xl text-gray-400 line-through">
                             {formatPrice(product.price)}
                           </span>
-                          <span className="text-sm text-primary-600">
+                          <span className="text-sm text-primary-600 font-bold bg-primary-50 px-3 py-1 rounded-full">
                             Save {discountPercentage}%
                           </span>
                         </>
@@ -482,9 +480,9 @@ const ProductCard = ({ product }) => {
 
                     {/* Shipping Fee Display */}
                     {product.shippingFee > 0 && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-3 text-base text-gray-600">
                         <svg
-                          className="w-4 h-4"
+                          className="w-5 h-5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -503,58 +501,56 @@ const ProductCard = ({ product }) => {
                             d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
                           ></path>
                         </svg>
-                        <span>
+                        <span className="font-medium">
                           Shipping fee: {formatPrice(product.shippingFee)}
                         </span>
                       </div>
                     )}
 
                     {/* Stock */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <div
-                        className={`w-3 h-3 rounded-full ${
-                          product.stock === 0
-                            ? "bg-red-500"
+                        className={`w-3 h-3 rounded-full ${product.stock === 0
+                            ? "bg-red-500 animate-pulse"
                             : product.stock <= 5
                               ? "bg-orange-500"
-                              : "bg-primary-500"
-                        }`}
+                              : "bg-green-500"
+                          }`}
                       />
-                      <span className="text-sm text-gray-600">
+                      <span className="text-base text-gray-600 font-medium">
                         {product.stock === 0
                           ? "Currently unavailable"
                           : product.stock <= 5
-                            ? `Only ${product.stock} items left in stock`
+                            ? `Only ${product.stock} items left in stock - Order soon!`
                             : "Available in stock"}
                       </span>
                     </div>
 
                     {/* Actions */}
-                    <div className="space-y-3 pt-4">
+                    <div className="space-y-4 pt-6">
                       <button
                         onClick={handleAddToCart}
                         disabled={product.stock === 0}
-                        className={`w-full py-4 rounded-lg text-base font-medium transition-all ${
-                          product.stock === 0
+                        className={`w-full py-4 rounded-xl text-base font-semibold transition-all ${product.stock === 0
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                            : "bg-gray-900 text-white hover:bg-black"
-                        }`}
+                            : "bg-gradient-to-r from-gray-900 to-black text-white hover:from-black hover:to-gray-900 hover:shadow-xl transform hover:-translate-y-1"
+                          }`}
                       >
                         {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
                       </button>
 
-                      <div className="flex gap-3">
+                      <div className="flex gap-4">
                         <button
                           onClick={toggleWishlist}
                           disabled={wishlistLoading}
-                          className={`w-1/2 py-4 rounded-lg text-base font-medium transition-all flex items-center justify-center gap-2 ${
-                            wishlistChecked[product._id] || isWishlisted
-                              ? "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
-                              : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
-                          }`}
+                          className={`w-1/2 py-4 rounded-xl text-base font-semibold transition-all flex items-center justify-center gap-3 ${wishlistChecked[product._id] || isWishlisted
+                              ? "bg-red-50 text-red-600 border-2 border-red-200 hover:bg-red-100"
+                              : "bg-gray-50 text-gray-700 border-2 border-gray-300 hover:bg-gray-100 hover:border-gray-400"
+                            }`}
                         >
                           <FaHeart
-                            className={`w-5 h-5 ${wishlistChecked[product._id] || isWishlisted ? "fill-red-500" : ""}`}
+                            className={`w-5 h-5 ${wishlistChecked[product._id] || isWishlisted ? "fill-red-500" : ""
+                              }`}
                           />
                           {wishlistChecked[product._id] || isWishlisted
                             ? "In Wishlist"
@@ -564,7 +560,7 @@ const ProductCard = ({ product }) => {
                         <Link
                           to={`/product/${product._id}`}
                           onClick={() => setShowQuickView(false)}
-                          className="w-1/2 py-4 rounded-lg border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors text-base font-medium text-center block"
+                          className="w-1/2 py-4 rounded-xl border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 text-base font-semibold text-center block hover:shadow-lg"
                         >
                           View Full Details
                         </Link>
@@ -572,19 +568,23 @@ const ProductCard = ({ product }) => {
                     </div>
 
                     {/* Features */}
-                    <div className="pt-6 border-t border-gray-100">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                          <span>Secure Payment</span>
+                    <div className="pt-8 border-t border-gray-100">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <div className="w-2 h-2 rounded-full bg-gray-400" />
+                          <span className="font-medium">Secure Payment</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                          <span>Easy Returns</span>
+                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <div className="w-2 h-2 rounded-full bg-gray-400" />
+                          <span className="font-medium">Easy Returns</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                          <span>Quality Guarantee</span>
+                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <div className="w-2 h-2 rounded-full bg-gray-400" />
+                          <span className="font-medium">Quality Guarantee</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <div className="w-2 h-2 rounded-full bg-gray-400" />
+                          <span className="font-medium">24/7 Support</span>
                         </div>
                       </div>
                     </div>
