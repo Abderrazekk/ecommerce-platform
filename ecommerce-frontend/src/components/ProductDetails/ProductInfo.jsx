@@ -21,18 +21,10 @@ import {
   Star,
   ShoppingBag,
   Zap,
-  Clock,
-  Phone,
 } from "lucide-react";
 import StarRating from "../common/StarRating";
 
-const ProductInfo = ({
-  product,
-  user,
-  isAuthenticated,
-  wishlistChecked,
-  wishlistLoading,
-}) => {
+const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
   const [quantity, setQuantity] = useState(1);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -42,13 +34,9 @@ const ProductInfo = ({
   const dispatch = useDispatch();
 
   const toggleWishlist = async () => {
-    if (!isAuthenticated) {
-      toast.error("Please login to add items to your wishlist");
-      navigate("/login");
-      return;
-    }
+    if (!product) return;
 
-    const isInWishlist = wishlistChecked[product?._id];
+    const isInWishlist = wishlistChecked[product._id];
 
     try {
       if (isInWishlist) {
@@ -60,32 +48,13 @@ const ProductInfo = ({
       }
     } catch (error) {
       console.error("Wishlist error:", error);
-      toast.error(error || "Failed to update wishlist");
+      toast.error(error?.message || "Failed to update wishlist");
     }
   };
 
   const handleAddToCart = () => {
-    if (product) {
-      dispatch(
-        addToCart({
-          product: product._id,
-          name: product.name,
-          price: product.discountPrice || product.price,
-          shippingFee: product.shippingFee || 0,
-          image: product.images?.[0]?.url || "",
-          quantity: quantity,
-        }),
-      );
-      toast.success("Added to cart");
-    }
-  };
-
-  const handleBuyNow = () => {
     if (!product) return;
 
-    setIsBuyNowLoading(true);
-
-    // Add product to cart
     dispatch(
       addToCart({
         product: product._id,
@@ -93,14 +62,30 @@ const ProductInfo = ({
         price: product.discountPrice || product.price,
         shippingFee: product.shippingFee || 0,
         image: product.images?.[0]?.url || "",
-        quantity: quantity,
+        quantity,
+      }),
+    );
+    toast.success("Added to cart");
+  };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+
+    setIsBuyNowLoading(true);
+
+    dispatch(
+      addToCart({
+        product: product._id,
+        name: product.name,
+        price: product.discountPrice || product.price,
+        shippingFee: product.shippingFee || 0,
+        image: product.images?.[0]?.url || "",
+        quantity,
       }),
     );
 
-    // Show success message
     toast.success("Added to cart! Redirecting to checkout...");
 
-    // Redirect to checkout after a short delay
     setTimeout(() => {
       navigate("/checkout");
       setIsBuyNowLoading(false);
@@ -136,9 +121,7 @@ const ProductInfo = ({
     try {
       await navigator.clipboard.writeText(text);
       setCopySuccess(true);
-      setTimeout(() => {
-        setCopySuccess(false);
-      }, 2000);
+      setTimeout(() => setCopySuccess(false), 2000);
     } catch (error) {
       fallbackCopyToClipboard(text);
     }
@@ -158,9 +141,7 @@ const ProductInfo = ({
       const successful = document.execCommand("copy");
       if (successful) {
         setCopySuccess(true);
-        setTimeout(() => {
-          setCopySuccess(false);
-        }, 2000);
+        setTimeout(() => setCopySuccess(false), 2000);
       } else {
         alert("Failed to copy link. Please copy the URL manually: " + text);
       }
@@ -178,228 +159,168 @@ const ProductInfo = ({
       )
     : 0;
 
-  // AliExpress delivery notice component
-  const AliExpressDeliveryNotice = () => (
-    <div className="mb-8 animate-fadeIn">
-      <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300 rounded-2xl p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0">
-            <div className="p-3 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl">
-              <Globe className="h-8 w-8 text-orange-600" />
-            </div>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-orange-800 mb-3">
-              ⚠️ AliExpress Product - Special Delivery Instructions
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-1">
-                  <Clock className="h-5 w-5 text-orange-600" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-orange-800">
-                    Delivery Time
-                  </h4>
-                  <p className="text-orange-700">10–20 days for delivery</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-1">
-                  <Phone className="h-5 w-5 text-orange-600" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-orange-800">
-                    Order Confirmation
-                  </h4>
-                  <p className="text-orange-700">
-                    Our team will call you to confirm
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-orange-100/50 border border-orange-200 rounded-lg p-4">
-              <p className="text-sm text-orange-800 font-medium">
-                📞 <span className="font-bold">Important:</span> Please ensure
-                your phone number is correct in your profile. Our customer
-                service team will contact you within 24 hours to confirm your
-                order details.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       {/* Product Header */}
-      <div className="space-y-6">
-        <div className="flex flex-wrap gap-3">
+      <div className="space-y-4">
+        {/* Badges – more refined */}
+        <div className="flex flex-wrap gap-2">
           {product.brand && (
-            <span className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
+            <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full border border-gray-200">
               {product.brand}
             </span>
           )}
-          <span className="inline-flex items-center px-4 py-2 bg-primary-50 text-primary-700 text-sm font-medium rounded-full">
+          <span className="inline-flex items-center px-3 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-full border border-primary-200">
             {product.category}
           </span>
           {product.isAliExpress && (
-            <span className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold rounded-full shadow-sm">
-              <Globe className="h-3.5 w-3.5 mr-2" />
+            <span className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full shadow-sm">
+              <Globe className="h-3 w-3 mr-1" />
               AliExpress
             </span>
           )}
           {product.isFeatured && (
-            <span className="inline-flex items-center px-4 py-2 bg-yellow-50 text-yellow-700 text-sm font-medium rounded-full">
-              <Star className="h-3.5 w-3.5 mr-2" />
+            <span className="inline-flex items-center px-3 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full border border-yellow-200">
+              <Star className="h-3 w-3 mr-1 fill-current" />
               Featured
             </span>
           )}
         </div>
 
-        <h1 className="text-4xl font-normal text-gray-900 leading-tight tracking-tight">
+        <h1 className="text-2xl lg:text-3xl font-semibold text-gray-900 leading-tight tracking-tight">
           {product.name}
         </h1>
 
         {/* Product Rating Display */}
         {product.averageRating > 0 ? (
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <StarRating rating={product.averageRating} readOnly showNumber />
-              <span className="ml-2 text-gray-600">
-                ({product.ratingsCount}{" "}
-                {product.ratingsCount === 1 ? "review" : "reviews"})
-              </span>
-            </div>
+          <div className="flex items-center space-x-3">
+            <StarRating
+              rating={product.averageRating}
+              readOnly
+              showNumber
+              size="md"
+            />
+            <span className="text-sm text-gray-600">
+              ({product.ratingsCount}{" "}
+              {product.ratingsCount === 1 ? "review" : "reviews"})
+            </span>
           </div>
         ) : (
-          <div className="text-gray-500 text-sm">No reviews yet</div>
+          <div className="text-sm text-gray-500">No reviews yet</div>
         )}
 
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-4">
+        {/* Wishlist & Share – with better tooltip */}
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={toggleWishlist}
+            disabled={wishlistLoading}
+            className={`relative p-2.5 rounded-full border transition-all duration-200 ${
+              wishlistChecked[product?._id]
+                ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
+                : "border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+            }`}
+            title={
+              wishlistChecked[product?._id]
+                ? "Remove from wishlist"
+                : "Add to wishlist"
+            }
+          >
+            <Heart
+              className={`h-5 w-5 ${wishlistChecked[product?._id] ? "fill-current" : ""}`}
+            />
+          </button>
+          <div className="relative">
             <button
-              onClick={toggleWishlist}
-              disabled={wishlistLoading}
-              className={`p-2.5 rounded-lg border transition-colors flex items-center justify-center ${
-                wishlistChecked[product?._id]
-                  ? "bg-red-50 border-red-200 text-red-600"
-                  : "border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300"
+              onClick={handleShare}
+              onMouseEnter={() => setShowShareTooltip(true)}
+              onMouseLeave={() => setShowShareTooltip(false)}
+              className={`p-2.5 rounded-full border transition-all duration-200 ${
+                copySuccess
+                  ? "bg-green-50 border-green-200 text-green-600"
+                  : "border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50"
               }`}
-              title={
-                wishlistChecked[product?._id]
-                  ? "Remove from wishlist"
-                  : "Add to wishlist"
-              }
+              title="Share product"
             >
-              <Heart
-                className={`h-5 w-5 ${
-                  wishlistChecked[product?._id] ? "fill-current" : ""
-                }`}
-              />
-            </button>
-            <div className="relative">
-              <button
-                onClick={handleShare}
-                onMouseEnter={() => setShowShareTooltip(true)}
-                onMouseLeave={() => setShowShareTooltip(false)}
-                className={`p-2.5 rounded-lg border transition-colors flex items-center justify-center ${
-                  copySuccess
-                    ? "bg-green-50 border-green-200 text-green-600"
-                    : "border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300"
-                }`}
-                title="Share product"
-              >
-                {copySuccess ? (
-                  <CheckCircle className="h-5 w-5" />
-                ) : (
-                  <Share2 className="h-5 w-5" />
-                )}
-              </button>
-
-              {/* Share Tooltip */}
-              {showShareTooltip && !copySuccess && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-xl z-50 animate-fade-in">
-                  Click to copy product link
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-900"></div>
-                </div>
+              {copySuccess ? (
+                <CheckCircle className="h-5 w-5" />
+              ) : (
+                <Share2 className="h-5 w-5" />
               )}
-            </div>
+            </button>
+
+            {showShareTooltip && !copySuccess && (
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-40 bg-gray-900 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-xl z-50 animate-fade-in">
+                Click to copy link
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-900" />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* AliExpress Delivery Notice */}
-      {product.isAliExpress && <AliExpressDeliveryNotice />}
+      {/* AliExpress Delivery Notice – cleaner */}
+      {product.isAliExpress && (
+        <div className="bg-orange-50/80 border border-orange-200 rounded-xl p-4 backdrop-blur-sm">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Globe className="h-5 w-5 text-orange-600" />
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-orange-800 mb-0.5">
+                AliExpress Product – Delivery Info
+              </h3>
+              <p className="text-xs text-orange-700">
+                Delivery: 10–20 days • Phone confirmation required within 24h.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Pricing Section */}
-      <div className="space-y-4">
-        <div className="flex items-baseline space-x-4">
+      {/* Pricing Section – more prominent */}
+      <div className="space-y-3">
+        <div className="flex items-baseline flex-wrap gap-3">
           {product.discountPrice ? (
             <>
-              <div className="space-y-1">
-                <div className="flex items-baseline space-x-3">
-                  <span className="text-5xl font-light text-gray-900">
-                    {formatPrice(product.discountPrice)}
-                  </span>
-                  <span className="text-xl text-gray-500 line-through">
-                    {formatPrice(product.price)}
-                  </span>
-                </div>
-                <div className="inline-flex items-center px-4 py-1.5 bg-red-50 text-red-700 rounded-full text-sm font-medium">
-                  Save {discountPercentage}% •{" "}
-                  {formatPrice(product.price - product.discountPrice)}
-                </div>
-              </div>
+              <span className="text-3xl lg:text-4xl font-light text-gray-900">
+                {formatPrice(product.discountPrice)}
+              </span>
+              <span className="text-lg text-gray-500 line-through">
+                {formatPrice(product.price)}
+              </span>
+              <span className="inline-flex items-center px-2.5 py-1 bg-red-600 text-white rounded-full text-xs font-bold shadow-sm">
+                Save {discountPercentage}%
+              </span>
             </>
           ) : (
-            <span className="text-5xl font-light text-gray-900">
+            <span className="text-3xl lg:text-4xl font-light text-gray-900">
               {formatPrice(product.price)}
             </span>
           )}
         </div>
 
-        {/* Shipping Fee Display */}
         {product.shippingFee > 0 && (
-          <div className="flex items-center gap-2 text-gray-600">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
-              ></path>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
-              ></path>
-            </svg>
-            <span>Shipping fee: {formatPrice(product.shippingFee)}</span>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Truck className="h-4 w-4" />
+            <span>Shipping: {formatPrice(product.shippingFee)}</span>
           </div>
         )}
 
-        <div className="flex items-center space-x-4">
+        {/* Stock Status – with animated pulse for low stock */}
+        <div className="flex items-center space-x-3">
           <div
-            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+            className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${
               product.stock > 10
-                ? "bg-green-50 text-green-700"
+                ? "bg-green-50 text-green-700 border border-green-200"
                 : product.stock > 0
-                  ? "bg-yellow-50 text-yellow-700"
-                  : "bg-red-50 text-red-700"
+                  ? "bg-yellow-50 text-yellow-700 border border-yellow-200 animate-pulse-slow"
+                  : "bg-red-50 text-red-700 border border-red-200"
             }`}
           >
             <div
-              className={`w-2 h-2 rounded-full mr-2 ${
+              className={`w-2 h-2 rounded-full mr-1.5 ${
                 product.stock > 10
                   ? "bg-green-500"
                   : product.stock > 0
@@ -410,33 +331,33 @@ const ProductInfo = ({
             {product.stock > 10
               ? "In Stock"
               : product.stock > 0
-                ? "Low Stock"
+                ? `Low Stock (${product.stock} left)`
                 : "Out of Stock"}
           </div>
         </div>
       </div>
 
       {/* Description */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+      <div className="space-y-2">
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
           Description
         </h3>
-        <div className="prose prose-gray max-w-none">
-          <p className="text-gray-700 leading-relaxed">{product.description}</p>
-        </div>
+        <p className="text-sm text-gray-700 leading-relaxed">
+          {product.description}
+        </p>
       </div>
 
       {/* Tags */}
       {product.tags && product.tags.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-            Product Tags
+        <div className="space-y-2">
+          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Tags
           </h3>
           <div className="flex flex-wrap gap-2">
             {product.tags.map((tag, index) => (
               <span
                 key={index}
-                className="inline-block bg-gray-50 text-gray-700 text-sm px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                className="inline-block bg-gray-50 text-gray-600 text-xs px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors"
               >
                 #{tag}
               </span>
@@ -447,48 +368,46 @@ const ProductInfo = ({
 
       {/* Quantity & Add to Cart */}
       {product.stock > 0 ? (
-        <div className="space-y-8 pt-8 border-t border-gray-100">
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-gray-700">
-                  Quantity
-                </label>
-                <span className="text-sm text-gray-500">
-                  Max: {product.stock}
+        <div className="space-y-6 pt-4 border-t border-gray-100">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-700">
+                Quantity
+              </label>
+              <span className="text-xs text-gray-500">
+                Max: {product.stock}
+              </span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center border border-gray-300 rounded-xl overflow-hidden shadow-sm">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="px-4 py-2.5 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-1 focus:ring-gray-300"
+                >
+                  <span className="text-lg font-medium">−</span>
+                </button>
+                <span className="px-6 py-2.5 border-x border-gray-300 text-lg min-w-[80px] text-center font-medium bg-white">
+                  {quantity}
                 </span>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center border border-gray-300 rounded-xl">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-5 py-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <span className="text-xl">−</span>
-                  </button>
-                  <span className="px-8 py-3 border-x border-gray-300 text-xl min-w-[100px] text-center font-medium">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() =>
-                      setQuantity(Math.min(product.stock, quantity + 1))
-                    }
-                    className="px-5 py-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <span className="text-xl">+</span>
-                  </button>
-                </div>
+                <button
+                  onClick={() =>
+                    setQuantity(Math.min(product.stock, quantity + 1))
+                  }
+                  className="px-4 py-2.5 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-1 focus:ring-gray-300"
+                >
+                  <span className="text-lg font-medium">+</span>
+                </button>
               </div>
             </div>
 
-            {/* Total */}
-            <div className="bg-gray-50 p-6 rounded-xl">
+            {/* Total – more elegant */}
+            <div className="bg-gray-50/80 p-5 rounded-xl border border-gray-100">
               <div className="flex justify-between items-center">
                 <div>
-                  <div className="text-gray-600">Total</div>
-                  <div className="text-sm text-gray-500">Including VAT</div>
+                  <div className="text-sm text-gray-600 font-medium">Total</div>
+                  <div className="text-xs text-gray-500">Incl. VAT</div>
                 </div>
-                <span className="text-3xl font-light text-gray-900">
+                <span className="text-2xl lg:text-3xl font-light text-gray-900">
                   {formatPrice(
                     (product.discountPrice || product.price) * quantity,
                   )}
@@ -496,51 +415,29 @@ const ProductInfo = ({
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Add to Cart Button */}
+            {/* Action Buttons – with lift effect */}
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   onClick={handleAddToCart}
-                  className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-xl text-lg font-medium transition-colors shadow-sm hover:shadow flex items-center justify-center gap-3"
+                  className="w-full py-3.5 bg-gray-900 hover:bg-black text-white rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-button hover:shadow-button-hover hover:-translate-y-0.5"
                 >
-                  <ShoppingBag className="h-5 w-5" />
+                  <ShoppingBag className="h-4 w-4" />
                   Add to Cart
                 </button>
-
-                {/* Buy Now Button */}
                 <button
                   onClick={handleBuyNow}
                   disabled={isBuyNowLoading}
-                  className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-lg font-medium transition-colors shadow-sm hover:shadow flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 shadow-button hover:shadow-button-hover hover:-translate-y-0.5"
                 >
                   {isBuyNowLoading ? (
                     <>
-                      <svg
-                        className="animate-spin h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
+                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Processing...
                     </>
                   ) : (
                     <>
-                      <Zap className="h-5 w-5" />
+                      <Zap className="h-4 w-4" />
                       Buy Now
                     </>
                   )}
@@ -548,81 +445,33 @@ const ProductInfo = ({
               </div>
 
               {/* Quick Quantity Buttons */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => setQuantity(Math.min(product.stock, 3))}
-                  className="py-3 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="py-2.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
                 >
                   Add 3
                 </button>
                 <button
                   onClick={() => setQuantity(Math.min(product.stock, 5))}
-                  className="py-3 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="py-2.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
                 >
                   Add 5
                 </button>
                 <button
                   onClick={() => setQuantity(product.stock)}
-                  className="py-3 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="py-2.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
                 >
                   Add All
                 </button>
               </div>
-
-              {/* Buy Now Explanation */}
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Zap className="h-4 w-4 text-blue-600" />
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-blue-900 mb-1">
-                      Buy Now Feature
-                    </h4>
-                    <p className="text-xs text-blue-700">
-                      Click "Buy Now" to add this item to your cart and proceed
-                      directly to checkout. This saves time if you're ready to
-                      purchase immediately.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* AliExpress Phone Confirmation Reminder */}
-              {product.isAliExpress && (
-                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0">
-                      <div className="h-8 w-8 bg-orange-100 rounded-full flex items-center justify-center">
-                        <Phone className="h-4 w-4 text-orange-600" />
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-orange-900 mb-1">
-                        Phone Confirmation Required
-                      </h4>
-                      <p className="text-xs text-orange-700">
-                        For AliExpress products, our team will call you within
-                        24 hours to confirm your order. Please ensure your phone
-                        number is up-to-date in your profile.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid grid-cols-2 gap-4 pt-8 border-t border-gray-100">
+          {/* Features Grid – with hover state */}
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
             {[
-              {
-                icon: Shield,
-                label: "2-Year Warranty",
-                desc: "Full coverage",
-              },
+              { icon: Shield, label: "2-Year Warranty", desc: "Full coverage" },
               {
                 icon: RefreshCw,
                 label: "30-Day Returns",
@@ -641,35 +490,35 @@ const ProductInfo = ({
             ].map((feature, index) => (
               <div
                 key={index}
-                className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 transition-colors"
+                className="flex items-start space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
               >
-                <div className="p-3 bg-gray-100 rounded-lg">
-                  <feature.icon className="h-6 w-6 text-gray-600" />
+                <div className="p-2 bg-gray-100 rounded-lg group-hover:bg-gray-200 transition-colors">
+                  <feature.icon className="h-4 w-4 text-gray-600 group-hover:text-gray-900" />
                 </div>
                 <div>
-                  <div className="font-medium text-gray-900">
+                  <div className="text-xs font-medium text-gray-900">
                     {feature.label}
                   </div>
-                  <div className="text-sm text-gray-500">{feature.desc}</div>
+                  <div className="text-xs text-gray-500">{feature.desc}</div>
                 </div>
               </div>
             ))}
           </div>
         </div>
       ) : (
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
-          <div className="flex items-center justify-center mb-6">
-            <div className="p-4 bg-red-100 rounded-full">
-              <Check className="h-8 w-8 text-red-600" />
+        <div className="bg-red-50/80 border border-red-200 rounded-xl p-6 text-center backdrop-blur-sm">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-3 bg-red-100 rounded-full">
+              <Check className="h-6 w-6 text-red-600" />
             </div>
           </div>
-          <h4 className="text-xl font-semibold text-red-700 mb-3">
+          <h4 className="text-base font-medium text-red-700 mb-2">
             Out of Stock
           </h4>
-          <p className="text-red-600 mb-6">
+          <p className="text-sm text-red-600 mb-4">
             This product is currently unavailable
           </p>
-          <button className="w-full py-3 border-2 border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium">
+          <button className="w-full py-2.5 border-2 border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium">
             Notify When Available
           </button>
         </div>

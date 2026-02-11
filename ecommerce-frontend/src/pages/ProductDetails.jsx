@@ -5,13 +5,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchProductById } from "../redux/slices/product.slice";
 import {
   fetchProductComments,
-  addComment,
-  editComment,
-  removeComment,
   fetchProductRatingSummary,
 } from "../redux/slices/comment.slice";
 import { checkInWishlist } from "../redux/slices/wishlist.slice";
-import { ArrowLeft, CheckCircle, Package } from "lucide-react";
+import { ArrowLeft, Package } from "lucide-react";
 import Loader from "../components/common/Loader";
 import ProductMedia from "../components/ProductDetails/ProductMedia";
 import ProductInfo from "../components/ProductDetails/ProductInfo";
@@ -26,20 +23,12 @@ const ProductDetails = () => {
   const { product, loading: productLoading } = useSelector(
     (state) => state.products,
   );
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const {
-    commentsByProduct,
-    loading: commentsLoading,
-    submitting,
-    error,
-  } = useSelector((state) => state.comments);
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const { wishlistChecked, loading: wishlistLoading } = useSelector(
     (state) => state.wishlist,
   );
 
-  const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     dispatch(fetchProductById(id));
@@ -68,7 +57,7 @@ const ProductDetails = () => {
           </p>
           <button
             onClick={() => navigate("/shop")}
-            className="px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors"
+            className="px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors shadow-button hover:shadow-button-hover"
           >
             Continue Shopping
           </button>
@@ -78,20 +67,10 @@ const ProductDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Share Success Toast */}
-      {copySuccess && (
-        <div className="fixed top-6 right-6 z-50 animate-fade-in">
-          <div className="bg-gray-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
-            <CheckCircle className="h-5 w-5 text-green-400" />
-            <span className="font-medium">Link copied to clipboard!</span>
-          </div>
-        </div>
-      )}
-
-      {/* Subtle Navigation */}
-      <div className="border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-8 py-6">
+    <div className="min-h-screen bg-gray-50">
+      {/* Full‑width navigation bar */}
+      <div className="w-full border-b border-gray-200 bg-white">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
           <button
             onClick={() => navigate(-1)}
             className="group flex items-center text-gray-600 hover:text-gray-900 transition-colors"
@@ -104,10 +83,11 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Left Column - Media */}
-          <div>
+      {/* Full‑width main content */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          {/* Left column – Product Media */}
+          <div className="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-shadow duration-300 p-5 sm:p-6">
             <ProductMedia
               product={product}
               selectedImageIndex={selectedImageIndex}
@@ -115,42 +95,25 @@ const ProductDetails = () => {
             />
           </div>
 
-          {/* Right Column - Product Details */}
-          <div>
+          {/* Right column – Product Info */}
+          <div className="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-shadow duration-300 p-5 sm:p-6">
             <ProductInfo
               product={product}
-              user={user}
-              isAuthenticated={isAuthenticated}
               wishlistChecked={wishlistChecked}
               wishlistLoading={wishlistLoading}
-              quantity={quantity}
-              setQuantity={setQuantity}
-              dispatch={dispatch}
-              navigate={navigate}
             />
           </div>
+
+          {/* Left column (second row) – Similar Products */}
+          <div className="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-shadow duration-300 p-5 sm:p-6">
+            <SimilarProducts productId={id} />
+          </div>
+
+          {/* Right column (second row) – Product Comments */}
+          <div className="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-shadow duration-300 p-5 sm:p-6">
+            <ProductComments productId={id} />
+          </div>
         </div>
-
-        {/* Reviews Section */}
-        <ProductComments
-          commentsByProduct={commentsByProduct}
-          id={id}
-          user={user}
-          isAuthenticated={isAuthenticated}
-          commentsLoading={commentsLoading}
-          submitting={submitting}
-          error={error}
-          dispatch={dispatch}
-          navigate={navigate}
-          addComment={addComment}
-          editComment={editComment}
-          removeComment={removeComment}
-          fetchProductComments={fetchProductComments}
-        />
-
-        {/* Similar Products */}
-        {/* Similar Products – key forces fresh fetch when product changes */}
-        <SimilarProducts key={id} productId={id} />
       </div>
     </div>
   );
