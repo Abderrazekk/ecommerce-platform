@@ -103,6 +103,11 @@ const productService = {
   deleteProduct: (id) => {
     return api.delete(`/products/${id}`);
   },
+
+  getSimilarProducts: async (productId) => {
+    const response = await api.get(`/products/${productId}/similar`);
+    return response.data; // ✅ returns { success, products }
+  },
 };
 
 export default productService;

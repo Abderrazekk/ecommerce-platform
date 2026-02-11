@@ -16,6 +16,7 @@ import Loader from "../components/common/Loader";
 import ProductMedia from "../components/ProductDetails/ProductMedia";
 import ProductInfo from "../components/ProductDetails/ProductInfo";
 import ProductComments from "../components/ProductDetails/ProductComments";
+import SimilarProducts from "../components/ProductDetails/SimilarProducts";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -146,6 +147,10 @@ const ProductDetails = () => {
           removeComment={removeComment}
           fetchProductComments={fetchProductComments}
         />
+
+        {/* Similar Products */}
+        {/* Similar Products – key forces fresh fetch when product changes */}
+        <SimilarProducts key={id} productId={id} />
       </div>
     </div>
   );

@@ -149,6 +149,22 @@ export const deleteProduct = createAsyncThunk(
   },
 );
 
+export const fetchSimilarProducts = createAsyncThunk(
+  "products/fetchSimilar",
+  async (productId, { rejectWithValue }) => {
+    if (!productId) return rejectWithValue("No product ID");
+    try {
+      const response = await productService.getSimilarProducts(productId);
+      return response.products; // ✅ array
+    } catch (error) {
+      // ❌ NO TOAST – silent failure
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to load similar products",
+      );
+    }
+  },
+);
+
 const initialState = {
   products: [], // All products (for admin)
   featuredProducts: [], // Featured products for homepage
@@ -157,6 +173,9 @@ const initialState = {
   categories: [],
   loading: false,
   error: null,
+  similarProducts: [],
+  similarProductsLoading: false,
+  similarProductsError: null,
   pagination: {
     page: 1,
     limit: 12,
@@ -296,6 +315,19 @@ const productSlice = createSlice({
         state.featuredProducts = state.featuredProducts.filter(
           (p) => p._id !== action.payload,
         );
+      })
+      // Similar products
+      .addCase(fetchSimilarProducts.pending, (state) => {
+        state.similarProductsLoading = true;
+        state.similarProductsError = null;
+      })
+      .addCase(fetchSimilarProducts.fulfilled, (state, action) => {
+        state.similarProductsLoading = false;
+        state.similarProducts = action.payload;
+      })
+      .addCase(fetchSimilarProducts.rejected, (state, action) => {
+        state.similarProductsLoading = false;
+        state.similarProductsError = action.payload;
       });
   },
 });

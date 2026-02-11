@@ -10,6 +10,7 @@ const {
   deleteProduct,
   getCategories,
   getBrands,
+  getSimilarProducts,
 } = require("../controllers/product.controller");
 const { protect } = require("../middlewares/auth.middleware");
 const { adminOnly } = require("../middlewares/admin.middleware");
@@ -24,6 +25,11 @@ router.get("/", getProducts);
 router.get("/featured", getFeaturedProducts);
 router.get("/categories", getCategories);
 router.get("/brands", getBrands);
+
+// ✅ MUST come before /:id
+router.get("/:id/similar", getSimilarProducts);
+
+// ✅ Generic route MUST be last
 router.get("/:id", getProductById);
 
 // Admin routes - Updated to use upload.fields for images and video

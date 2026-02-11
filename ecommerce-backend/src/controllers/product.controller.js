@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+const Order = require("../models/Order.model");
 const { Product, productCategories } = require("../models/Product.model");
 const cloudinary = require("../config/cloudinary");
 const asyncHandler = require("express-async-handler");
@@ -597,6 +599,101 @@ const getBrands = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get similar products (3 best‑selling + 3 newest from same category)
+// @route   GET /api/products/:id/similar
+// @access  Public
+const getSimilarProducts = asyncHandler(async (req, res) => {
+  const productId = req.params.id;
+
+  // -------------------------------------------------------------
+  // 1. Always return 200 – never 404, never 500
+  // -------------------------------------------------------------
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    return res.json({ success: true, products: [] });
+  }
+
+  const product = await Product.findById(productId).lean();
+  if (!product) {
+    return res.json({ success: true, products: [] });
+  }
+
+  // -------------------------------------------------------------
+  // 2. Best‑selling product IDs – COMPLETELY SAFE
+  // -------------------------------------------------------------
+  let bestSellingIds = [];
+  try {
+    // ✅ This works even if Order collection does NOT exist
+    const db = mongoose.connection.db;
+    const collections = await db.listCollections({ name: "orders" }).toArray();
+    if (collections.length > 0) {
+      const topProducts = await Order.aggregate([
+        { $unwind: "$items" },
+        {
+          $group: {
+            _id: "$items.product",
+            totalSold: { $sum: "$items.quantity" },
+          },
+        },
+        { $sort: { totalSold: -1 } },
+        { $limit: 4 },
+        { $match: { _id: { $ne: product._id } } },
+      ]);
+      bestSellingIds = topProducts.map((p) => p._id);
+    }
+  } catch (err) {
+    // Silently ignore – no orders yet
+  }
+
+  // -------------------------------------------------------------
+  // 3. Fetch best‑selling products (visible only)
+  // -------------------------------------------------------------
+  let bestSellingProducts = [];
+  if (bestSellingIds.length > 0) {
+    bestSellingProducts = await Product.find({
+      _id: { $in: bestSellingIds },
+      isVisible: true,
+    }).lean();
+  }
+
+  // -------------------------------------------------------------
+  // 4. Newest products from same category (visible only)
+  // -------------------------------------------------------------
+  const newestFromCategory = await Product.find({
+    category: product.category,
+    _id: { $ne: product._id },
+    isVisible: true,
+  })
+    .sort({ createdAt: -1 })
+    .limit(4)
+    .lean();
+
+  // -------------------------------------------------------------
+  // 5. Merge distinct products (max 6, best‑selling priority)
+  // -------------------------------------------------------------
+  const seenIds = new Set();
+  const similarProducts = [];
+
+  for (const p of bestSellingProducts) {
+    if (!seenIds.has(p._id.toString())) {
+      seenIds.add(p._id.toString());
+      similarProducts.push(p);
+      if (similarProducts.length === 6) break;
+    }
+  }
+
+  if (similarProducts.length < 6) {
+    for (const p of newestFromCategory) {
+      if (!seenIds.has(p._id.toString())) {
+        seenIds.add(p._id.toString());
+        similarProducts.push(p);
+        if (similarProducts.length === 6) break;
+      }
+    }
+  }
+
+  return res.json({ success: true, products: similarProducts });
+});
+
 module.exports = {
   getProducts,
   getAdminProducts,
@@ -607,4 +704,5 @@ module.exports = {
   deleteProduct,
   getCategories,
   getBrands,
+  getSimilarProducts,
 };
