@@ -1,3 +1,4 @@
+// Hero.jsx (Public) – Force slideshow on mobile
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,6 +13,18 @@ const Hero = () => {
   const [isAutoRotating, setIsAutoRotating] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const timerRef = useRef(null);
+
+  // ---------- Mobile detection (added) ----------
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+  // ------------------------------------------------
 
   // Calculate layout variables
   const effectiveLayout = hero
@@ -29,7 +42,11 @@ const Hero = () => {
                 : "slideshow")
     : "slideshow";
 
-  const isSlideshowMode = effectiveLayout === "slideshow";
+  // ----- Force slideshow on mobile -----
+  const displayLayout =
+    isMobile && hero?.images?.length ? "slideshow" : effectiveLayout;
+  const isSlideshowMode = displayLayout === "slideshow";
+  // -------------------------------------
 
   useEffect(() => {
     dispatch(fetchActiveHero());
@@ -223,11 +240,11 @@ const Hero = () => {
     );
   };
 
-  // Render static layouts
+  // Render static layouts (uses displayLayout instead of effectiveLayout)
   const renderStaticLayout = () => {
     const images = hero.images || [];
 
-    switch (effectiveLayout) {
+    switch (displayLayout) {
       case "2-modern":
         return (
           <div className="h-[70vh] md:h-[85vh]">

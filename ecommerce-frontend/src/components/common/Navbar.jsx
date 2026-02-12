@@ -198,47 +198,47 @@ const Navbar = () => {
   const shopCategories = [
     {
       name: t("shopCategories.electronics.name"),
-      path: "/shop?category=Electronics & Gadgets",
+      path: `/shop?category=${encodeURIComponent("Electronics & Gadgets")}`,
       desc: t("shopCategories.electronics.description"),
     },
     {
       name: t("shopCategories.fashion.name"),
-      path: "/shop?category=Fashion & Apparel",
+      path: `/shop?category=${encodeURIComponent("Fashion & Apparel")}`,
       desc: t("shopCategories.fashion.description"),
     },
     {
       name: t("shopCategories.beauty.name"),
-      path: "/shop?category=Beauty & Personal Care",
+      path: `/shop?category=${encodeURIComponent("Beauty & Personal Care")}`,
       desc: t("shopCategories.beauty.description"),
     },
     {
       name: t("shopCategories.homeKitchen.name"),
-      path: "/shop?category=Home & Kitchen",
+      path: `/shop?category=${encodeURIComponent("Home & Kitchen")}`,
       desc: t("shopCategories.homeKitchen.description"),
     },
     {
       name: t("shopCategories.fitness.name"),
-      path: "/shop?category=Fitness & Outdoors",
+      path: `/shop?category=${encodeURIComponent("Fitness & Outdoors")}`,
       desc: t("shopCategories.fitness.description"),
     },
     {
       name: t("shopCategories.babyKids.name"),
-      path: "/shop?category=Baby & Kids",
+      path: `/shop?category=${encodeURIComponent("Baby & Kids")}`,
       desc: t("shopCategories.babyKids.description"),
     },
     {
       name: t("shopCategories.pets.name"),
-      path: "/shop?category=Pets",
+      path: `/shop?category=${encodeURIComponent("Pets")}`,
       desc: t("shopCategories.pets.description"),
     },
     {
       name: t("shopCategories.automotive.name"),
-      path: "/shop?category=Automotive & Tools",
+      path: `/shop?category=${encodeURIComponent("Automotive & Tools")}`,
       desc: t("shopCategories.automotive.description"),
     },
     {
       name: t("shopCategories.lifestyle.name"),
-      path: "/shop?category=Lifestyle & Hobbies",
+      path: `/shop?category=${encodeURIComponent("Lifestyle & Hobbies")}`,
       desc: t("shopCategories.lifestyle.description"),
     },
   ];
@@ -343,15 +343,27 @@ const Navbar = () => {
           <div className="px-6 py-4">
             <div className="flex items-center gap-3">
               <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-sm text-gray-600 font-medium">{t("search.searching")}</span>
+              <span className="text-sm text-gray-600 font-medium">
+                {t("search.searching")}
+              </span>
             </div>
           </div>
         )}
         {!isSearching && searchError && (
           <div className="px-6 py-4">
             <div className="flex items-center gap-3 text-red-500">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <span className="text-sm font-medium">{searchError}</span>
             </div>
@@ -360,10 +372,22 @@ const Navbar = () => {
         {!isSearching && !searchError && searchResults.length === 0 && (
           <div className="px-6 py-4">
             <div className="flex items-center gap-3 text-gray-500">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
-              <span className="text-sm font-medium">{t("search.noResults")}</span>
+              <span className="text-sm font-medium">
+                {t("search.noResults")}
+              </span>
             </div>
           </div>
         )}
@@ -377,10 +401,11 @@ const Navbar = () => {
               id={`search-result-${product._id}`}
               aria-selected={activeResultIndex === index}
               onClick={() => handleResultSelect(product)}
-              className={`w-full text-left px-6 py-4 flex items-center gap-4 transition-all duration-200 border-b border-gray-100 last:border-0 ${activeResultIndex === index
+              className={`w-full text-left px-6 py-4 flex items-center gap-4 transition-all duration-200 border-b border-gray-100 last:border-0 ${
+                activeResultIndex === index
                   ? "bg-gradient-to-r from-primary-50 to-primary-100/50 text-primary-700"
                   : "hover:bg-gray-50"
-                }`}
+              }`}
             >
               <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden flex items-center justify-center shadow-sm">
                 {product.images?.[0]?.url ? (
@@ -508,7 +533,9 @@ const Navbar = () => {
                 >
                   <div className="flex items-center gap-2">
                     {item.icon}
-                    <span className="group-hover:translate-x-0.5 transition-transform">{item.name}</span>
+                    <span className="group-hover:translate-x-0.5 transition-transform">
+                      {item.name}
+                    </span>
                   </div>
                 </Link>
               ))}
@@ -521,7 +548,10 @@ const Navbar = () => {
                 onMouseLeave={(e) => {
                   // Check if mouse is leaving the trigger area and not entering the dropdown
                   const relatedTarget = e.relatedTarget;
-                  if (shopDropdownRef.current && !shopDropdownRef.current.contains(relatedTarget)) {
+                  if (
+                    shopDropdownRef.current &&
+                    !shopDropdownRef.current.contains(relatedTarget)
+                  ) {
                     setShopDropdown(false);
                   }
                 }}
@@ -533,8 +563,9 @@ const Navbar = () => {
                   <FaStore className="h-4 w-4 mr-2" />
                   <span>{t("menu.shop")}</span>
                   <FaChevronDown
-                    className={`ml-2 h-3 w-3 transition-transform duration-300 ${shopDropdown ? "rotate-180" : ""
-                      }`}
+                    className={`ml-2 h-3 w-3 transition-transform duration-300 ${
+                      shopDropdown ? "rotate-180" : ""
+                    }`}
                   />
                 </Link>
 
@@ -700,7 +731,10 @@ const Navbar = () => {
               </button>
 
               {/* Language Switcher Icon - Hidden on mobile, shown on desktop */}
-              <div className="hidden md:block relative" ref={languageDropdownRef}>
+              <div
+                className="hidden md:block relative"
+                ref={languageDropdownRef}
+              >
                 <button
                   onClick={() => setLanguageDropdown(!languageDropdown)}
                   className="flex items-center space-x-1 px-3 py-2.5 text-gray-700 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-xl transition-all duration-300"
@@ -715,8 +749,9 @@ const Navbar = () => {
                         : "AR"}
                   </span>
                   <FaChevronDown
-                    className={`h-3 w-3 transition-transform duration-300 ${languageDropdown ? "rotate-180" : ""
-                      }`}
+                    className={`h-3 w-3 transition-transform duration-300 ${
+                      languageDropdown ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
 
@@ -726,10 +761,11 @@ const Navbar = () => {
                       <button
                         key={lang.code}
                         onClick={() => changeLanguage(lang.code)}
-                        className={`flex items-center space-x-3 w-full px-4 py-3 text-sm hover:bg-gradient-to-r from-gray-50 to-white transition-all duration-300 ${i18n.language === lang.code
+                        className={`flex items-center space-x-3 w-full px-4 py-3 text-sm hover:bg-gradient-to-r from-gray-50 to-white transition-all duration-300 ${
+                          i18n.language === lang.code
                             ? "text-primary-600 bg-gradient-to-r from-primary-50 to-primary-100/50"
                             : "text-gray-700"
-                          }`}
+                        }`}
                       >
                         <span className="text-lg">{lang.flag}</span>
                         <span className="font-semibold">{lang.name}</span>
@@ -766,10 +802,11 @@ const Navbar = () => {
               >
                 <FaHeart className="h-5 w-5" />
                 <span
-                  className={`absolute -top-1.5 -right-1.5 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 shadow-lg ${wishlistCount > 0
+                  className={`absolute -top-1.5 -right-1.5 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 shadow-lg ${
+                    wishlistCount > 0
                       ? "bg-gradient-to-r from-red-500 to-pink-500 scale-100 opacity-100"
                       : "scale-0 opacity-0"
-                    }`}
+                  }`}
                   key={`wishlist-badge-${wishlistCount}`}
                 >
                   {wishlistCount > 9 ? "9+" : wishlistCount}
@@ -788,10 +825,11 @@ const Navbar = () => {
               >
                 <FaShoppingCart className="h-5 w-5" />
                 <span
-                  className={`absolute -top-1.5 -right-1.5 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 ${cartItemCount > 0
+                  className={`absolute -top-1.5 -right-1.5 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 ${
+                    cartItemCount > 0
                       ? "bg-gradient-to-r from-primary-500 to-primary-600 scale-100 opacity-100"
                       : "scale-0 opacity-0"
-                    }`}
+                  }`}
                   key={`cart-badge-${cartItemCount}`}
                 >
                   {cartItemCount > 9 ? "9+" : cartItemCount}
@@ -815,8 +853,9 @@ const Navbar = () => {
                         <FaUserCog className="h-4 w-4" />
                         <span>{t("user.admin")}</span>
                         <FaChevronDown
-                          className={`h-3 w-3 transition-transform duration-300 ${adminDropdown ? "rotate-180" : ""
-                            }`}
+                          className={`h-3 w-3 transition-transform duration-300 ${
+                            adminDropdown ? "rotate-180" : ""
+                          }`}
                         />
                       </button>
                       {adminDropdown && (
@@ -843,17 +882,24 @@ const Navbar = () => {
                       className="flex items-center space-x-3 px-4 py-2.5 text-gray-700 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-xl transition-all duration-300"
                     >
                       <FaUser className="h-5 w-5 text-gray-600" />
-                      <span className="font-semibold text-sm">{user?.name}</span>
+                      <span className="font-semibold text-sm">
+                        {user?.name}
+                      </span>
                       <FaChevronDown
-                        className={`h-3 w-3 transition-transform duration-300 ${userDropdown ? "rotate-180" : ""
-                          }`}
+                        className={`h-3 w-3 transition-transform duration-300 ${
+                          userDropdown ? "rotate-180" : ""
+                        }`}
                       />
                     </button>
                     {userDropdown && (
                       <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl py-2 border border-gray-100 z-10 backdrop-blur-lg bg-white/95">
                         <div className="px-4 py-3 border-b border-gray-100">
-                          <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
-                          <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {user?.name}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {user?.email}
+                          </p>
                         </div>
                         <Link
                           to="/wishlist"
@@ -987,10 +1033,11 @@ const Navbar = () => {
                           changeLanguage(lang.code);
                           setIsOpen(false);
                         }}
-                        className={`flex flex-col items-center justify-center py-4 rounded-xl text-sm font-semibold transition-all duration-300 ${i18n.language === lang.code
+                        className={`flex flex-col items-center justify-center py-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                          i18n.language === lang.code
                             ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg"
                             : "bg-gray-50 text-gray-700 hover:bg-gradient-to-r from-gray-100 to-white border border-gray-200"
-                          }`}
+                        }`}
                       >
                         <span className="text-2xl mb-2">{lang.flag}</span>
                         <span>{lang.name}</span>
@@ -1010,7 +1057,9 @@ const Navbar = () => {
                   <div className="w-10 h-10 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center">
                     <FaHome className="h-5 w-5 text-primary-600" />
                   </div>
-                  <span className="font-semibold text-base">{t("menu.home")}</span>
+                  <span className="font-semibold text-base">
+                    {t("menu.home")}
+                  </span>
                 </Link>
 
                 <Link
@@ -1021,7 +1070,9 @@ const Navbar = () => {
                   <div className="w-10 h-10 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center">
                     <FaStore className="h-5 w-5 text-primary-600" />
                   </div>
-                  <span className="font-semibold text-base">{t("menu.shop")}</span>
+                  <span className="font-semibold text-base">
+                    {t("menu.shop")}
+                  </span>
                 </Link>
 
                 {/* Shop Categories in Mobile */}

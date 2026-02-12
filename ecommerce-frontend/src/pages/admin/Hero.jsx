@@ -1,3 +1,4 @@
+// Hero.jsx (Admin) – Full width version
 import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
@@ -703,7 +704,8 @@ const Hero = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Full width container – no max-width constraint */}
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         {/* Enhanced Header */}
         <div className="mb-10 text-center">
           <div className="inline-flex items-center justify-center p-3 bg-gradient-to-r from-primary-100 to-primary-50 rounded-2xl mb-4">

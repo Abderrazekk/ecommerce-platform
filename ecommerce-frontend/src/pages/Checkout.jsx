@@ -1,3 +1,4 @@
+// Checkout.jsx – Premium green‑themed with primary color palette
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +9,17 @@ import {
   savePhone,
 } from "../redux/slices/cart.slice";
 import { formatPrice } from "../utils/formatPrice";
-import { Package, MapPin, Phone, Truck, AlertCircle } from "lucide-react";
+import {
+  Package,
+  MapPin,
+  Phone,
+  Truck,
+  AlertCircle,
+  CreditCard,
+  Check,
+  ChevronRight,
+  Home,
+} from "lucide-react";
 
 const Checkout = () => {
   const { cartItems } = useSelector((state) => state.cart);
@@ -126,71 +137,95 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-12 lg:py-16 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
+            Checkout
+          </h1>
+          <p className="text-gray-500 mt-2 text-lg">
+            Complete your purchase in a few steps
+          </p>
+        </div>
 
-        {/* Debug Info Banner */}
+        {/* Debug Warning Banner – subtle, expandable */}
         {highestShippingFee === 0 && cartItems.length > 0 && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-center">
-              <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
-              <div>
-                <h3 className="font-medium text-yellow-800">
-                  Shipping Fee Warning
-                </h3>
-                <p className="text-sm text-yellow-700">
-                  No shipping fees found in cart items. This may indicate a data
-                  issue.
-                </p>
-                <div className="mt-2 text-xs">
+          <div className="mb-8 p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4 animate-fade-in">
+            <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-800 flex-1">
+              <p className="font-semibold">Shipping Fee Warning</p>
+              <p className="text-amber-700">
+                No shipping fees found in cart items. This may indicate a data
+                issue.
+              </p>
+              <details className="mt-2 text-xs text-amber-600">
+                <summary className="cursor-pointer hover:text-amber-800 font-medium">
+                  Debug details
+                </summary>
+                <div className="mt-2 bg-amber-100/50 p-3 rounded-xl">
                   <strong>Cart Items:</strong> {cartItems.length} items
                   <br />
                   <strong>Shipping Fees:</strong> {JSON.stringify(shippingFees)}
                 </div>
-              </div>
+              </details>
             </div>
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Shipping Information */}
-            <div className="space-y-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold mb-6 flex items-center">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  Shipping Information
-                </h2>
-
-                <div className="space-y-4">
+          {/* Two-column layout: shipping (2/3) + summary (1/3) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+            {/* Shipping Information – left column */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Step 1: Shipping Information */}
+              <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-7 lg:p-8">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-2xl text-lg font-bold shadow-md">
+                    1
+                  </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={user?.name || ""}
-                      disabled
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
-                    />
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Shipping Information
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Full Name (disabled) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Full Name
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={user?.name || ""}
+                          disabled
+                          className="w-full px-4 py-3.5 border border-gray-200 rounded-2xl bg-gray-50 text-gray-600 text-base focus:ring-0 cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email (disabled) */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={user?.email || ""}
+                        disabled
+                        className="w-full px-4 py-3.5 border border-gray-200 rounded-2xl bg-gray-50 text-gray-600 text-base focus:ring-0 cursor-not-allowed"
+                      />
+                    </div>
                   </div>
 
+                  {/* Phone Number */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={user?.email || ""}
-                      disabled
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-1 flex items-center">
-                      <Phone className="h-4 w-4 mr-1" />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Phone className="h-4 w-4 inline mr-1.5" />
                       Phone Number *
                     </label>
                     <input
@@ -198,21 +233,25 @@ const Checkout = () => {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       required
-                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.phone ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-4 py-3.5 border rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-shadow ${
+                        errors.phone
+                          ? "border-red-300 bg-red-50"
+                          : "border-gray-200"
                       }`}
                       placeholder="+216 XX XXX XXX"
                     />
                     {errors.phone && (
-                      <p className="mt-1 text-sm text-red-600 flex items-center">
-                        <AlertCircle className="h-4 w-4 mr-1" />
+                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
                         {errors.phone}
                       </p>
                     )}
                   </div>
 
+                  {/* Shipping Address */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <MapPin className="h-4 w-4 inline mr-1.5" />
                       Shipping Address *
                     </label>
                     <textarea
@@ -220,135 +259,166 @@ const Checkout = () => {
                       onChange={(e) => setShippingAddress(e.target.value)}
                       required
                       rows="4"
-                      className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      className={`w-full px-4 py-3.5 border rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-shadow resize-none ${
                         errors.shippingAddress
-                          ? "border-red-500"
-                          : "border-gray-300"
+                          ? "border-red-300 bg-red-50"
+                          : "border-gray-200"
                       }`}
                       placeholder="Street address, City, Postal code, Country"
                     />
                     {errors.shippingAddress && (
-                      <p className="mt-1 text-sm text-red-600 flex items-center">
-                        <AlertCircle className="h-4 w-4 mr-1" />
+                      <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                        <AlertCircle className="h-4 w-4" />
                         {errors.shippingAddress}
                       </p>
                     )}
-                    <p className="text-sm text-gray-500 mt-1">
-                      We'll deliver your order to this address
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2: Payment – visual step */}
+              <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-7 lg:p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-600 rounded-2xl text-lg font-bold border border-gray-200">
+                    2
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Payment Method
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      Pay when you receive your order
+                    </p>
+                  </div>
+                  <span className="ml-auto bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-xs font-medium border border-gray-200">
+                    Cash on Delivery
+                  </span>
+                </div>
+                <div className="pl-14">
+                  <div className="bg-primary-50 border border-primary-100 rounded-2xl p-5 flex items-center gap-3">
+                    <CreditCard className="h-5 w-5 text-primary-600" />
+                    <p className="text-sm text-primary-700">
+                      You'll pay <strong>Cash on Delivery</strong> when your
+                      order arrives.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Order Summary */}
-            <div>
-              <div className="bg-white rounded-lg shadow p-6 sticky top-24">
-                <h2 className="text-xl font-semibold mb-6 flex items-center">
-                  <Package className="h-5 w-5 mr-2" />
-                  Order Summary
-                </h2>
+            {/* Order Summary – right column (sticky) */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-3xl shadow-card-hover border border-gray-100 p-7 lg:sticky lg:top-24">
+                <div className="flex items-center gap-3 mb-7">
+                  <div className="bg-gray-100 rounded-xl p-2">
+                    <Package className="h-5 w-5 text-gray-700" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Your Order
+                  </h2>
+                </div>
 
-                <div className="space-y-4 mb-6 max-h-96 overflow-y-auto pr-2">
+                {/* Order items list – scrollable */}
+                <div className="space-y-5 max-h-80 overflow-y-auto pr-1 -mr-1">
                   {cartItems.map((item) => (
                     <div
                       key={item.product}
-                      className="flex items-center justify-between py-3 border-b last:border-0"
+                      className="flex gap-4 py-4 border-b border-gray-100 last:border-0"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-start gap-3">
-                          <div className="h-16 w-16 flex-shrink-0">
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="h-full w-full object-cover rounded"
-                            />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {item.name}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              Qty: {item.quantity} ×{" "}
-                              {formatPrice(item.discountPrice || item.price)}
-                            </p>
-                            <div className="flex items-center text-xs text-gray-500 mt-1">
-                              <Truck className="h-3 w-3 mr-1" />
-                              <span>
-                                Shipping: {formatPrice(item.shippingFee || 0)}
-                              </span>
-                              {item.shippingFee === 0 && (
-                                <span className="ml-2 text-red-500 text-xs">
-                                  (Missing shipping fee)
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                      <div className="h-20 w-20 flex-shrink-0 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden shadow-sm">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
+                          {item.name}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Qty: {item.quantity}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-2">
+                          <Truck className="h-3 w-3 text-gray-400" />
+                          <span className="text-xs text-gray-500">
+                            Shipping: {formatPrice(item.shippingFee || 0)}
+                          </span>
+                          {item.shippingFee === 0 && (
+                            <span className="text-xs bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-medium">
+                              Missing
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <p className="font-semibold text-right">
+                      <div className="text-base font-bold text-gray-900 whitespace-nowrap">
                         {formatPrice(
                           (item.discountPrice || item.price) * item.quantity,
                         )}
-                      </p>
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="space-y-3 border-t pt-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Products Subtotal</span>
-                    <span className="font-medium">{formatPrice(subtotal)}</span>
+                {/* Totals */}
+                <div className="space-y-4 border-t border-gray-200 pt-6 mt-6">
+                  <div className="flex justify-between text-base">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-semibold text-gray-900">
+                      {formatPrice(subtotal)}
+                    </span>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
+                  <div className="flex justify-between text-base">
+                    <div className="flex items-center gap-1.5">
                       <Truck className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-600">Shipping Fee</span>
+                      <span className="text-gray-600">Shipping</span>
                     </div>
                     <div className="text-right">
                       {isFreeShipping ? (
-                        <div className="flex flex-col items-end">
-                          <span className="text-green-600 font-medium">
-                            FREE
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            (Order over {formatPrice(FREE_SHIPPING_THRESHOLD)})
-                          </span>
-                        </div>
+                        <span className="text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-full text-sm">
+                          FREE
+                        </span>
                       ) : (
-                        <div className="flex flex-col items-end">
-                          <span className="font-medium">
+                        <>
+                          <span className="font-semibold text-gray-900">
                             {formatPrice(shipping)}
                           </span>
                           {highestShippingFee > 0 && (
-                            <span className="text-xs text-gray-500">
-                              Based on highest product shipping fee:{" "}
-                              {formatPrice(highestShippingFee)}
-                            </span>
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              (highest product fee)
+                            </div>
                           )}
-                        </div>
+                        </>
                       )}
                     </div>
                   </div>
 
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>Total Amount</span>
-                      <span>{formatPrice(total)}</span>
+                  <div className="border-t border-gray-200 pt-4 mt-4">
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-lg font-bold text-gray-900">
+                        Total
+                      </span>
+                      <span className="text-3xl font-extrabold text-gray-900">
+                        {formatPrice(total)}
+                      </span>
                     </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Including {formatPrice(shipping)} shipping fee
+                    </p>
                   </div>
                 </div>
 
+                {/* Place Order Button */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full btn-primary py-3 text-lg mt-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-8 w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold py-5 px-6 rounded-2xl shadow-button hover:shadow-button-hover transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3 text-lg"
                 >
                   {loading ? (
-                    <span className="flex items-center justify-center">
+                    <>
                       <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        className="animate-spin h-5 w-5 text-white"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -368,20 +438,25 @@ const Checkout = () => {
                         ></path>
                       </svg>
                       Placing Order...
-                    </span>
+                    </>
                   ) : (
-                    "Place Order"
+                    <>
+                      <CreditCard className="h-5 w-5" />
+                      Place Order
+                      <ChevronRight className="h-5 w-5" />
+                    </>
                   )}
                 </button>
 
-                <div className="mt-6 pt-6 border-t">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">
-                    Order Breakdown
+                {/* Order breakdown – subtle */}
+                <div className="mt-6 pt-5 border-t border-gray-100">
+                  <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
+                    Order Summary
                   </h3>
-                  <div className="text-xs text-gray-600 space-y-1">
+                  <div className="text-xs text-gray-600 space-y-2 bg-gray-50 p-4 rounded-2xl">
                     <div className="flex justify-between">
-                      <span>Number of items:</span>
-                      <span>
+                      <span>Items:</span>
+                      <span className="font-medium">
                         {cartItems.reduce(
                           (acc, item) => acc + item.quantity,
                           0,
@@ -390,15 +465,23 @@ const Checkout = () => {
                     </div>
                     <div className="flex justify-between">
                       <span>Products total:</span>
-                      <span>{formatPrice(subtotal)}</span>
+                      <span className="font-medium">
+                        {formatPrice(subtotal)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Shipping fee:</span>
-                      <span>{formatPrice(shipping)}</span>
+                      <span className="font-medium">
+                        {formatPrice(shipping)}
+                      </span>
                     </div>
-                    <div className="flex justify-between font-medium text-gray-900">
-                      <span>Order total:</span>
-                      <span>{formatPrice(total)}</span>
+                    <div className="flex justify-between pt-2 border-t border-gray-200 mt-2">
+                      <span className="font-semibold text-gray-900">
+                        Order total:
+                      </span>
+                      <span className="font-bold text-gray-900">
+                        {formatPrice(total)}
+                      </span>
                     </div>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 import {
   fetchProducts,
   fetchBrands,
@@ -29,14 +30,35 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+// Backend category enum → translation key
+const CATEGORY_ENUM_TO_KEY = {
+  "Electronics & Gadgets": "electronics",
+  "Fashion & Apparel": "fashion",
+  "Beauty & Personal Care": "beauty",
+  "Home & Kitchen": "home",
+  "Fitness & Outdoors": "fitness",
+  "Baby & Kids": "baby",
+  Pets: "pets",
+  "Automotive & Tools": "automotive",
+  "Lifestyle & Hobbies": "lifestyle",
+};
+
+// Special pseudo-category for AliExpress (not a real backend category)
+const ALIEXPRESS_CATEGORY_VALUE = "aliexpress";
+
 const Shop = () => {
   const { t } = useTranslation("shop");
   const dispatch = useDispatch();
+  const location = useLocation();
+
   const { products, loading, pagination, brands } = useSelector(
     (state) => state.products,
   );
 
-  const [selectedCategory, setSelectedCategory] = useState(t("categories.all"));
+  // ------------------------------------------------------------
+  // State – using backend enum values or special constants
+  // ------------------------------------------------------------
+  const [selectedCategory, setSelectedCategory] = useState(""); // "" = All
   const [selectedBrand, setSelectedBrand] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,104 +70,118 @@ const Shop = () => {
   const [aliExpressOnly, setAliExpressOnly] = useState(false);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Filter panel states
+  // Filter panel expand/collapse
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isBrandOpen, setIsBrandOpen] = useState(true);
   const [isPriceOpen, setIsPriceOpen] = useState(true);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(true);
 
-  // Initialize categories with translations
-  const categories = [
-    t("categories.all"),
-    t("categories.electronics"),
-    t("categories.fashion"),
-    t("categories.beauty"),
-    t("categories.home"),
-    t("categories.fitness"),
-    t("categories.baby"),
-    t("categories.pets"),
-    t("categories.automotive"),
-    t("categories.lifestyle"),
-    t("categories.aliexpress"),
+  // ------------------------------------------------------------
+  // Category options for radio buttons (value = backend enum or special)
+  // ------------------------------------------------------------
+  const categoryOptions = [
+    { value: "", label: t("categories.all") },
+    ...Object.entries(CATEGORY_ENUM_TO_KEY).map(([enumVal, key]) => ({
+      value: enumVal,
+      label: t(`categories.${key}`),
+    })),
+    { value: ALIEXPRESS_CATEGORY_VALUE, label: t("categories.aliexpress") },
   ];
 
+  // ------------------------------------------------------------
+  // 1. Read URL query parameters on mount & when URL changes
+  // ------------------------------------------------------------
   useEffect(() => {
-    dispatch(setCategories(categories));
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get("category");
+    const searchParam = params.get("search");
+    const brandParam = params.get("brand");
+    const pageParam = params.get("page");
+
+    // Category – only set if it matches a known enum or the special "aliexpress"
+    if (categoryParam) {
+      if (
+        Object.keys(CATEGORY_ENUM_TO_KEY).includes(categoryParam) ||
+        categoryParam === ALIEXPRESS_CATEGORY_VALUE
+      ) {
+        setSelectedCategory(categoryParam);
+      } else {
+        setSelectedCategory(""); // fallback to All
+      }
+    } else {
+      setSelectedCategory("");
+    }
+
+    if (searchParam) setSearchTerm(searchParam);
+    if (brandParam) setSelectedBrand(brandParam);
+    if (pageParam) setCurrentPage(parseInt(pageParam, 10) || 1);
+  }, [location.search]);
+
+  // ------------------------------------------------------------
+  // 2. Fetch brands once (static list)
+  // ------------------------------------------------------------
+  useEffect(() => {
     dispatch(fetchBrands());
   }, [dispatch]);
 
+  // ------------------------------------------------------------
+  // 3. Fetch products whenever filters change
+  // ------------------------------------------------------------
   useEffect(() => {
-    const category =
-      selectedCategory === t("categories.all") ? "" : selectedCategory;
-    const brand = selectedBrand || "";
-
-    // Handle AliExpress filter
+    let category = selectedCategory;
     let isAliExpress = "";
-    if (selectedCategory === t("categories.aliexpress")) {
+
+    // Special handling for the AliExpress pseudo-category
+    if (selectedCategory === ALIEXPRESS_CATEGORY_VALUE) {
       isAliExpress = "true";
+      category = ""; // clear category filter, only use isAliExpress
     }
 
     dispatch(
       fetchProducts({
         page: currentPage,
-        category:
-          selectedCategory === t("categories.aliexpress") ? "" : category,
+        limit: 12,
+        category: category,
         search: searchTerm,
-        brand,
+        brand: selectedBrand,
         isAliExpress,
       }),
     );
-  }, [dispatch, currentPage, selectedCategory, searchTerm, selectedBrand, t]);
+  }, [dispatch, currentPage, selectedCategory, searchTerm, selectedBrand]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setCurrentPage(1);
-  };
-
-  const handleClearFilters = () => {
-    setSelectedCategory(t("categories.all"));
-    setSelectedBrand("");
-    setSearchTerm("");
-    setPriceRange({ min: 0, max: 10000 });
-    setSortBy("newest");
-    setInStockOnly(false);
-    setDiscountedOnly(false);
-    setFeaturedOnly(false);
-    setAliExpressOnly(false);
-    setCurrentPage(1);
-    setIsMobileFilterOpen(false);
-  };
-
+  // ------------------------------------------------------------
+  // 4. Client-side filtering (applied on current page's products)
+  // ------------------------------------------------------------
   const filteredProducts = useCallback(() => {
     let filtered = [...products];
 
-    // Apply price filter
+    // Price range
     filtered = filtered.filter(
       (product) =>
         product.price >= priceRange.min && product.price <= priceRange.max,
     );
 
-    // Apply in stock filter
+    // In stock
     if (inStockOnly) {
       filtered = filtered.filter((product) => product.stock > 0);
     }
 
-    // Apply discount filter
+    // Discounted
     if (discountedOnly) {
       filtered = filtered.filter((product) => product.discountPrice);
     }
 
-    // Apply featured filter
+    // Featured
     if (featuredOnly) {
       filtered = filtered.filter((product) => product.isFeatured);
     }
 
-    // Apply AliExpress filter locally
+    // AliExpress checkbox (independent of category)
     if (aliExpressOnly) {
       filtered = filtered.filter((product) => product.isAliExpress);
     }
 
-    // Apply sorting
+    // Sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "price-low":
@@ -171,6 +207,28 @@ const Shop = () => {
     sortBy,
   ]);
 
+  // ------------------------------------------------------------
+  // Handlers
+  // ------------------------------------------------------------
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setSelectedCategory("");
+    setSelectedBrand("");
+    setSearchTerm("");
+    setPriceRange({ min: 0, max: 10000 });
+    setSortBy("newest");
+    setInStockOnly(false);
+    setDiscountedOnly(false);
+    setFeaturedOnly(false);
+    setAliExpressOnly(false);
+    setCurrentPage(1);
+    setIsMobileFilterOpen(false);
+  };
+
   const handlePriceChange = (type, value) => {
     setPriceRange((prev) => ({
       ...prev,
@@ -178,6 +236,47 @@ const Shop = () => {
     }));
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < pagination.totalPages) {
+      setCurrentPage((prev) => prev + 1);
+      scrollToTop();
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+      scrollToTop();
+    }
+  };
+
+  // Helper to get display label for a category value
+  const getCategoryLabel = (catValue) => {
+    if (catValue === "") return t("categories.all");
+    if (catValue === ALIEXPRESS_CATEGORY_VALUE)
+      return t("categories.aliexpress");
+    const key = CATEGORY_ENUM_TO_KEY[catValue];
+    return key ? t(`categories.${key}`) : catValue;
+  };
+
+  // Active filters count (for badges)
+  const activeFiltersCount =
+    (selectedCategory !== "" ? 1 : 0) +
+    (selectedBrand ? 1 : 0) +
+    (searchTerm ? 1 : 0) +
+    (inStockOnly ? 1 : 0) +
+    (discountedOnly ? 1 : 0) +
+    (featuredOnly ? 1 : 0) +
+    (aliExpressOnly ? 1 : 0) +
+    (priceRange.min > 0 || priceRange.max < 10000 ? 1 : 0);
+
+  // ------------------------------------------------------------
+  // Render filter section helper
+  // ------------------------------------------------------------
   const renderFilterSection = (title, isOpen, setIsOpen, children) => (
     <div className="border-b border-gray-100 last:border-0">
       <button
@@ -198,50 +297,24 @@ const Shop = () => {
     </div>
   );
 
-  const activeFiltersCount =
-    (selectedCategory !== t("categories.all") ? 1 : 0) +
-    (selectedBrand ? 1 : 0) +
-    (searchTerm ? 1 : 0) +
-    (inStockOnly ? 1 : 0) +
-    (discountedOnly ? 1 : 0) +
-    (featuredOnly ? 1 : 0) +
-    (aliExpressOnly ? 1 : 0) +
-    (priceRange.min > 0 || priceRange.max < 10000 ? 1 : 0);
-
-  // Scroll to top when page changes
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < pagination.totalPages) {
-      setCurrentPage((prev) => prev + 1);
-      scrollToTop();
-    }
-  };
-
-  const goToPrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-      scrollToTop();
-    }
-  };
-
-  // Mobile Filter Drawer Component
+  // ------------------------------------------------------------
+  // Mobile Filter Drawer
+  // ------------------------------------------------------------
   const MobileFilterDrawer = () => (
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 ${isMobileFilterOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+          isMobileFilterOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
         onClick={() => setIsMobileFilterOpen(false)}
       />
 
       {/* Drawer */}
       <div
-        className={`fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isMobileFilterOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+          isMobileFilterOpen ? "translate-x-0" : "translate-x-full"
+        }`}
       >
         {/* Drawer Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4">
@@ -277,25 +350,28 @@ const Shop = () => {
             isCategoryOpen,
             setIsCategoryOpen,
             <div className="space-y-2">
-              {categories.map((category) => (
-                <div key={category} className="flex items-center group">
+              {categoryOptions.map((option) => (
+                <div
+                  key={option.value || "all"}
+                  className="flex items-center group"
+                >
                   <div className="relative flex items-center">
                     <input
                       type="radio"
-                      id={`cat-mobile-${category}`}
+                      id={`cat-mobile-${option.value || "all"}`}
                       name="category-mobile"
-                      checked={selectedCategory === category}
+                      checked={selectedCategory === option.value}
                       onChange={() => {
-                        setSelectedCategory(category);
+                        setSelectedCategory(option.value);
                         setCurrentPage(1);
                       }}
                       className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-1 transition-all duration-200"
                     />
                     <label
-                      htmlFor={`cat-mobile-${category}`}
+                      htmlFor={`cat-mobile-${option.value || "all"}`}
                       className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200"
                     >
-                      {category}
+                      {option.label}
                     </label>
                   </div>
                 </div>
@@ -551,13 +627,12 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8">
-      {/* Full width container */}
       <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Mobile Filter Drawer */}
         <MobileFilterDrawer />
 
         {/* AliExpress Warning Banner */}
-        {selectedCategory === t("categories.aliexpress") && (
+        {selectedCategory === ALIEXPRESS_CATEGORY_VALUE && (
           <div className="mb-8 animate-fadeIn">
             <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-6 shadow-sm">
               <div className="flex items-start gap-4">
@@ -663,11 +738,11 @@ const Shop = () => {
                   </span>
                 </div>
 
-                {selectedCategory !== t("categories.all") && (
+                {selectedCategory !== "" && (
                   <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary-50 to-primary-100 text-primary-800 rounded-full text-sm font-semibold border border-primary-200">
-                    {selectedCategory}
+                    {getCategoryLabel(selectedCategory)}
                     <button
-                      onClick={() => setSelectedCategory(t("categories.all"))}
+                      onClick={() => setSelectedCategory("")}
                       className="hover:bg-primary-200/50 rounded-full p-0.5 transition-colors"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -742,12 +817,12 @@ const Shop = () => {
                   </span>
                 )}
 
-                {selectedCategory === t("categories.aliexpress") && (
+                {selectedCategory === ALIEXPRESS_CATEGORY_VALUE && (
                   <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-50 to-amber-100 text-orange-800 rounded-full text-sm font-semibold border border-orange-300">
                     <Globe className="h-3.5 w-3.5" />
                     {t("filterTags.aliexpress")}
                     <button
-                      onClick={() => setSelectedCategory(t("categories.all"))}
+                      onClick={() => setSelectedCategory("")}
                       className="hover:bg-orange-200/50 rounded-full p-0.5 transition-colors"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -756,7 +831,7 @@ const Shop = () => {
                 )}
 
                 {aliExpressOnly &&
-                  selectedCategory !== t("categories.aliexpress") && (
+                  selectedCategory !== ALIEXPRESS_CATEGORY_VALUE && (
                     <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-50 to-amber-100 text-orange-800 rounded-full text-sm font-semibold border border-orange-300">
                       <Globe className="h-3.5 w-3.5" />
                       {t("filterTags.aliexpressOnly")}
@@ -782,7 +857,7 @@ const Shop = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Desktop Sidebar Filters - Hidden on Mobile */}
+          {/* Desktop Sidebar Filters */}
           <div className="hidden lg:block lg:w-80 xl:w-96">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-24 transition-all duration-300 hover:shadow-md">
               <div className="flex items-center justify-between mb-8">
@@ -801,31 +876,34 @@ const Shop = () => {
                 )}
               </div>
 
-              {/* Categories Filter */}
+              {/* Categories Filter - Desktop */}
               {renderFilterSection(
                 t("filters.sections.categories"),
                 isCategoryOpen,
                 setIsCategoryOpen,
                 <div className="space-y-2">
-                  {categories.map((category) => (
-                    <div key={category} className="flex items-center group">
+                  {categoryOptions.map((option) => (
+                    <div
+                      key={option.value || "all"}
+                      className="flex items-center group"
+                    >
                       <div className="relative flex items-center">
                         <input
                           type="radio"
-                          id={`cat-${category}`}
+                          id={`cat-${option.value || "all"}`}
                           name="category"
-                          checked={selectedCategory === category}
+                          checked={selectedCategory === option.value}
                           onChange={() => {
-                            setSelectedCategory(category);
+                            setSelectedCategory(option.value);
                             setCurrentPage(1);
                           }}
                           className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-1 transition-all duration-200"
                         />
                         <label
-                          htmlFor={`cat-${category}`}
+                          htmlFor={`cat-${option.value || "all"}`}
                           className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200"
                         >
-                          {category}
+                          {option.label}
                         </label>
                       </div>
                     </div>
@@ -833,7 +911,7 @@ const Shop = () => {
                 </div>,
               )}
 
-              {/* Price Range Filter */}
+              {/* Price Range Filter - Desktop */}
               {renderFilterSection(
                 t("filters.sections.priceRange"),
                 isPriceOpen,
@@ -901,7 +979,7 @@ const Shop = () => {
                 </div>,
               )}
 
-              {/* Brands Filter */}
+              {/* Brands Filter - Desktop */}
               {renderFilterSection(
                 t("filters.sections.brands"),
                 isBrandOpen,
@@ -962,7 +1040,7 @@ const Shop = () => {
                 </div>,
               )}
 
-              {/* Additional Features Filter */}
+              {/* Additional Features Filter - Desktop */}
               {renderFilterSection(
                 t("filters.sections.features"),
                 isFeaturesOpen,
@@ -1060,7 +1138,7 @@ const Shop = () => {
                 </div>,
               )}
 
-              {/* Quick Actions */}
+              {/* Reset Filters Button */}
               <div className="mt-8 pt-6 border-t border-gray-100">
                 <button
                   onClick={handleClearFilters}
@@ -1078,9 +1156,8 @@ const Shop = () => {
             {/* Sort and Results Info with Mobile Filters Button */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-
                 <div className="flex items-center gap-4">
-                  {/* Mobile Filters Button - Hidden on Desktop */}
+                  {/* Mobile Filters Button */}
                   <button
                     onClick={() => setIsMobileFilterOpen(true)}
                     className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300"
@@ -1109,7 +1186,6 @@ const Shop = () => {
               <>
                 {filteredProducts().length > 0 ? (
                   <>
-                    {/* Products Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                       {filteredProducts().map((product) => (
                         <div
@@ -1121,7 +1197,7 @@ const Shop = () => {
                       ))}
                     </div>
 
-                    {/* Pagination - Bottom Only for Desktop */}
+                    {/* Desktop Pagination */}
                     {pagination.totalPages > 1 && (
                       <div className="hidden lg:block">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mt-4">
@@ -1129,7 +1205,7 @@ const Shop = () => {
                             <button
                               onClick={goToPrevPage}
                               disabled={currentPage === 1}
-                              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-100 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:from-gray-100 disabled:hover:to-gray-50 group border border-gray-300"
+                              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-100 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed group border border-gray-300"
                             >
                               <ChevronLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
                               <span className="font-semibold">
@@ -1204,7 +1280,7 @@ const Shop = () => {
                             <button
                               onClick={goToNextPage}
                               disabled={currentPage === pagination.totalPages}
-                              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-100 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:from-gray-100 disabled:hover:to-gray-50 group border border-gray-300"
+                              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 rounded-xl hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-100 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed group border border-gray-300"
                             >
                               <span className="font-semibold">
                                 {t("pagination.next")}

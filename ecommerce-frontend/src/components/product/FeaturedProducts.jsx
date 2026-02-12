@@ -34,11 +34,6 @@ const FeaturedProducts = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Premium Header Section */}
         <div className="text-center mb-16 lg:mb-20">
-          <div className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-primary-50 to-primary-100 rounded-full mb-6">
-            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">
-              Premium Selection
-            </span>
-          </div>
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
             {t("title")}
           </h2>
