@@ -443,8 +443,8 @@ const Navbar = () => {
     <>
       {/* Premium Top Header Bar */}
       <div className="bg-gradient-to-r from-gray-900 to-black text-white">
-        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center py-3 space-y-2 md:space-y-0">
+        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center py-2 space-y-2 md:space-y-0">
             {/* Left side - Contact Info - REMOVED CADRE */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 text-sm">
               <div className="flex items-center gap-2 group">

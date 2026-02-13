@@ -11,7 +11,7 @@ const FeaturedProducts = () => {
   const { featuredProducts, loading } = useSelector((state) => state.products);
 
   useEffect(() => {
-    dispatch(fetchFeaturedProducts({ limit: 8 }));
+    dispatch(fetchFeaturedProducts({ limit: 10 })); // changed from 8 to 10
   }, [dispatch]);
 
   if (loading) {
@@ -32,7 +32,6 @@ const FeaturedProducts = () => {
   return (
     <div className="py-16 lg:py-24 bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Premium Header Section */}
         <div className="text-center mb-16 lg:mb-20">
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
             {t("title")}
@@ -42,9 +41,9 @@ const FeaturedProducts = () => {
           </p>
         </div>
 
-        {/* Products Grid */}
         {featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          // 5 columns on large screens, gap reduced slightly
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
             {featuredProducts.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}

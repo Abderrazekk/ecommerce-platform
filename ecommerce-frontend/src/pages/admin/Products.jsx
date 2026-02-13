@@ -20,6 +20,9 @@ import {
   Clock,
   Phone,
 } from "lucide-react";
+// Rich text editor
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const categories = [
   "Electronics & Gadgets",
@@ -44,7 +47,7 @@ const Products = () => {
   const [formData, setFormData] = useState({
     name: "",
     brand: "",
-    description: "",
+    description: "", // now stores HTML string
     price: "",
     discountPrice: "",
     shippingFee: "",
@@ -64,7 +67,7 @@ const Products = () => {
   const videoInputRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // NEW: Color variants state
+  // Color variants state
   const [colors, setColors] = useState([]); // each: { name, hex, images: [] (existing URLs), files: [] (new files), previews: [] }
 
   useEffect(() => {
@@ -111,15 +114,15 @@ const Products = () => {
       setRemoveExistingVideo(false);
       setImagesToRemove([]);
 
-      // NEW: Load colors from product
+      // Load colors from product
       if (product.colors && product.colors.length > 0) {
         setColors(
           product.colors.map((c) => ({
             name: c.name,
             hex: c.hex,
-            images: c.images || [], // existing image URLs
-            files: [], // no new files initially
-            previews: c.images || [], // use existing URLs as previews
+            images: c.images || [],
+            files: [],
+            previews: c.images || [],
           })),
         );
       } else {
@@ -147,7 +150,7 @@ const Products = () => {
       setVideoPreview(null);
       setRemoveExistingVideo(false);
       setImagesToRemove([]);
-      setColors([]); // reset colors
+      setColors([]);
     }
     setShowModal(true);
   };
@@ -187,10 +190,14 @@ const Products = () => {
     });
   };
 
+  // New handler for rich text description
+  const handleDescriptionChange = (value) => {
+    setFormData({ ...formData, description: value });
+  };
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
 
-    // Calculate total images (existing previews + new files)
     const totalImages = imagePreviews.length + files.length;
     if (totalImages > 6) {
       toast.error(
@@ -225,7 +232,6 @@ const Products = () => {
 
     setImageFiles((prev) => [...prev, ...validFiles]);
 
-    // Add previews for new files
     validFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -273,21 +279,17 @@ const Products = () => {
   };
 
   const removeImage = (index) => {
-    // Check if this is an existing image (from product.images) or a new one
     const isExistingImage =
       editingProduct && index < (editingProduct.images?.length || 0);
 
     if (isExistingImage) {
-      // For existing images, mark them for removal
       const imageId = editingProduct.images[index].public_id;
       setImagesToRemove((prev) => [...prev, imageId]);
     } else {
-      // For new images, remove from imageFiles
       const adjustedIndex = index - (editingProduct?.images?.length || 0);
       setImageFiles((prev) => prev.filter((_, i) => i !== adjustedIndex));
     }
 
-    // Remove from previews
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -300,7 +302,7 @@ const Products = () => {
     if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
-  // NEW: Color handlers
+  // Color handlers
   const handleColorChange = (index, field, value) => {
     const newColors = [...colors];
     newColors[index][field] = value;
@@ -311,7 +313,6 @@ const Products = () => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    // Validate files (optional: add size/type checks)
     const validFiles = files.filter((file) => file.type.startsWith("image/"));
     if (validFiles.length === 0) {
       toast.error("Please select valid image files.");
@@ -319,9 +320,7 @@ const Products = () => {
     }
 
     const newColors = [...colors];
-    // Store files for upload
     newColors[index].files = validFiles;
-    // Create previews
     const previews = validFiles.map((file) => URL.createObjectURL(file));
     newColors[index].previews = previews;
     setColors(newColors);
@@ -333,7 +332,7 @@ const Products = () => {
       {
         name: "",
         hex: "#000000",
-        images: [], // existing URLs (empty for new)
+        images: [],
         files: [],
         previews: [],
       },
@@ -400,7 +399,6 @@ const Products = () => {
       }
     }
 
-    // Validate shipping fee
     const shippingFeeStr = String(formData.shippingFee || "");
     if (shippingFeeStr && shippingFeeStr.trim() !== "") {
       const shippingNum = parseFloat(shippingFeeStr);
@@ -415,7 +413,6 @@ const Products = () => {
       }
     }
 
-    // Validate colors: each must have name and hex
     for (let i = 0; i < colors.length; i++) {
       const color = colors[i];
       if (!color.name || !color.name.trim()) {
@@ -433,7 +430,7 @@ const Products = () => {
     const productData = new FormData();
     productData.append("name", formData.name);
     productData.append("brand", formData.brand);
-    productData.append("description", formData.description);
+    productData.append("description", formData.description); // HTML string
     productData.append("price", String(formData.price));
 
     if (discountPriceStr && discountPriceStr.trim() !== "") {
@@ -447,7 +444,6 @@ const Products = () => {
       productData.append("discountPrice", "");
     }
 
-    // Shipping fee
     const shippingFeeNum = parseFloat(shippingFeeStr) || 0;
     productData.append("shippingFee", String(shippingFeeNum));
 
@@ -458,32 +454,26 @@ const Products = () => {
     productData.append("isVisible", formData.isVisible);
     productData.append("isAliExpress", formData.isAliExpress);
 
-    // Add only NEW main images
     imageFiles.forEach((file) => {
       productData.append("images", file);
     });
 
-    // Add images to remove if any
     imagesToRemove.forEach((publicId, idx) => {
       productData.append(`removeImages[${idx}]`, publicId);
     });
 
-    // Video handling
     if (videoFile) productData.append("video", videoFile);
     if (editingProduct && removeExistingVideo && !videoFile)
       productData.append("removeVideo", "true");
 
-    // NEW: Handle colors
     if (colors.length > 0) {
-      // Prepare colors array without temporary fields
       const colorsData = colors.map((c) => ({
         name: c.name,
         hex: c.hex,
-        images: c.images || [], // include existing URLs (for updates)
+        images: c.images || [],
       }));
       productData.append("colors", JSON.stringify(colorsData));
 
-      // Append new images for each color with field name "colorImages[index]"
       colors.forEach((color, idx) => {
         if (color.files && color.files.length > 0) {
           color.files.forEach((file) => {
@@ -561,7 +551,6 @@ const Products = () => {
               product.isAliExpress ? "border-orange-300" : "border-gray-200"
             }`}
           >
-            {/* Card content (unchanged) */}
             <div className="h-48 bg-gray-100 overflow-hidden relative">
               <img
                 src={product.images?.[0]?.url || ""}
@@ -711,7 +700,7 @@ const Products = () => {
 
               <form onSubmit={handleSubmit}>
                 <div className="space-y-4">
-                  {/* Product Images (unchanged) */}
+                  {/* Product Images */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Product Images {!editingProduct && "*"}
@@ -775,7 +764,7 @@ const Products = () => {
                     </p>
                   </div>
 
-                  {/* Product Video (unchanged) */}
+                  {/* Product Video */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Product Video (Optional)
@@ -815,7 +804,7 @@ const Products = () => {
                     <p className="text-xs text-gray-500 mt-1">Max 50MB</p>
                   </div>
 
-                  {/* Basic fields grid (unchanged) */}
+                  {/* Basic fields grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -845,17 +834,25 @@ const Products = () => {
                     </div>
                   </div>
 
+                  {/* Rich text description */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Description *
                     </label>
-                    <textarea
-                      name="description"
+                    <ReactQuill
+                      theme="snow"
                       value={formData.description}
-                      onChange={handleInputChange}
-                      required
-                      rows="3"
-                      className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onChange={handleDescriptionChange}
+                      modules={{
+                        toolbar: [
+                          [{ header: [1, 2, 3, false] }],
+                          ["bold", "italic", "underline", "strike"],
+                          [{ color: [] }, { background: [] }],
+                          [{ list: "ordered" }, { list: "bullet" }],
+                          ["link", "clean"],
+                        ],
+                      }}
+                      className="bg-white"
                     />
                   </div>
 
@@ -958,7 +955,7 @@ const Products = () => {
                     </div>
                   </div>
 
-                  {/* NEW: Color Variants Section */}
+                  {/* Color Variants Section */}
                   <div className="border-t pt-4">
                     <h3 className="text-lg font-medium mb-2">
                       Color Variants (Optional)
@@ -1040,7 +1037,7 @@ const Products = () => {
                     </button>
                   </div>
 
-                  {/* Checkboxes (unchanged) */}
+                  {/* Checkboxes */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-4">
                       <div

@@ -20,15 +20,17 @@ import {
   Star,
   ShoppingBag,
   Zap,
+  Wallet,
 } from "lucide-react";
 import StarRating from "../common/StarRating";
+import DOMPurify from "dompurify";
 
 const ProductInfo = ({
   product,
   wishlistChecked,
   wishlistLoading,
-  selectedColor, // NEW
-  setSelectedColor, // NEW
+  selectedColor,
+  setSelectedColor,
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
@@ -164,41 +166,23 @@ const ProductInfo = ({
       )
     : 0;
 
-  // NEW: Color selector render function
-  // ProductInfo.jsx – inside the component, before return
-
+  // Color selector render
   const renderColorSelector = () => {
     if (!product.colors || product.colors.length === 0) return null;
 
     return (
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium text-gray-700">Color</h3>
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Default / Main Images button */}
-          <button
-            onClick={() => setSelectedColor(null)}
-            className={`
-            w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center text-xs font-medium
-            ${
-              selectedColor === null
-                ? "border-gray-900 bg-gray-900 text-white scale-110 ring-2 ring-offset-2 ring-gray-900"
-                : "border-gray-300 bg-white text-gray-700 hover:scale-105 hover:border-gray-400"
-            }
-          `}
-            title="Default images"
-          >
-            <span>All</span>
-          </button>
-
+      <div className="flex items-center gap-2">
+        <h3 className="text-sm font-medium text-gray-700">Colors : </h3>
+        <div className="flex flex-wrap items-center gap-2">
           {product.colors.map((color) => (
             <button
               key={color.hex + color.name}
               onClick={() => setSelectedColor(color)}
               className={`
-              w-10 h-10 rounded-full border-2 transition-all
+              w-8 h-8 rounded-full border-2 transition-all
               ${
                 selectedColor?.hex === color.hex
-                  ? "border-gray-900 scale-110 ring-2 ring-offset-2 ring-gray-900"
+                  ? "border-gray-900 scale-110 ring-offset-2"
                   : "border-gray-300 hover:scale-105"
               }
             `}
@@ -213,56 +197,13 @@ const ProductInfo = ({
 
   return (
     <div className="space-y-6">
-      {/* Product Header */}
-      <div className="space-y-4">
-        {/* Badges */}
-        <div className="flex flex-wrap gap-2">
-          {product.brand && (
-            <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full border border-gray-200">
-              {product.brand}
-            </span>
-          )}
-          <span className="inline-flex items-center px-3 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-full border border-primary-200">
-            {product.category}
-          </span>
-          {product.isAliExpress && (
-            <span className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full shadow-sm">
-              <Globe className="h-3 w-3 mr-1" />
-              AliExpress
-            </span>
-          )}
-          {product.isFeatured && (
-            <span className="inline-flex items-center px-3 py-1 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-full border border-yellow-200">
-              <Star className="h-3 w-3 mr-1 fill-current" />
-              Featured
-            </span>
-          )}
-        </div>
-
+      {/* Row 1: Product Name + Rating */}
+      <div className="flex justify-between items-start">
         <h1 className="text-2xl lg:text-3xl font-semibold text-gray-900 leading-tight tracking-tight">
           {product.name}
         </h1>
-
-        {/* Product Rating Display */}
-        {product.averageRating > 0 ? (
-          <div className="flex items-center space-x-3">
-            <StarRating
-              rating={product.averageRating}
-              readOnly
-              showNumber
-              size="md"
-            />
-            <span className="text-sm text-gray-600">
-              ({product.ratingsCount}{" "}
-              {product.ratingsCount === 1 ? "review" : "reviews"})
-            </span>
-          </div>
-        ) : (
-          <div className="text-sm text-gray-500">No reviews yet</div>
-        )}
-
-        {/* Wishlist & Share */}
-        <div className="flex items-center space-x-4">
+        {/* Right side: wishlist & share icons */}
+        <div className="flex items-center space-x-3">
           <button
             onClick={toggleWishlist}
             disabled={wishlistLoading}
@@ -283,6 +224,7 @@ const ProductInfo = ({
               }`}
             />
           </button>
+
           <div className="relative">
             <button
               onClick={handleShare}
@@ -312,7 +254,90 @@ const ProductInfo = ({
         </div>
       </div>
 
-      {/* AliExpress Delivery Notice */}
+      {/* Row 2: Color Selector + Wishlist & Share */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        {/* Left side: color selector (if exists) */}
+        <div className="flex-1">{renderColorSelector()}</div>
+
+        <div className="flex-shrink-0">
+          {product.averageRating > 0 ? (
+            <div className="flex items-center space-x-2">
+              <StarRating
+                rating={product.averageRating}
+                readOnly
+                showNumber
+                size="md"
+              />
+              <span className="text-sm text-gray-600 whitespace-nowrap">
+                ({product.ratingsCount}{" "}
+                {product.ratingsCount === 1 ? "review" : "reviews"})
+              </span>
+            </div>
+          ) : (
+            <div className="text-sm text-gray-500">No reviews yet</div>
+          )}
+        </div>
+      </div>
+
+      {/* Row 3: Price */}
+      <div className="flex items-baseline flex-wrap gap-3">
+        {product.discountPrice ? (
+          <>
+            <span className="text-3xl lg:text-4xl font-light text-gray-900">
+              {formatPrice(product.discountPrice)}
+            </span>
+            <span className="text-lg text-gray-500 line-through">
+              {formatPrice(product.price)}
+            </span>
+            <span className="inline-flex items-center px-2.5 py-1 bg-red-600 text-white rounded-full text-xs font-bold shadow-sm">
+              Save {discountPercentage}%
+            </span>
+          </>
+        ) : (
+          <span className="text-3xl lg:text-4xl font-light text-gray-900">
+            {formatPrice(product.price)}
+          </span>
+        )}
+      </div>
+
+      {/* Row 4: Stock Status + Shipping */}
+      <div className="flex flex-wrap items-center gap-4">
+        {/* Stock status */}
+        <div
+          className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${
+            product.stock > 10
+              ? "bg-green-50 text-green-700 border border-green-200"
+              : product.stock > 0
+                ? "bg-yellow-50 text-yellow-700 border border-yellow-200 animate-pulse-slow"
+                : "bg-red-50 text-red-700 border border-red-200"
+          }`}
+        >
+          <div
+            className={`w-2 h-2 rounded-full mr-1.5 ${
+              product.stock > 10
+                ? "bg-green-500"
+                : product.stock > 0
+                  ? "bg-yellow-500"
+                  : "bg-red-500"
+            }`}
+          />
+          {product.stock > 10
+            ? "In Stock"
+            : product.stock > 0
+              ? `Low Stock (${product.stock} left)`
+              : "Out of Stock"}
+        </div>
+
+        {/* Shipping fee */}
+        {product.shippingFee > 0 && (
+          <div className="flex items-center gap-1 text-sm text-gray-600">
+            <Truck className="h-4 w-4" />
+            <span>Shipping: {formatPrice(product.shippingFee)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* AliExpress Delivery Notice (if applicable) */}
       {product.isAliExpress && (
         <div className="bg-orange-50/80 border border-orange-200 rounded-xl p-4 backdrop-blur-sm">
           <div className="flex items-start gap-3">
@@ -333,78 +358,24 @@ const ProductInfo = ({
         </div>
       )}
 
-      {/* NEW: Color Selector */}
-      {renderColorSelector()}
-
-      {/* Pricing Section */}
-      <div className="space-y-3">
-        <div className="flex items-baseline flex-wrap gap-3">
-          {product.discountPrice ? (
-            <>
-              <span className="text-3xl lg:text-4xl font-light text-gray-900">
-                {formatPrice(product.discountPrice)}
-              </span>
-              <span className="text-lg text-gray-500 line-through">
-                {formatPrice(product.price)}
-              </span>
-              <span className="inline-flex items-center px-2.5 py-1 bg-red-600 text-white rounded-full text-xs font-bold shadow-sm">
-                Save {discountPercentage}%
-              </span>
-            </>
-          ) : (
-            <span className="text-3xl lg:text-4xl font-light text-gray-900">
-              {formatPrice(product.price)}
-            </span>
-          )}
-        </div>
-
-        {product.shippingFee > 0 && (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Truck className="h-4 w-4" />
-            <span>Shipping: {formatPrice(product.shippingFee)}</span>
-          </div>
-        )}
-
-        {/* Stock Status */}
-        <div className="flex items-center space-x-3">
-          <div
-            className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${
-              product.stock > 10
-                ? "bg-green-50 text-green-700 border border-green-200"
-                : product.stock > 0
-                  ? "bg-yellow-50 text-yellow-700 border border-yellow-200 animate-pulse-slow"
-                  : "bg-red-50 text-red-700 border border-red-200"
-            }`}
-          >
-            <div
-              className={`w-2 h-2 rounded-full mr-1.5 ${
-                product.stock > 10
-                  ? "bg-green-500"
-                  : product.stock > 0
-                    ? "bg-yellow-500"
-                    : "bg-red-500"
-              }`}
-            />
-            {product.stock > 10
-              ? "In Stock"
-              : product.stock > 0
-                ? `Low Stock (${product.stock} left)`
-                : "Out of Stock"}
-          </div>
-        </div>
-      </div>
-
-      {/* Description */}
+      {/* Row 5: Description */}
       <div className="space-y-2">
         <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
           Description
         </h3>
-        <p className="text-sm text-gray-700 leading-relaxed">
-          {product.description}
-        </p>
+        {product.description ? (
+          <div
+            className="prose prose-sm max-w-none text-gray-700"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(product.description),
+            }}
+          />
+        ) : (
+          <p className="text-sm text-gray-500 italic">No description</p>
+        )}
       </div>
 
-      {/* Tags */}
+      {/* Tags (if any) */}
       {product.tags && product.tags.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -461,8 +432,7 @@ const ProductInfo = ({
             <div className="bg-gray-50/80 p-5 rounded-xl border border-gray-100">
               <div className="flex justify-between items-center">
                 <div>
-                  <div className="text-sm text-gray-600 font-medium">Total</div>
-                  <div className="text-xs text-gray-500">Incl. VAT</div>
+                  <div className="text-sm text-gray-800 font-bold">Total</div>
                 </div>
                 <span className="text-2xl lg:text-3xl font-light text-gray-900">
                   {formatPrice(
@@ -528,16 +498,21 @@ const ProductInfo = ({
           {/* Features Grid */}
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
             {[
-              { icon: Shield, label: "2-Year Warranty", desc: "Full coverage" },
+              {
+                icon: Wallet,
+                label: "Cash on Delivery",
+                desc: "Pay when your order arrives",
+              },
+
               {
                 icon: RefreshCw,
-                label: "30-Day Returns",
+                label: "3-Day Returns",
                 desc: "Easy process",
               },
               {
                 icon: Globe,
-                label: "Worldwide Delivery",
-                desc: "International",
+                label: "Tunisia-wide Delivery",
+                desc: "All over Tunisia",
               },
               {
                 icon: Truck,

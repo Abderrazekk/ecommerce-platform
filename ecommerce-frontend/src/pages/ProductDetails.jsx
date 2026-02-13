@@ -70,7 +70,7 @@ const ProductDetails = () => {
     <div className="min-h-screen bg-gray-50">
 
       {/* Full‑width main content */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Left column – Product Media */}
           <div className="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-shadow duration-300 p-5 sm:p-6">

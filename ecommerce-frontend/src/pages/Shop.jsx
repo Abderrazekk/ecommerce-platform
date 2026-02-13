@@ -30,7 +30,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-// Backend category enum → translation key
 const CATEGORY_ENUM_TO_KEY = {
   "Electronics & Gadgets": "electronics",
   "Fashion & Apparel": "fashion",
@@ -43,7 +42,6 @@ const CATEGORY_ENUM_TO_KEY = {
   "Lifestyle & Hobbies": "lifestyle",
 };
 
-// Special pseudo-category for AliExpress (not a real backend category)
 const ALIEXPRESS_CATEGORY_VALUE = "aliexpress";
 
 const Shop = () => {
@@ -55,10 +53,7 @@ const Shop = () => {
     (state) => state.products,
   );
 
-  // ------------------------------------------------------------
-  // State – using backend enum values or special constants
-  // ------------------------------------------------------------
-  const [selectedCategory, setSelectedCategory] = useState(""); // "" = All
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -70,15 +65,11 @@ const Shop = () => {
   const [aliExpressOnly, setAliExpressOnly] = useState(false);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Filter panel expand/collapse
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isBrandOpen, setIsBrandOpen] = useState(true);
   const [isPriceOpen, setIsPriceOpen] = useState(true);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(true);
 
-  // ------------------------------------------------------------
-  // Category options for radio buttons (value = backend enum or special)
-  // ------------------------------------------------------------
   const categoryOptions = [
     { value: "", label: t("categories.all") },
     ...Object.entries(CATEGORY_ENUM_TO_KEY).map(([enumVal, key]) => ({
@@ -88,9 +79,6 @@ const Shop = () => {
     { value: ALIEXPRESS_CATEGORY_VALUE, label: t("categories.aliexpress") },
   ];
 
-  // ------------------------------------------------------------
-  // 1. Read URL query parameters on mount & when URL changes
-  // ------------------------------------------------------------
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const categoryParam = params.get("category");
@@ -98,7 +86,6 @@ const Shop = () => {
     const brandParam = params.get("brand");
     const pageParam = params.get("page");
 
-    // Category – only set if it matches a known enum or the special "aliexpress"
     if (categoryParam) {
       if (
         Object.keys(CATEGORY_ENUM_TO_KEY).includes(categoryParam) ||
@@ -106,7 +93,7 @@ const Shop = () => {
       ) {
         setSelectedCategory(categoryParam);
       } else {
-        setSelectedCategory(""); // fallback to All
+        setSelectedCategory("");
       }
     } else {
       setSelectedCategory("");
@@ -117,30 +104,23 @@ const Shop = () => {
     if (pageParam) setCurrentPage(parseInt(pageParam, 10) || 1);
   }, [location.search]);
 
-  // ------------------------------------------------------------
-  // 2. Fetch brands once (static list)
-  // ------------------------------------------------------------
   useEffect(() => {
     dispatch(fetchBrands());
   }, [dispatch]);
 
-  // ------------------------------------------------------------
-  // 3. Fetch products whenever filters change
-  // ------------------------------------------------------------
   useEffect(() => {
     let category = selectedCategory;
     let isAliExpress = "";
 
-    // Special handling for the AliExpress pseudo-category
     if (selectedCategory === ALIEXPRESS_CATEGORY_VALUE) {
       isAliExpress = "true";
-      category = ""; // clear category filter, only use isAliExpress
+      category = "";
     }
 
     dispatch(
       fetchProducts({
         page: currentPage,
-        limit: 12,
+        limit: 15,
         category: category,
         search: searchTerm,
         brand: selectedBrand,
@@ -149,39 +129,30 @@ const Shop = () => {
     );
   }, [dispatch, currentPage, selectedCategory, searchTerm, selectedBrand]);
 
-  // ------------------------------------------------------------
-  // 4. Client-side filtering (applied on current page's products)
-  // ------------------------------------------------------------
   const filteredProducts = useCallback(() => {
     let filtered = [...products];
 
-    // Price range
     filtered = filtered.filter(
       (product) =>
         product.price >= priceRange.min && product.price <= priceRange.max,
     );
 
-    // In stock
     if (inStockOnly) {
       filtered = filtered.filter((product) => product.stock > 0);
     }
 
-    // Discounted
     if (discountedOnly) {
       filtered = filtered.filter((product) => product.discountPrice);
     }
 
-    // Featured
     if (featuredOnly) {
       filtered = filtered.filter((product) => product.isFeatured);
     }
 
-    // AliExpress checkbox (independent of category)
     if (aliExpressOnly) {
       filtered = filtered.filter((product) => product.isAliExpress);
     }
 
-    // Sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "price-low":
@@ -207,9 +178,6 @@ const Shop = () => {
     sortBy,
   ]);
 
-  // ------------------------------------------------------------
-  // Handlers
-  // ------------------------------------------------------------
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
@@ -254,7 +222,6 @@ const Shop = () => {
     }
   };
 
-  // Helper to get display label for a category value
   const getCategoryLabel = (catValue) => {
     if (catValue === "") return t("categories.all");
     if (catValue === ALIEXPRESS_CATEGORY_VALUE)
@@ -263,7 +230,6 @@ const Shop = () => {
     return key ? t(`categories.${key}`) : catValue;
   };
 
-  // Active filters count (for badges)
   const activeFiltersCount =
     (selectedCategory !== "" ? 1 : 0) +
     (selectedBrand ? 1 : 0) +
@@ -274,9 +240,6 @@ const Shop = () => {
     (aliExpressOnly ? 1 : 0) +
     (priceRange.min > 0 || priceRange.max < 10000 ? 1 : 0);
 
-  // ------------------------------------------------------------
-  // Render filter section helper
-  // ------------------------------------------------------------
   const renderFilterSection = (title, isOpen, setIsOpen, children) => (
     <div className="border-b border-gray-100 last:border-0">
       <button
@@ -297,9 +260,6 @@ const Shop = () => {
     </div>
   );
 
-  // ------------------------------------------------------------
-  // Mobile Filter Drawer
-  // ------------------------------------------------------------
   const MobileFilterDrawer = () => (
     <>
       {/* Backdrop */}
@@ -310,11 +270,13 @@ const Shop = () => {
         onClick={() => setIsMobileFilterOpen(false)}
       />
 
-      {/* Drawer */}
+      {/* Drawer – RTL aware */}
       <div
-        className={`fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
-          isMobileFilterOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+          isMobileFilterOpen
+            ? "translate-x-0"
+            : "ltr:translate-x-full rtl:-translate-x-full"
+        } ltr:right-0 rtl:left-0`}
       >
         {/* Drawer Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4">
@@ -344,7 +306,6 @@ const Shop = () => {
 
         {/* Drawer Content */}
         <div className="h-[calc(100vh-140px)] overflow-y-auto px-6 py-4">
-          {/* Categories Filter */}
           {renderFilterSection(
             t("filters.sections.categories"),
             isCategoryOpen,
@@ -369,7 +330,7 @@ const Shop = () => {
                     />
                     <label
                       htmlFor={`cat-mobile-${option.value || "all"}`}
-                      className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200"
+                      className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200"
                     >
                       {option.label}
                     </label>
@@ -379,7 +340,6 @@ const Shop = () => {
             </div>,
           )}
 
-          {/* Price Range Filter */}
           {renderFilterSection(
             t("filters.sections.priceRange"),
             isPriceOpen,
@@ -399,7 +359,7 @@ const Shop = () => {
                       min="0"
                       value={priceRange.min}
                       onChange={(e) => handlePriceChange("min", e.target.value)}
-                      className="w-full pl-8 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 bg-white transition-all duration-300"
+                      className="w-full ps-8 pe-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 bg-white transition-all duration-300"
                     />
                   </div>
                 </div>
@@ -416,7 +376,7 @@ const Shop = () => {
                       min="0"
                       value={priceRange.max}
                       onChange={(e) => handlePriceChange("max", e.target.value)}
-                      className="w-full pl-8 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 bg-white transition-all duration-300"
+                      className="w-full ps-8 pe-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 bg-white transition-all duration-300"
                     />
                   </div>
                 </div>
@@ -443,7 +403,6 @@ const Shop = () => {
             </div>,
           )}
 
-          {/* Brands Filter */}
           {renderFilterSection(
             t("filters.sections.brands"),
             isBrandOpen,
@@ -469,7 +428,7 @@ const Shop = () => {
                     />
                     <label
                       htmlFor="brand-all-mobile"
-                      className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200"
+                      className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200"
                     >
                       {t("products.allBrands")}
                     </label>
@@ -489,7 +448,7 @@ const Shop = () => {
                       />
                       <label
                         htmlFor={`brand-mobile-${brand}`}
-                        className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200 truncate"
+                        className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200 truncate"
                       >
                         {brand}
                       </label>
@@ -504,7 +463,6 @@ const Shop = () => {
             </div>,
           )}
 
-          {/* Additional Features Filter */}
           {renderFilterSection(
             t("filters.sections.features"),
             isFeaturesOpen,
@@ -520,7 +478,7 @@ const Shop = () => {
                 />
                 <label
                   htmlFor="in-stock-mobile"
-                  className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                  className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
                 >
                   {t("features.inStock")}
                 </label>
@@ -536,7 +494,7 @@ const Shop = () => {
                 />
                 <label
                   htmlFor="discounted-mobile"
-                  className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                  className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
                 >
                   <span className="flex items-center gap-2">
                     <Tag className="h-4 w-4 text-orange-500" />
@@ -555,7 +513,7 @@ const Shop = () => {
                 />
                 <label
                   htmlFor="featured-mobile"
-                  className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                  className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
                 >
                   <span className="flex items-center gap-2">
                     <Star className="h-4 w-4 text-amber-500" />
@@ -574,7 +532,7 @@ const Shop = () => {
                 />
                 <label
                   htmlFor="ali-express-mobile"
-                  className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                  className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
                 >
                   <span className="flex items-center gap-2">
                     <Globe className="h-4 w-4 text-orange-500" />
@@ -591,7 +549,7 @@ const Shop = () => {
                 />
                 <label
                   htmlFor="free-shipping-mobile"
-                  className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                  className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
                 >
                   <span className="flex items-center gap-2">
                     <Truck className="h-4 w-4 text-blue-500" />
@@ -628,10 +586,8 @@ const Shop = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8">
       <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Mobile Filter Drawer */}
         <MobileFilterDrawer />
 
-        {/* AliExpress Warning Banner */}
         {selectedCategory === ALIEXPRESS_CATEGORY_VALUE && (
           <div className="mb-8 animate-fadeIn">
             <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-6 shadow-sm">
@@ -682,9 +638,7 @@ const Shop = () => {
           </div>
         )}
 
-        {/* Header with Search */}
         <div className="mb-5">
-          {/* Active Filters Bar */}
           {activeFiltersCount > 0 && (
             <div className="mb-8 p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
               <div className="flex flex-wrap items-center gap-3">
@@ -803,7 +757,7 @@ const Shop = () => {
 
                 <button
                   onClick={handleClearFilters}
-                  className="ml-auto flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:text-gray-900 bg-gradient-to-r from-gray-100 to-gray-50 hover:from-gray-200 hover:to-gray-100 rounded-full transition-all duration-300 hover:shadow-sm border border-gray-300"
+                  className="ml-auto flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-700 bg-gradient-to-r from-gray-100 to-gray-50 hover:from-gray-200 hover:to-gray-100 rounded-full transition-all duration-300 hover:shadow-sm border border-gray-300"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
                   {t("filters.clearAll")}
@@ -833,7 +787,6 @@ const Shop = () => {
                 )}
               </div>
 
-              {/* Categories Filter - Desktop */}
               {renderFilterSection(
                 t("filters.sections.categories"),
                 isCategoryOpen,
@@ -858,7 +811,7 @@ const Shop = () => {
                         />
                         <label
                           htmlFor={`cat-${option.value || "all"}`}
-                          className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200"
+                          className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200"
                         >
                           {option.label}
                         </label>
@@ -868,7 +821,6 @@ const Shop = () => {
                 </div>,
               )}
 
-              {/* Price Range Filter - Desktop */}
               {renderFilterSection(
                 t("filters.sections.priceRange"),
                 isPriceOpen,
@@ -890,7 +842,7 @@ const Shop = () => {
                           onChange={(e) =>
                             handlePriceChange("min", e.target.value)
                           }
-                          className="w-full pl-8 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 bg-white transition-all duration-300"
+                          className="w-full ps-8 pe-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 bg-white transition-all duration-300"
                         />
                       </div>
                     </div>
@@ -909,7 +861,7 @@ const Shop = () => {
                           onChange={(e) =>
                             handlePriceChange("max", e.target.value)
                           }
-                          className="w-full pl-8 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 bg-white transition-all duration-300"
+                          className="w-full ps-8 pe-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 bg-white transition-all duration-300"
                         />
                       </div>
                     </div>
@@ -936,7 +888,6 @@ const Shop = () => {
                 </div>,
               )}
 
-              {/* Brands Filter - Desktop */}
               {renderFilterSection(
                 t("filters.sections.brands"),
                 isBrandOpen,
@@ -962,7 +913,7 @@ const Shop = () => {
                         />
                         <label
                           htmlFor="brand-all"
-                          className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200"
+                          className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200"
                         >
                           {t("products.allBrands")}
                         </label>
@@ -982,7 +933,7 @@ const Shop = () => {
                           />
                           <label
                             htmlFor={`brand-${brand}`}
-                            className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200 truncate"
+                            className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 group-hover:translate-x-1 transition-all duration-200 truncate"
                           >
                             {brand}
                           </label>
@@ -997,7 +948,6 @@ const Shop = () => {
                 </div>,
               )}
 
-              {/* Additional Features Filter - Desktop */}
               {renderFilterSection(
                 t("filters.sections.features"),
                 isFeaturesOpen,
@@ -1013,7 +963,7 @@ const Shop = () => {
                     />
                     <label
                       htmlFor="in-stock"
-                      className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                      className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
                     >
                       {t("features.inStock")}
                     </label>
@@ -1029,7 +979,7 @@ const Shop = () => {
                     />
                     <label
                       htmlFor="discounted"
-                      className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                      className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
                     >
                       <span className="flex items-center gap-2">
                         <Tag className="h-4 w-4 text-orange-500" />
@@ -1048,7 +998,7 @@ const Shop = () => {
                     />
                     <label
                       htmlFor="featured"
-                      className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                      className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
                     >
                       <span className="flex items-center gap-2">
                         <Star className="h-4 w-4 text-amber-500" />
@@ -1067,7 +1017,7 @@ const Shop = () => {
                     />
                     <label
                       htmlFor="ali-express"
-                      className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                      className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
                     >
                       <span className="flex items-center gap-2">
                         <Globe className="h-4 w-4 text-orange-500" />
@@ -1084,7 +1034,7 @@ const Shop = () => {
                     />
                     <label
                       htmlFor="free-shipping"
-                      className="ml-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
+                      className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
                     >
                       <span className="flex items-center gap-2">
                         <Truck className="h-4 w-4 text-blue-500" />
@@ -1095,7 +1045,6 @@ const Shop = () => {
                 </div>,
               )}
 
-              {/* Reset Filters Button */}
               <div className="mt-8 pt-6 border-t border-gray-100">
                 <button
                   onClick={handleClearFilters}
@@ -1110,11 +1059,9 @@ const Shop = () => {
 
           {/* Products Section */}
           <div className="flex-1">
-            {/* Sort and Results Info with Mobile Filters Button */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  {/* Mobile Filters Button */}
                   <button
                     onClick={() => setIsMobileFilterOpen(true)}
                     className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300"
@@ -1131,7 +1078,6 @@ const Shop = () => {
               </div>
             </div>
 
-            {/* Products Grid */}
             {loading ? (
               <div className="flex justify-center items-center h-96">
                 <div className="relative">
@@ -1143,7 +1089,7 @@ const Shop = () => {
               <>
                 {filteredProducts().length > 0 ? (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6 mb-8">
                       {filteredProducts().map((product) => (
                         <div
                           key={product._id}
@@ -1154,7 +1100,6 @@ const Shop = () => {
                       ))}
                     </div>
 
-                    {/* Desktop Pagination */}
                     {pagination.totalPages > 1 && (
                       <div className="hidden lg:block">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mt-4">
@@ -1249,7 +1194,6 @@ const Shop = () => {
                       </div>
                     )}
 
-                    {/* Mobile Pagination */}
                     {pagination.totalPages > 1 && (
                       <div className="lg:hidden">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mt-4">
@@ -1260,7 +1204,6 @@ const Shop = () => {
                                 total: pagination.totalPages,
                               })}
                             </div>
-
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={goToPrevPage}
@@ -1270,7 +1213,6 @@ const Shop = () => {
                                 <ChevronLeft className="h-4 w-4" />
                                 {t("pagination.previous")}
                               </button>
-
                               <div className="flex items-center space-x-1">
                                 {Array.from(
                                   {
@@ -1331,7 +1273,6 @@ const Shop = () => {
                                     </>
                                   )}
                               </div>
-
                               <button
                                 onClick={goToNextPage}
                                 disabled={currentPage === pagination.totalPages}
