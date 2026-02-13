@@ -27,6 +27,33 @@ const imageSchema = new mongoose.Schema(
   { _id: false },
 );
 
+const colorSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    hex: {
+      type: String,
+      required: true,
+      match: [/^#([0-9A-F]{3}){1,2}$/i, "Invalid hex color"],
+    },
+    images: {
+      type: [String], // Cloudinary URLs
+      validate: {
+        validator: function (v) {
+          return v.every(
+            (url) => typeof url === "string" && url.startsWith("http"),
+          );
+        },
+        message: "Each image must be a valid URL",
+      },
+    },
+  },
+  { _id: false }, // no need for sub‑document IDs
+);
+
 const productSchema = new mongoose.Schema(
   {
     name: {
@@ -84,6 +111,10 @@ const productSchema = new mongoose.Schema(
         message: "Video must be a valid Cloudinary URL",
       },
     },
+    colors: {
+      type: [colorSchema],
+      default: [],
+    },
     category: {
       type: String,
       required: [true, "Please select a category"],
@@ -135,7 +166,7 @@ const productSchema = new mongoose.Schema(
     // NEW: Rating distribution for analytics
     ratingDistribution: {
       type: mongoose.Schema.Types.Mixed,
-      default: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      default: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
     },
     createdAt: {
       type: Date,

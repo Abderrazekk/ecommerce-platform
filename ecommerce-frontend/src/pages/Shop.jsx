@@ -683,50 +683,7 @@ const Shop = () => {
         )}
 
         {/* Header with Search */}
-        <div className="mb-12">
-          <div className="relative mb-8">
-            <div className="p-8 rounded-3xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 shadow-sm">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-2 h-8 bg-gradient-to-b from-primary-500 to-primary-600 rounded-full"></div>
-                    <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                      {t("header.title")}
-                    </h1>
-                  </div>
-                  <p className="text-gray-600 text-lg leading-relaxed">
-                    {t("header.subtitle", { count: pagination.total })}
-                  </p>
-                </div>
-
-                <form
-                  onSubmit={handleSearch}
-                  className="w-full lg:w-1/2 xl:w-2/5"
-                >
-                  <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 group-hover:text-primary-500 transition-colors" />
-                    <input
-                      type="text"
-                      placeholder={t("search.placeholder")}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-12 pr-10 py-3.5 rounded-2xl border-2 border-gray-200 bg-white/80 backdrop-blur-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300 shadow-sm"
-                    />
-                    {searchTerm && (
-                      <button
-                        type="button"
-                        onClick={() => setSearchTerm("")}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
+        <div className="mb-5">
           {/* Active Filters Bar */}
           {activeFiltersCount > 0 && (
             <div className="mb-8 p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">

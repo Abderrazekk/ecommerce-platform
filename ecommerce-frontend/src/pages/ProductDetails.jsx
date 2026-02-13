@@ -1,4 +1,3 @@
-// ecommerce-frontend/src/pages/ProductDetails.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -29,6 +28,7 @@ const ProductDetails = () => {
   );
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(null);
 
   useEffect(() => {
     dispatch(fetchProductById(id));
@@ -68,20 +68,6 @@ const ProductDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Full‑width navigation bar */}
-      <div className="w-full border-b border-gray-200 bg-white">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="group flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <div className="p-2 rounded-full group-hover:bg-gray-100 transition-colors mr-3">
-              <ArrowLeft className="h-5 w-5" />
-            </div>
-            <span className="font-medium">Back to Collection</span>
-          </button>
-        </div>
-      </div>
 
       {/* Full‑width main content */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
@@ -90,6 +76,8 @@ const ProductDetails = () => {
           <div className="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-shadow duration-300 p-5 sm:p-6">
             <ProductMedia
               product={product}
+              selectedColor={selectedColor}
+              setSelectedColor={setSelectedColor} // ✅ Added
               selectedImageIndex={selectedImageIndex}
               setSelectedImageIndex={setSelectedImageIndex}
             />
@@ -101,6 +89,8 @@ const ProductDetails = () => {
               product={product}
               wishlistChecked={wishlistChecked}
               wishlistLoading={wishlistLoading}
+              selectedColor={selectedColor}
+              setSelectedColor={setSelectedColor}
             />
           </div>
 

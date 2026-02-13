@@ -53,7 +53,7 @@ const Products = () => {
     tags: "",
     isFeatured: false,
     isVisible: true,
-    isAliExpress: false, // NEW: AliExpress field
+    isAliExpress: false,
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -63,6 +63,9 @@ const Products = () => {
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // NEW: Color variants state
+  const [colors, setColors] = useState([]); // each: { name, hex, images: [] (existing URLs), files: [] (new files), previews: [] }
 
   useEffect(() => {
     dispatch(fetchAdminProducts({ page: 1, limit: 50 }));
@@ -97,7 +100,7 @@ const Products = () => {
         tags: product.tags ? product.tags.join(", ") : "",
         isFeatured: product.isFeatured || false,
         isVisible: product.isVisible !== false,
-        isAliExpress: product.isAliExpress || false, // NEW
+        isAliExpress: product.isAliExpress || false,
       });
       setImageFiles([]);
       setImagePreviews(
@@ -107,6 +110,21 @@ const Products = () => {
       setVideoPreview(product.video || null);
       setRemoveExistingVideo(false);
       setImagesToRemove([]);
+
+      // NEW: Load colors from product
+      if (product.colors && product.colors.length > 0) {
+        setColors(
+          product.colors.map((c) => ({
+            name: c.name,
+            hex: c.hex,
+            images: c.images || [], // existing image URLs
+            files: [], // no new files initially
+            previews: c.images || [], // use existing URLs as previews
+          })),
+        );
+      } else {
+        setColors([]);
+      }
     } else {
       setEditingProduct(null);
       setFormData({
@@ -121,7 +139,7 @@ const Products = () => {
         tags: "",
         isFeatured: false,
         isVisible: true,
-        isAliExpress: false, // NEW
+        isAliExpress: false,
       });
       setImageFiles([]);
       setImagePreviews([]);
@@ -129,6 +147,7 @@ const Products = () => {
       setVideoPreview(null);
       setRemoveExistingVideo(false);
       setImagesToRemove([]);
+      setColors([]); // reset colors
     }
     setShowModal(true);
   };
@@ -148,13 +167,14 @@ const Products = () => {
       tags: "",
       isFeatured: false,
       isVisible: true,
-      isAliExpress: false, // NEW
+      isAliExpress: false,
     });
     setImageFiles([]);
     setImagePreviews([]);
     setVideoFile(null);
     setVideoPreview(null);
     setRemoveExistingVideo(false);
+    setColors([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (videoInputRef.current) videoInputRef.current.value = "";
   };
@@ -280,6 +300,51 @@ const Products = () => {
     if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
+  // NEW: Color handlers
+  const handleColorChange = (index, field, value) => {
+    const newColors = [...colors];
+    newColors[index][field] = value;
+    setColors(newColors);
+  };
+
+  const handleColorImages = (index, e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    // Validate files (optional: add size/type checks)
+    const validFiles = files.filter((file) => file.type.startsWith("image/"));
+    if (validFiles.length === 0) {
+      toast.error("Please select valid image files.");
+      return;
+    }
+
+    const newColors = [...colors];
+    // Store files for upload
+    newColors[index].files = validFiles;
+    // Create previews
+    const previews = validFiles.map((file) => URL.createObjectURL(file));
+    newColors[index].previews = previews;
+    setColors(newColors);
+  };
+
+  const addColor = () => {
+    setColors([
+      ...colors,
+      {
+        name: "",
+        hex: "#000000",
+        images: [], // existing URLs (empty for new)
+        files: [],
+        previews: [],
+      },
+    ]);
+  };
+
+  const removeColor = (index) => {
+    const newColors = colors.filter((_, i) => i !== index);
+    setColors(newColors);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -350,6 +415,21 @@ const Products = () => {
       }
     }
 
+    // Validate colors: each must have name and hex
+    for (let i = 0; i < colors.length; i++) {
+      const color = colors[i];
+      if (!color.name || !color.name.trim()) {
+        toast.error(`Color #${i + 1} must have a name.`);
+        return;
+      }
+      if (!color.hex || !/^#[0-9A-F]{6}$/i.test(color.hex)) {
+        toast.error(
+          `Color #${i + 1} must have a valid hex code (e.g., #FF0000).`,
+        );
+        return;
+      }
+    }
+
     const productData = new FormData();
     productData.append("name", formData.name);
     productData.append("brand", formData.brand);
@@ -376,11 +456,9 @@ const Products = () => {
     productData.append("tags", formData.tags);
     productData.append("isFeatured", formData.isFeatured);
     productData.append("isVisible", formData.isVisible);
-
-    // NEW: Append AliExpress flag
     productData.append("isAliExpress", formData.isAliExpress);
 
-    // Add only NEW images (existing ones are already in product.images)
+    // Add only NEW main images
     imageFiles.forEach((file) => {
       productData.append("images", file);
     });
@@ -394,6 +472,26 @@ const Products = () => {
     if (videoFile) productData.append("video", videoFile);
     if (editingProduct && removeExistingVideo && !videoFile)
       productData.append("removeVideo", "true");
+
+    // NEW: Handle colors
+    if (colors.length > 0) {
+      // Prepare colors array without temporary fields
+      const colorsData = colors.map((c) => ({
+        name: c.name,
+        hex: c.hex,
+        images: c.images || [], // include existing URLs (for updates)
+      }));
+      productData.append("colors", JSON.stringify(colorsData));
+
+      // Append new images for each color with field name "colorImages[index]"
+      colors.forEach((color, idx) => {
+        if (color.files && color.files.length > 0) {
+          color.files.forEach((file) => {
+            productData.append(`colorImages[${idx}]`, file);
+          });
+        }
+      });
+    }
 
     try {
       if (editingProduct) {
@@ -425,6 +523,7 @@ const Products = () => {
 
   return (
     <div className="p-6">
+      {/* Header */}
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">Products Management</h1>
@@ -439,6 +538,7 @@ const Products = () => {
         </button>
       </div>
 
+      {/* Search */}
       <div className="mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -452,6 +552,7 @@ const Products = () => {
         </div>
       </div>
 
+      {/* Product Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredProducts.map((product) => (
           <div
@@ -460,13 +561,13 @@ const Products = () => {
               product.isAliExpress ? "border-orange-300" : "border-gray-200"
             }`}
           >
+            {/* Card content (unchanged) */}
             <div className="h-48 bg-gray-100 overflow-hidden relative">
               <img
                 src={product.images?.[0]?.url || ""}
                 alt={product.name}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />
-              {/* AliExpress Badge */}
               {product.isAliExpress && (
                 <div className="absolute top-2 left-2">
                   <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full">
@@ -475,7 +576,6 @@ const Products = () => {
                   </div>
                 </div>
               )}
-              {/* Featured Badge */}
               {product.isFeatured && (
                 <div className="absolute top-2 right-2">
                   <div className="px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
@@ -503,7 +603,6 @@ const Products = () => {
                 </span>
               </div>
 
-              {/* AliExpress Notice in Product Card */}
               {product.isAliExpress && (
                 <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
                   <div className="flex items-center gap-1 mb-1">
@@ -571,6 +670,7 @@ const Products = () => {
         ))}
       </div>
 
+      {/* Empty State */}
       {filteredProducts.length === 0 && (
         <div className="text-center py-12 border border-gray-200 rounded-lg">
           <div className="max-w-md mx-auto">
@@ -611,7 +711,7 @@ const Products = () => {
 
               <form onSubmit={handleSubmit}>
                 <div className="space-y-4">
-                  {/* Product Images */}
+                  {/* Product Images (unchanged) */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Product Images {!editingProduct && "*"}
@@ -634,7 +734,9 @@ const Products = () => {
                               <img
                                 src={preview}
                                 alt={`Preview ${index + 1}`}
-                                className={`h-24 w-full object-cover rounded ${isMarkedForRemoval ? "opacity-50" : ""}`}
+                                className={`h-24 w-full object-cover rounded ${
+                                  isMarkedForRemoval ? "opacity-50" : ""
+                                }`}
                               />
                               {isMarkedForRemoval && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-red-500/50 rounded">
@@ -673,7 +775,7 @@ const Products = () => {
                     </p>
                   </div>
 
-                  {/* Product Video */}
+                  {/* Product Video (unchanged) */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Product Video (Optional)
@@ -713,6 +815,7 @@ const Products = () => {
                     <p className="text-xs text-gray-500 mt-1">Max 50MB</p>
                   </div>
 
+                  {/* Basic fields grid (unchanged) */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -855,8 +958,90 @@ const Products = () => {
                     </div>
                   </div>
 
+                  {/* NEW: Color Variants Section */}
+                  <div className="border-t pt-4">
+                    <h3 className="text-lg font-medium mb-2">
+                      Color Variants (Optional)
+                    </h3>
+                    {colors.map((color, idx) => (
+                      <div
+                        key={idx}
+                        className="mb-4 p-4 border rounded bg-gray-50"
+                      >
+                        <div className="grid grid-cols-2 gap-2 mb-2">
+                          <input
+                            type="text"
+                            placeholder="Color name (e.g., Red)"
+                            value={color.name}
+                            onChange={(e) =>
+                              handleColorChange(idx, "name", e.target.value)
+                            }
+                            className="border p-2 rounded"
+                          />
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={color.hex}
+                              onChange={(e) =>
+                                handleColorChange(idx, "hex", e.target.value)
+                              }
+                              className="w-10 h-10 p-1 border rounded"
+                            />
+                            <input
+                              type="text"
+                              value={color.hex}
+                              onChange={(e) =>
+                                handleColorChange(idx, "hex", e.target.value)
+                              }
+                              className="flex-1 border p-2 rounded"
+                              placeholder="#000000"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm">
+                            Images for this color
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={(e) => handleColorImages(idx, e)}
+                            className="w-full border p-2 rounded"
+                          />
+                          {color.previews && color.previews.length > 0 && (
+                            <div className="flex gap-2 mt-2 flex-wrap">
+                              {color.previews.map((src, i) => (
+                                <img
+                                  key={i}
+                                  src={src}
+                                  className="w-16 h-16 object-cover rounded border"
+                                  alt="color preview"
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeColor(idx)}
+                          className="mt-2 text-red-600 text-sm hover:underline"
+                        >
+                          Remove Color
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addColor}
+                      className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+                    >
+                      + Add Color
+                    </button>
+                  </div>
+
+                  {/* Checkboxes (unchanged) */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* AliExpress Checkbox */}
                     <div className="space-y-4">
                       <div
                         className={`flex items-start gap-3 p-4 border rounded-xl transition-all ${
@@ -896,7 +1081,6 @@ const Products = () => {
                         </label>
                       </div>
 
-                      {/* Featured Checkbox */}
                       <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl">
                         <input
                           type="checkbox"
@@ -915,7 +1099,6 @@ const Products = () => {
                       </div>
                     </div>
 
-                    {/* Visibility Checkbox */}
                     <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl h-fit">
                       <input
                         type="checkbox"
@@ -934,6 +1117,7 @@ const Products = () => {
                     </div>
                   </div>
 
+                  {/* Form Actions */}
                   <div className="flex justify-end gap-3 pt-4 border-t">
                     <button
                       type="button"

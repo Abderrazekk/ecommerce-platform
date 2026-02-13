@@ -1,5 +1,4 @@
-// ecommerce-frontend/src/components/ProductDetails/ProductMedia.jsx
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,6 +12,8 @@ import {
 
 const ProductMedia = ({
   product,
+  selectedColor,
+  setSelectedColor, // ✅ Added
   selectedImageIndex,
   setSelectedImageIndex,
 }) => {
@@ -35,12 +36,76 @@ const ProductMedia = ({
   const videoRef = useRef(null);
   const videoControlsTimeout = useRef(null);
 
+  // Determine which images to display in the main view based on selected color
+  const images =
+    selectedColor?.images && selectedColor.images.length > 0
+      ? selectedColor.images
+      : product.images || [];
+
+  // Reset main image index when color changes (if out of bounds)
+  useEffect(() => {
+    if (selectedImageIndex >= images.length) {
+      setSelectedImageIndex(0);
+    }
+  }, [images, selectedImageIndex, setSelectedImageIndex]);
+
+  // --- Unified gallery: flatten all images from main + all colors ---
+  const allImages = useMemo(() => {
+    const result = [];
+    // Main product images
+    if (product.images) {
+      product.images.forEach((img, idx) => {
+        result.push({
+          url: img.url || img,
+          color: null,
+          imageIndex: idx,
+        });
+      });
+    }
+    // Color variant images
+    if (product.colors) {
+      product.colors.forEach((color) => {
+        if (color.images && color.images.length > 0) {
+          color.images.forEach((imgUrl, idx) => {
+            result.push({
+              url: imgUrl,
+              color: color,
+              imageIndex: idx,
+            });
+          });
+        }
+      });
+    }
+    return result;
+  }, [product]);
+
+  // Check if a thumbnail is the currently selected one
+  const isThumbnailSelected = (thumb) => {
+    if (thumb.color === null && selectedColor === null) {
+      return thumb.imageIndex === selectedImageIndex;
+    }
+    if (thumb.color && selectedColor) {
+      return (
+        thumb.color.hex === selectedColor.hex &&
+        thumb.imageIndex === selectedImageIndex
+      );
+    }
+    return false;
+  };
+
+  // Handle thumbnail click – update both color and index
+  const handleThumbnailClick = (thumb) => {
+    // If the thumbnail belongs to a color, set that color; otherwise set null (main)
+    setSelectedColor(thumb.color);
+    setSelectedImageIndex(thumb.imageIndex);
+  };
+
   // Zoom functionality
   const handleMouseMove = (e) => {
     if (
       !imageContainerRef.current ||
       !mainImageRef.current ||
-      !product?.images ||
+      !images ||
       !imageLoaded
     )
       return;
@@ -62,7 +127,7 @@ const ProductMedia = ({
   };
 
   const calculateZoomStyle = () => {
-    if (!imageContainerRef.current || !mainImageRef.current || !product?.images)
+    if (!imageContainerRef.current || !mainImageRef.current || !images)
       return {};
 
     const container = imageContainerRef.current;
@@ -205,7 +270,7 @@ const ProductMedia = ({
           <h3 className="text-lg font-medium text-gray-900">Gallery</h3>
         </div>
 
-        {/* Main Image Container – with subtle zoom on hover */}
+        {/* Main Image Container */}
         <div
           ref={imageContainerRef}
           className="relative overflow-hidden bg-white rounded-xl border border-gray-200 group"
@@ -213,22 +278,24 @@ const ProductMedia = ({
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={handleMouseLeave}
         >
-          {/* Main Image with scale on hover */}
-          {product.images && product.images.length > 0 && (
+          {/* Main Image */}
+          {images.length > 0 && (
             <img
               ref={mainImageRef}
-              src={product.images[selectedImageIndex]?.url || ""}
+              src={
+                images[selectedImageIndex]?.url || images[selectedImageIndex]
+              }
               alt={`${product.name} - Image ${selectedImageIndex + 1}`}
               className="w-full h-[500px] lg:h-[600px] object-contain transition-transform duration-700 group-hover:scale-105"
               onLoad={handleImageLoad}
             />
           )}
 
-          {/* Zoom Lens (only when actively hovering with zoom intent) */}
+          {/* Zoom Lens */}
           {isHovering &&
-            product.images &&
+            images.length > 0 &&
             imageLoaded &&
-            product.images[selectedImageIndex] && (
+            images[selectedImageIndex] && (
               <div
                 className="absolute pointer-events-none z-20 overflow-hidden rounded-full"
                 style={{
@@ -239,7 +306,9 @@ const ProductMedia = ({
                   border: "3px solid rgba(255, 255, 255, 0.9)",
                   boxShadow:
                     "0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255,255,255,0.5)",
-                  backgroundImage: `url(${product.images[selectedImageIndex].url})`,
+                  backgroundImage: `url(${
+                    images[selectedImageIndex].url || images[selectedImageIndex]
+                  })`,
                   backgroundRepeat: "no-repeat",
                   backgroundSize: zoomStyle.backgroundSize || "auto",
                   backgroundPosition: zoomStyle.backgroundPosition || "0px 0px",
@@ -248,13 +317,13 @@ const ProductMedia = ({
               />
             )}
 
-          {/* Navigation Arrows – more premium */}
-          {product.images && product.images.length > 1 && (
+          {/* Navigation Arrows (based on current images) */}
+          {images.length > 1 && (
             <>
               <button
                 onClick={() => {
                   setSelectedImageIndex((prev) =>
-                    prev > 0 ? prev - 1 : product.images.length - 1,
+                    prev > 0 ? prev - 1 : images.length - 1,
                   );
                   setIsHovering(false);
                 }}
@@ -265,7 +334,7 @@ const ProductMedia = ({
               <button
                 onClick={() => {
                   setSelectedImageIndex((prev) =>
-                    prev < product.images.length - 1 ? prev + 1 : 0,
+                    prev < images.length - 1 ? prev + 1 : 0,
                   );
                   setIsHovering(false);
                 }}
@@ -276,37 +345,44 @@ const ProductMedia = ({
             </>
           )}
 
-          {/* Image Counter – sleeker */}
+          {/* Image Counter */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full text-xs font-medium shadow-md">
-            {selectedImageIndex + 1} / {product.images?.length || 1}
+            {selectedImageIndex + 1} / {images.length || 1}
           </div>
         </div>
 
-        {/* Thumbnail Strip – refined active state */}
-        {product.images && product.images.length > 1 && (
+        {/* Unified Thumbnail Strip – all images from main + colors */}
+        {allImages.length > 1 && (
           <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
-            {product.images.map((image, index) => (
+            {allImages.map((thumb, idx) => (
               <button
-                key={index}
-                onClick={() => setSelectedImageIndex(index)}
+                key={idx}
+                onClick={() => handleThumbnailClick(thumb)}
                 className={`flex-shrink-0 relative overflow-hidden rounded-lg transition-all duration-200 ${
-                  selectedImageIndex === index
+                  isThumbnailSelected(thumb)
                     ? "ring-2 ring-primary-500 ring-offset-2 scale-105"
                     : "opacity-70 hover:opacity-100 hover:scale-105"
                 }`}
               >
                 <img
-                  src={image.url}
-                  alt={`Thumbnail ${index + 1}`}
+                  src={thumb.url}
+                  alt={`Thumbnail ${idx + 1}`}
                   className="w-20 h-20 object-cover rounded-lg"
                 />
+                {/* Optional: small color indicator for thumbnails belonging to a color */}
+                {thumb.color && (
+                  <div
+                    className="absolute bottom-1 right-1 w-3 h-3 rounded-full border border-white"
+                    style={{ backgroundColor: thumb.color.hex }}
+                  />
+                )}
               </button>
             ))}
           </div>
         )}
       </div>
 
-      {/* Video Section – with refined controls */}
+      {/* Video Section */}
       {product.video && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -342,7 +418,7 @@ const ProductMedia = ({
               onClick={handleVideoPlayPause}
             />
 
-            {/* Video Controls Overlay – cleaner, more modern */}
+            {/* Video Controls Overlay */}
             <div
               className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-opacity duration-300 ${
                 showVideoControls ? "opacity-100" : "opacity-0"
@@ -403,7 +479,7 @@ const ProductMedia = ({
                 </div>
               </div>
 
-              {/* Center Play Button – with pulse animation */}
+              {/* Center Play Button */}
               {!videoPlaying && (
                 <button
                   onClick={handleVideoPlayPause}
@@ -415,7 +491,7 @@ const ProductMedia = ({
 
               {/* Bottom Controls Bar */}
               <div className="absolute bottom-0 left-0 right-0 p-5 space-y-3">
-                {/* Progress Bar – thicker, with glowing thumb */}
+                {/* Progress Bar */}
                 <div
                   className="relative h-1.5 bg-gray-700/50 rounded-full cursor-pointer group"
                   onClick={handleSeek}

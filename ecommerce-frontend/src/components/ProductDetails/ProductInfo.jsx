@@ -1,4 +1,3 @@
-// ecommerce-frontend/src/components/ProductDetails/ProductInfo.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -24,7 +23,13 @@ import {
 } from "lucide-react";
 import StarRating from "../common/StarRating";
 
-const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
+const ProductInfo = ({
+  product,
+  wishlistChecked,
+  wishlistLoading,
+  selectedColor, // NEW
+  setSelectedColor, // NEW
+}) => {
   const [quantity, setQuantity] = useState(1);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -159,11 +164,58 @@ const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
       )
     : 0;
 
+  // NEW: Color selector render function
+  // ProductInfo.jsx – inside the component, before return
+
+  const renderColorSelector = () => {
+    if (!product.colors || product.colors.length === 0) return null;
+
+    return (
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-gray-700">Color</h3>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Default / Main Images button */}
+          <button
+            onClick={() => setSelectedColor(null)}
+            className={`
+            w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center text-xs font-medium
+            ${
+              selectedColor === null
+                ? "border-gray-900 bg-gray-900 text-white scale-110 ring-2 ring-offset-2 ring-gray-900"
+                : "border-gray-300 bg-white text-gray-700 hover:scale-105 hover:border-gray-400"
+            }
+          `}
+            title="Default images"
+          >
+            <span>All</span>
+          </button>
+
+          {product.colors.map((color) => (
+            <button
+              key={color.hex + color.name}
+              onClick={() => setSelectedColor(color)}
+              className={`
+              w-10 h-10 rounded-full border-2 transition-all
+              ${
+                selectedColor?.hex === color.hex
+                  ? "border-gray-900 scale-110 ring-2 ring-offset-2 ring-gray-900"
+                  : "border-gray-300 hover:scale-105"
+              }
+            `}
+              style={{ backgroundColor: color.hex }}
+              title={color.name}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Product Header */}
       <div className="space-y-4">
-        {/* Badges – more refined */}
+        {/* Badges */}
         <div className="flex flex-wrap gap-2">
           {product.brand && (
             <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full border border-gray-200">
@@ -209,7 +261,7 @@ const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
           <div className="text-sm text-gray-500">No reviews yet</div>
         )}
 
-        {/* Wishlist & Share – with better tooltip */}
+        {/* Wishlist & Share */}
         <div className="flex items-center space-x-4">
           <button
             onClick={toggleWishlist}
@@ -226,7 +278,9 @@ const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
             }
           >
             <Heart
-              className={`h-5 w-5 ${wishlistChecked[product?._id] ? "fill-current" : ""}`}
+              className={`h-5 w-5 ${
+                wishlistChecked[product?._id] ? "fill-current" : ""
+              }`}
             />
           </button>
           <div className="relative">
@@ -258,7 +312,7 @@ const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
         </div>
       </div>
 
-      {/* AliExpress Delivery Notice – cleaner */}
+      {/* AliExpress Delivery Notice */}
       {product.isAliExpress && (
         <div className="bg-orange-50/80 border border-orange-200 rounded-xl p-4 backdrop-blur-sm">
           <div className="flex items-start gap-3">
@@ -279,7 +333,10 @@ const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
         </div>
       )}
 
-      {/* Pricing Section – more prominent */}
+      {/* NEW: Color Selector */}
+      {renderColorSelector()}
+
+      {/* Pricing Section */}
       <div className="space-y-3">
         <div className="flex items-baseline flex-wrap gap-3">
           {product.discountPrice ? (
@@ -308,7 +365,7 @@ const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
           </div>
         )}
 
-        {/* Stock Status – with animated pulse for low stock */}
+        {/* Stock Status */}
         <div className="flex items-center space-x-3">
           <div
             className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${
@@ -400,7 +457,7 @@ const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
               </div>
             </div>
 
-            {/* Total – more elegant */}
+            {/* Total */}
             <div className="bg-gray-50/80 p-5 rounded-xl border border-gray-100">
               <div className="flex justify-between items-center">
                 <div>
@@ -415,7 +472,7 @@ const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
               </div>
             </div>
 
-            {/* Action Buttons – with lift effect */}
+            {/* Action Buttons */}
             <div className="space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
@@ -468,7 +525,7 @@ const ProductInfo = ({ product, wishlistChecked, wishlistLoading }) => {
             </div>
           </div>
 
-          {/* Features Grid – with hover state */}
+          {/* Features Grid */}
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
             {[
               { icon: Shield, label: "2-Year Warranty", desc: "Full coverage" },

@@ -237,13 +237,10 @@ const getProductById = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Create a product
-// @route   POST /api/products
-// @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
   console.log("=== CREATE PRODUCT REQUEST ===");
   console.log("Request body:", req.body);
-  console.log("Request files:", req.files);
+  console.log("Request files:", req.files); // req.files is now an array
 
   const {
     name,
@@ -251,7 +248,7 @@ const createProduct = asyncHandler(async (req, res) => {
     description,
     price,
     discountPrice,
-    shippingFee, // ADDED: Extract shippingFee from req.body
+    shippingFee,
     category,
     stock,
     isFeatured,
@@ -260,20 +257,54 @@ const createProduct = asyncHandler(async (req, res) => {
     isAliExpress,
   } = req.body;
 
-  // Check for required images
-  if (!req.files?.images || req.files.images.length === 0) {
-    console.log("No images in request");
+  // ----- Process uploaded files -----
+  // Separate files into categories based on fieldname
+  const mainImageFiles = [];
+  let videoFile = null;
+  const colorFilesMap = {}; // key: color index, value: array of files
+
+  if (req.files && Array.isArray(req.files)) {
+    req.files.forEach((file) => {
+      if (file.fieldname === "images") {
+        mainImageFiles.push(file);
+      } else if (file.fieldname === "video") {
+        // If multiple videos are sent, take the first one
+        if (!videoFile) videoFile = file;
+      } else {
+        const idx = extractColorIndex(file.fieldname);
+        if (idx !== null) {
+          if (!colorFilesMap[idx]) colorFilesMap[idx] = [];
+          colorFilesMap[idx].push(file);
+        } else {
+          console.warn(
+            `Ignored file with unknown fieldname: ${file.fieldname}`,
+          );
+        }
+      }
+    });
+  }
+
+  // ----- Validation -----
+  // 1. Main images are required (at least one)
+  if (mainImageFiles.length === 0) {
+    console.log("No main images in request");
     res.status(400);
     throw new Error("Please upload at least one product image");
   }
 
-  // Validate category
+  // 2. Max 6 main images
+  if (mainImageFiles.length > 6) {
+    res.status(400);
+    throw new Error("Maximum 6 images allowed per product");
+  }
+
+  // 3. Validate category
   if (!productCategories.includes(category)) {
     res.status(400);
     throw new Error("Invalid category");
   }
 
-  // Parse tags if provided
+  // 4. Parse tags if provided
   let parsedTags = [];
   if (tags) {
     parsedTags = tags
@@ -282,20 +313,70 @@ const createProduct = asyncHandler(async (req, res) => {
       .filter((tag) => tag.length > 0);
   }
 
-  try {
-    // Upload images to Cloudinary
-    console.log(`Uploading ${req.files.images.length} images to Cloudinary...`);
-    const uploadedImages = await uploadImagesToCloudinary(req.files.images);
-    console.log("Images uploaded successfully:", uploadedImages.length);
+  // 5. Parse and validate colors
+  let colors = [];
+  if (req.body.colors) {
+    try {
+      colors = JSON.parse(req.body.colors); // expected: [{ name, hex }, ...]
+    } catch (err) {
+      console.error("Error parsing colors JSON:", err);
+      res.status(400);
+      throw new Error("Invalid colors format. Must be a valid JSON array.");
+    }
 
-    // Upload video to Cloudinary if provided
+    // Validate each color object
+    for (const [index, color] of colors.entries()) {
+      if (!color.name || typeof color.name !== "string") {
+        res.status(400);
+        throw new Error(
+          `Color at index ${index} must have a valid 'name' string.`,
+        );
+      }
+      if (!color.hex || !/^#([0-9A-F]{3}){1,2}$/i.test(color.hex)) {
+        res.status(400);
+        throw new Error(
+          `Color at index ${index} must have a valid hex code (e.g., #FF0000).`,
+        );
+      }
+    }
+
+    // Check that the number of colors matches the files indices (optional)
+    // The files map may have indices that don't exist in the colors array – we ignore extra files.
+  }
+
+  try {
+    // ----- Upload main images -----
+    console.log(
+      `Uploading ${mainImageFiles.length} main images to Cloudinary...`,
+    );
+    const uploadedImages = await uploadImagesToCloudinary(mainImageFiles);
+    console.log("Main images uploaded successfully:", uploadedImages.length);
+
+    // ----- Upload video if present -----
     let videoUrl = null;
-    if (req.files.video && req.files.video.length > 0) {
+    if (videoFile) {
       console.log("Uploading video to Cloudinary...");
-      videoUrl = await uploadVideoToCloudinary(req.files.video[0]);
+      videoUrl = await uploadVideoToCloudinary(videoFile);
       console.log("Video uploaded successfully:", videoUrl);
     }
 
+    // ----- Upload color images -----
+    if (colors.length > 0) {
+      for (let i = 0; i < colors.length; i++) {
+        const filesForThisColor = colorFilesMap[i] || [];
+        if (filesForThisColor.length > 0) {
+          console.log(
+            `Uploading ${filesForThisColor.length} images for color ${colors[i].name}...`,
+          );
+          const urls = await uploadColorImages(filesForThisColor);
+          colors[i].images = urls; // store URLs in the color object
+        } else {
+          colors[i].images = []; // no images for this color
+        }
+      }
+    }
+
+    // ----- Create product in database -----
     const product = await Product.create({
       name,
       brand,
@@ -307,7 +388,7 @@ const createProduct = asyncHandler(async (req, res) => {
             ? null
             : Number(discountPrice)
           : null,
-      shippingFee: shippingFee ? Number(shippingFee) : 0, // ADDED: Include shipping fee
+      shippingFee: shippingFee ? Number(shippingFee) : 0,
       category,
       stock,
       tags: parsedTags,
@@ -316,34 +397,46 @@ const createProduct = asyncHandler(async (req, res) => {
       isFeatured: isFeatured === "true" || isFeatured === true,
       isVisible: isVisible !== "false",
       isAliExpress: isAliExpress === "true" || isAliExpress === true,
+      colors: colors,
     });
 
     console.log("Product created successfully:", product._id);
-    console.log("Product shipping fee:", product.shippingFee);
-
-    res.status(201).json({
-      success: true,
-      product,
-    });
+    res.status(201).json({ success: true, product });
   } catch (error) {
     console.error("Error in createProduct:", error);
 
-    // Clean up uploaded files if product creation fails
-    if (req.files?.images && req.files.images.length > 0) {
+    // ----- Cleanup on failure -----
+    // Attempt to delete any uploaded files (best effort)
+    if (uploadedImages && uploadedImages.length > 0) {
       try {
-        const uploadedImages = await uploadImagesToCloudinary(req.files.images);
         await deleteImagesFromCloudinary(uploadedImages);
       } catch (cleanupError) {
-        console.error("Error cleaning up images:", cleanupError);
+        console.error("Error cleaning up main images:", cleanupError);
       }
     }
 
-    if (req.files?.video && req.files.video.length > 0) {
+    if (videoUrl) {
       try {
-        const videoUrl = await uploadVideoToCloudinary(req.files.video[0]);
         await deleteVideoFromCloudinary(videoUrl);
       } catch (cleanupError) {
         console.error("Error cleaning up video:", cleanupError);
+      }
+    }
+
+    // Clean up color images if any were uploaded
+    for (const color of colors) {
+      if (color.images && color.images.length > 0) {
+        try {
+          const deletePromises = color.images.map((url) => {
+            const publicId = url.split("/").slice(-1)[0].split(".")[0];
+            return cloudinary.uploader.destroy(
+              `ecommerce/products/colors/${publicId}`,
+            );
+          });
+          await Promise.all(deletePromises);
+        } catch (cleanupError) {
+          console.error("Error cleaning up color images:", cleanupError);
+        }
       }
     }
 
@@ -359,7 +452,7 @@ const updateProduct = asyncHandler(async (req, res) => {
   console.log("=== UPDATE PRODUCT REQUEST ===");
   console.log("Product ID:", req.params.id);
   console.log("Request body:", req.body);
-  console.log("Request files:", req.files);
+  console.log("Request files:", req.files); // req.files is now an array from upload.any()
 
   const product = await Product.findById(req.params.id);
 
@@ -374,7 +467,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     description,
     price,
     discountPrice,
-    shippingFee, // ADDED: Extract shippingFee from req.body
+    shippingFee,
     category,
     stock,
     isFeatured,
@@ -436,19 +529,46 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
   }
 
+  // ----- Process uploaded files -----
+  const mainImageFiles = [];
+  let videoFile = null;
+  const colorFilesMap = {}; // key: color index, value: array of files
+
+  if (req.files && Array.isArray(req.files)) {
+    req.files.forEach((file) => {
+      if (file.fieldname === "images") {
+        mainImageFiles.push(file);
+      } else if (file.fieldname === "video") {
+        if (!videoFile) videoFile = file; // take first video if multiple
+      } else {
+        // Check for colorImages[<index>] fieldname
+        const match = file.fieldname.match(/^colorImages\[(\d+)\]$/);
+        if (match) {
+          const idx = parseInt(match[1], 10);
+          if (!colorFilesMap[idx]) colorFilesMap[idx] = [];
+          colorFilesMap[idx].push(file);
+        } else {
+          console.warn(
+            `Ignored file with unknown fieldname: ${file.fieldname}`,
+          );
+        }
+      }
+    });
+  }
+
   // Store old files for cleanup
   const oldImages = [...product.images];
   const oldVideoUrl = product.video;
   let newImages = [...product.images];
   let newVideoUrl = product.video;
 
-  // Upload new images if provided
-  if (req.files?.images && req.files.images.length > 0) {
+  // ----- Upload new main images if provided -----
+  if (mainImageFiles.length > 0) {
     try {
       console.log(
-        `Uploading ${req.files.images.length} new images to Cloudinary...`,
+        `Uploading ${mainImageFiles.length} new main images to Cloudinary...`,
       );
-      const uploadedImages = await uploadImagesToCloudinary(req.files.images);
+      const uploadedImages = await uploadImagesToCloudinary(mainImageFiles);
 
       // APPEND new images to existing images
       newImages = [...oldImages, ...uploadedImages];
@@ -466,16 +586,16 @@ const updateProduct = asyncHandler(async (req, res) => {
 
       console.log(`Total images after appending: ${newImages.length}`);
     } catch (uploadError) {
-      console.error("Error uploading new images:", uploadError);
-      throw new Error("Failed to upload new images");
+      console.error("Error uploading new main images:", uploadError);
+      throw new Error("Failed to upload new main images");
     }
   }
 
-  // Upload new video if provided
-  if (req.files?.video && req.files.video.length > 0) {
+  // ----- Upload new video if provided -----
+  if (videoFile) {
     try {
       console.log("Uploading new video to Cloudinary...");
-      newVideoUrl = await uploadVideoToCloudinary(req.files.video[0]);
+      newVideoUrl = await uploadVideoToCloudinary(videoFile);
 
       if (oldVideoUrl) {
         console.log("Deleting old video from Cloudinary...");
@@ -495,6 +615,76 @@ const updateProduct = asyncHandler(async (req, res) => {
     newVideoUrl = null;
   } else {
     newVideoUrl = oldVideoUrl;
+  }
+
+  // ----- Handle Colors -----
+  let updatedColors = product.colors; // default to existing
+  if (req.body.colors) {
+    try {
+      updatedColors = JSON.parse(req.body.colors); // client sends full updated array
+    } catch (err) {
+      console.error("Error parsing colors JSON:", err);
+      res.status(400);
+      throw new Error("Invalid colors format. Must be a valid JSON array.");
+    }
+
+    // Validate each color object (basic)
+    for (const [index, color] of updatedColors.entries()) {
+      if (!color.name || typeof color.name !== "string") {
+        res.status(400);
+        throw new Error(
+          `Color at index ${index} must have a valid 'name' string.`,
+        );
+      }
+      if (!color.hex || !/^#([0-9A-F]{3}){1,2}$/i.test(color.hex)) {
+        res.status(400);
+        throw new Error(
+          `Color at index ${index} must have a valid hex code (e.g., #FF0000).`,
+        );
+      }
+      // Ensure images field exists (may be empty array)
+      if (!color.images) color.images = [];
+    }
+
+    // Process new images for each color
+    for (let i = 0; i < updatedColors.length; i++) {
+      const color = updatedColors[i];
+      const filesForThisColor = colorFilesMap[i] || [];
+
+      if (filesForThisColor.length > 0) {
+        // Upload new images for this color
+        console.log(
+          `Uploading ${filesForThisColor.length} images for color ${color.name}...`,
+        );
+        const newUrls = await uploadColorImages(filesForThisColor);
+
+        // If the color previously had images, delete the old ones from Cloudinary
+        if (color.images && color.images.length > 0) {
+          console.log(`Deleting old images for color ${color.name}...`);
+          await Promise.all(
+            color.images.map(async (url) => {
+              try {
+                const publicId = url.split("/").slice(-1)[0].split(".")[0];
+                await cloudinary.uploader.destroy(
+                  `ecommerce/products/colors/${publicId}`,
+                );
+              } catch (delErr) {
+                console.error(
+                  `Failed to delete old color image: ${url}`,
+                  delErr,
+                );
+              }
+            }),
+          );
+        }
+
+        // Replace with new URLs
+        color.images = newUrls;
+      } else {
+        // Keep existing images – they are already in color.images from the client
+        // (client must send the full array of URLs for unchanged colors)
+      }
+    }
   }
 
   // Build update object
@@ -518,6 +708,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     tags: parsedTags,
     images: newImages,
     video: newVideoUrl,
+    colors: updatedColors,
   };
 
   // Only update boolean fields if provided
@@ -529,7 +720,6 @@ const updateProduct = asyncHandler(async (req, res) => {
     updateData.isVisible = isVisible !== "false";
   }
 
-  // NEW: Handle isAliExpress update
   if (isAliExpress !== undefined) {
     updateData.isAliExpress = isAliExpress === "true" || isAliExpress === true;
   }
@@ -693,6 +883,36 @@ const getSimilarProducts = asyncHandler(async (req, res) => {
 
   return res.json({ success: true, products: similarProducts });
 });
+// Helper: Upload multiple color images to Cloudinary
+const uploadColorImages = async (files) => {
+  if (!files || files.length === 0) return [];
+  const uploadPromises = files.map(
+    (file) =>
+      new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "ecommerce/products/colors",
+            resource_type: "auto",
+          },
+          (error, result) => {
+            if (error) {
+              console.error("Cloudinary color image upload error:", error);
+              reject(error);
+            } else {
+              resolve(result.secure_url);
+            }
+          },
+        );
+        stream.end(file.buffer);
+      }),
+  );
+  return await Promise.all(uploadPromises);
+};
+
+const extractColorIndex = (fieldname) => {
+  const match = fieldname.match(/^colorImages\[(\d+)\]$/);
+  return match ? parseInt(match[1], 10) : null;
+};
 
 module.exports = {
   getProducts,
