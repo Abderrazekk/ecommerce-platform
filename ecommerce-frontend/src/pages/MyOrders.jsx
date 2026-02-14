@@ -17,6 +17,7 @@ import {
   ChevronRight,
   MapPin,
   Phone as PhoneIcon,
+  FileText, // NEW: import for description
 } from "lucide-react";
 
 const MyOrders = () => {
@@ -111,7 +112,7 @@ const MyOrders = () => {
                         </div>
                         <span
                           className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold border shadow-sm ${getStatusColor(
-                            order.status
+                            order.status,
                           )}`}
                         >
                           {getStatusIcon(order.status)}
@@ -124,16 +125,21 @@ const MyOrders = () => {
                         <Calendar className="h-4 w-4" />
                         <span>
                           Placed on{" "}
-                          {new Date(order.createdAt).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
+                          {new Date(order.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            },
+                          )}
                         </span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end">
-                      <span className="text-sm text-gray-500">Total amount</span>
+                      <span className="text-sm text-gray-500">
+                        Total amount
+                      </span>
                       <span className="text-2xl font-bold text-gray-900">
                         {formatPrice(order.totalPrice)}
                       </span>
@@ -145,7 +151,10 @@ const MyOrders = () => {
                 <div className="px-7 py-6 sm:px-9 sm:py-8">
                   <div className="space-y-6 divide-y divide-gray-100">
                     {order.items.map((item, index) => (
-                      <div key={index} className="flex items-start gap-5 pt-5 first:pt-0">
+                      <div
+                        key={index}
+                        className="flex items-start gap-5 pt-5 first:pt-0"
+                      >
                         <div className="h-24 w-24 flex-shrink-0 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                           <img
                             src={item.image}
@@ -159,10 +168,12 @@ const MyOrders = () => {
                           </h4>
                           <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                             <span className="text-gray-600 flex items-center gap-1">
-                              <span className="font-medium">Quantity:</span> {item.quantity}
+                              <span className="font-medium">Quantity:</span>{" "}
+                              {item.quantity}
                             </span>
                             <span className="text-gray-600 flex items-center gap-1">
-                              <span className="font-medium">Unit price:</span> {formatPrice(item.price)}
+                              <span className="font-medium">Unit price:</span>{" "}
+                              {formatPrice(item.price)}
                             </span>
                           </div>
                         </div>
@@ -174,7 +185,7 @@ const MyOrders = () => {
                   </div>
                 </div>
 
-                {/* Order Footer – delivery & price summary */}
+                {/* Order Footer – delivery & price summary, and optional description */}
                 <div className="border-t border-gray-100 bg-gray-50/50 px-7 py-6 sm:px-9 sm:py-7">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Delivery Address with icon */}
@@ -200,6 +211,25 @@ const MyOrders = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* NEW: Order Description – if present */}
+                    {order.description && (
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0">
+                          <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
+                            <FileText className="h-5 w-5 text-gray-600" />
+                          </div>
+                        </div>
+                        <div>
+                          <h5 className="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
+                            Order Notes
+                          </h5>
+                          <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                            {order.description}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Price Summary – elegant, right-aligned */}
                     <div className="flex flex-col items-end justify-center">

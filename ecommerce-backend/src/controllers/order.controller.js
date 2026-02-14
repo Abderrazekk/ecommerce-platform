@@ -6,7 +6,8 @@ const asyncHandler = require("../middlewares/error.middleware").asyncHandler;
 // @route   POST /api/orders
 // @access  Private
 const createOrder = asyncHandler(async (req, res) => {
-  const { items, deliveryAddress, phone } = req.body;
+  // NEW: accept description from request body
+  const { items, deliveryAddress, phone, description } = req.body;
 
   console.log("Creating order with items:", items);
 
@@ -34,12 +35,10 @@ const createOrder = asyncHandler(async (req, res) => {
       throw new Error(`Insufficient stock for: ${product.name}`);
     }
 
-    // Use discount price if available, otherwise use regular price
     const itemPrice = product.discountPrice || product.price;
     const itemTotal = itemPrice * item.quantity;
     productsTotal += itemTotal;
 
-    // Track the highest shipping fee among products
     if (product.shippingFee > highestShippingFee) {
       highestShippingFee = product.shippingFee;
     }
@@ -53,12 +52,10 @@ const createOrder = asyncHandler(async (req, res) => {
       shippingFee: product.shippingFee,
     });
 
-    // Update product stock
     product.stock -= item.quantity;
     await product.save();
   }
 
-  // Calculate shipping fee (free if order total > 100 TND)
   let shippingFee = 0;
   let freeShipping = false;
 
@@ -68,9 +65,9 @@ const createOrder = asyncHandler(async (req, res) => {
     freeShipping = true;
   }
 
-  // Calculate final total
   const totalPrice = productsTotal + shippingFee;
 
+  // NEW: include description in order creation
   const order = await Order.create({
     user: req.user._id,
     items: orderItems,
@@ -80,6 +77,7 @@ const createOrder = asyncHandler(async (req, res) => {
     freeShipping,
     deliveryAddress,
     phone,
+    description: description || "", // optional field
   });
 
   res.status(201).json({
@@ -88,7 +86,9 @@ const createOrder = asyncHandler(async (req, res) => {
   });
 });
 
-// In fetchAllOrders function (or get all orders for admin)
+// @desc    Get all orders (admin)
+// @route   GET /api/admin/orders
+// @access  Private/Admin
 const getAllOrders = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -100,9 +100,8 @@ const getAllOrders = asyncHandler(async (req, res) => {
     filter.status = status;
   }
 
-  // Populate user information
   const orders = await Order.find(filter)
-    .populate("user", "name email phone address") // Add phone and address if needed
+    .populate("user", "name email phone address")
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 });
@@ -150,7 +149,6 @@ const getOrderById = asyncHandler(async (req, res) => {
     throw new Error("Order not found");
   }
 
-  // Check if user owns order or is admin
   if (
     order.user._id.toString() !== req.user._id.toString() &&
     req.user.role !== "admin"
@@ -165,4 +163,31 @@ const getOrderById = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { createOrder, getMyOrders, getOrderById, getAllOrders };
+// NEW: Delete order (admin only)
+// @desc    Delete order
+// @route   DELETE /api/admin/orders/:id
+// @access  Private/Admin
+const deleteOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
+
+  // Optional: restore product stock? Usually not needed for deleted orders, but you could implement if desired.
+  await order.deleteOne();
+
+  res.json({
+    success: true,
+    message: "Order deleted successfully",
+  });
+});
+
+module.exports = {
+  createOrder,
+  getMyOrders,
+  getOrderById,
+  getAllOrders,
+  deleteOrder,
+};

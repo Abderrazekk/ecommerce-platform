@@ -1,74 +1,91 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import orderService from '../../services/order.service'
-import { toast } from 'react-hot-toast'
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import orderService from "../../services/order.service";
+import { toast } from "react-hot-toast";
 
 // Async thunks
 export const createOrder = createAsyncThunk(
-  'orders/create',
+  "orders/create",
   async (orderData, { rejectWithValue }) => {
     try {
-      const response = await orderService.createOrder(orderData)
-      toast.success('Order placed successfully!')
-      return response.data.order
+      const response = await orderService.createOrder(orderData);
+      toast.success("Order placed successfully!");
+      return response.data.order;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to create order')
-      return rejectWithValue(error.response?.data?.message)
+      toast.error(error.response?.data?.message || "Failed to create order");
+      return rejectWithValue(error.response?.data?.message);
     }
-  }
-)
+  },
+);
 
 export const fetchMyOrders = createAsyncThunk(
-  'orders/fetchMyOrders',
+  "orders/fetchMyOrders",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await orderService.getMyOrders()
-      return response.data.orders
+      const response = await orderService.getMyOrders();
+      return response.data.orders;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to fetch orders')
-      return rejectWithValue(error.response?.data?.message)
+      toast.error(error.response?.data?.message || "Failed to fetch orders");
+      return rejectWithValue(error.response?.data?.message);
     }
-  }
-)
+  },
+);
 
 export const fetchAllOrders = createAsyncThunk(
-  'orders/fetchAll',
+  "orders/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await orderService.getAllOrders()
-      return response.data.orders
+      const response = await orderService.getAllOrders();
+      return response.data.orders;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to fetch orders')
-      return rejectWithValue(error.response?.data?.message)
+      toast.error(error.response?.data?.message || "Failed to fetch orders");
+      return rejectWithValue(error.response?.data?.message);
     }
-  }
-)
+  },
+);
 
 export const updateOrderStatus = createAsyncThunk(
-  'orders/updateStatus',
+  "orders/updateStatus",
   async ({ id, status }, { rejectWithValue }) => {
     try {
-      const response = await orderService.updateOrderStatus(id, status)
-      toast.success('Order status updated!')
-      return response.data.order
+      const response = await orderService.updateOrderStatus(id, status);
+      toast.success("Order status updated!");
+      return response.data.order;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update order status')
-      return rejectWithValue(error.response?.data?.message)
+      toast.error(
+        error.response?.data?.message || "Failed to update order status",
+      );
+      return rejectWithValue(error.response?.data?.message);
     }
-  }
-)
+  },
+);
 
 export const fetchOrderById = createAsyncThunk(
-  'orders/fetchById',
+  "orders/fetchById",
   async (id, { rejectWithValue }) => {
     try {
-      const response = await orderService.getOrder(id)
-      return response.data.order
+      const response = await orderService.getOrder(id);
+      return response.data.order;
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to fetch order')
-      return rejectWithValue(error.response?.data?.message)
+      toast.error(error.response?.data?.message || "Failed to fetch order");
+      return rejectWithValue(error.response?.data?.message);
     }
-  }
-)
+  },
+);
+
+// NEW: Delete order (admin)
+export const deleteOrder = createAsyncThunk(
+  "orders/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      await orderService.deleteOrder(id);
+      toast.success("Order deleted successfully");
+      return id; // return the id of deleted order to remove from state
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete order");
+      return rejectWithValue(error.response?.data?.message);
+    }
+  },
+);
 
 const initialState = {
   orders: [],
@@ -76,60 +93,72 @@ const initialState = {
   order: null,
   loading: false,
   error: null,
-}
+};
 
 const orderSlice = createSlice({
-  name: 'orders',
+  name: "orders",
   initialState,
   reducers: {
     clearOrders: (state) => {
-      state.orders = []
-      state.myOrders = []
-      state.order = null
+      state.orders = [];
+      state.myOrders = [];
+      state.order = null;
     },
   },
   extraReducers: (builder) => {
     builder
       // Create order
       .addCase(createOrder.pending, (state) => {
-        state.loading = true
-        state.error = null
+        state.loading = true;
+        state.error = null;
       })
       .addCase(createOrder.fulfilled, (state, action) => {
-        state.loading = false
-        state.order = action.payload
-        state.myOrders.unshift(action.payload)
+        state.loading = false;
+        state.order = action.payload;
+        state.myOrders.unshift(action.payload);
       })
       .addCase(createOrder.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.payload
+        state.loading = false;
+        state.error = action.payload;
       })
       // Fetch my orders
       .addCase(fetchMyOrders.fulfilled, (state, action) => {
-        state.myOrders = action.payload
+        state.myOrders = action.payload;
       })
       // Fetch all orders (admin)
       .addCase(fetchAllOrders.fulfilled, (state, action) => {
-        state.orders = action.payload
+        state.orders = action.payload;
       })
       // Update order status
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
-        const index = state.orders.findIndex(o => o._id === action.payload._id)
+        const index = state.orders.findIndex(
+          (o) => o._id === action.payload._id,
+        );
         if (index !== -1) {
-          state.orders[index] = action.payload
+          state.orders[index] = action.payload;
         }
-        
-        const myIndex = state.myOrders.findIndex(o => o._id === action.payload._id)
+
+        const myIndex = state.myOrders.findIndex(
+          (o) => o._id === action.payload._id,
+        );
         if (myIndex !== -1) {
-          state.myOrders[myIndex] = action.payload
+          state.myOrders[myIndex] = action.payload;
         }
       })
       // Fetch order by ID
       .addCase(fetchOrderById.fulfilled, (state, action) => {
-        state.order = action.payload
+        state.order = action.payload;
       })
+      // NEW: Delete order
+      .addCase(deleteOrder.fulfilled, (state, action) => {
+        state.orders = state.orders.filter((o) => o._id !== action.payload);
+        state.myOrders = state.myOrders.filter((o) => o._id !== action.payload);
+        if (state.order?._id === action.payload) {
+          state.order = null;
+        }
+      });
   },
-})
+});
 
-export const { clearOrders } = orderSlice.actions
-export default orderSlice.reducer
+export const { clearOrders } = orderSlice.actions;
+export default orderSlice.reducer;

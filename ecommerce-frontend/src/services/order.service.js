@@ -21,6 +21,11 @@ const orderService = {
     return api.put(`/admin/order/${id}/status`, { status });
   },
 
+  // NEW: Delete order (admin)
+  deleteOrder: (id) => {
+    return api.delete(`/admin/orders/${id}`);
+  },
+
   getDashboardStats: () => {
     return api.get("/admin/dashboard");
   },

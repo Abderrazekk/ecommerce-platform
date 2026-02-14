@@ -19,6 +19,7 @@ import {
   Check,
   ChevronRight,
   Home,
+  FileText, // NEW icon for description
 } from "lucide-react";
 
 const Checkout = () => {
@@ -29,6 +30,8 @@ const Checkout = () => {
 
   const [shippingAddress, setShippingAddress] = useState(user?.address || "");
   const [phone, setPhone] = useState(user?.phone || "");
+  // NEW: state for description
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -84,6 +87,8 @@ const Checkout = () => {
       newErrors.phone = "Please enter a valid phone number";
     }
 
+    // Description is optional, no validation needed
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -101,7 +106,7 @@ const Checkout = () => {
       dispatch(saveShippingAddress(shippingAddress));
       dispatch(savePhone(phone));
 
-      // Create order - log what's being sent
+      // Create order - include description
       console.log(
         "📤 Creating order with items:",
         cartItems.map((item) => ({
@@ -118,6 +123,7 @@ const Checkout = () => {
         })),
         deliveryAddress: shippingAddress,
         phone: phone,
+        description: description.trim() || undefined, // send only if not empty
       };
 
       await dispatch(createOrder(orderData)).unwrap();
@@ -272,6 +278,24 @@ const Checkout = () => {
                         {errors.shippingAddress}
                       </p>
                     )}
+                  </div>
+
+                  {/* NEW: Optional Description Field */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <FileText className="h-4 w-4 inline mr-1.5" />
+                      Order Notes (Optional)
+                    </label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      rows="3"
+                      className="w-full px-4 py-3.5 border border-gray-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-shadow resize-none"
+                      placeholder="Any special instructions, color preferences, etc."
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Add any notes for your order (optional)
+                    </p>
                   </div>
                 </div>
               </div>

@@ -726,6 +726,25 @@ const deleteUser = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Delete order (admin only)
+// @route   DELETE /api/admin/orders/:id
+// @access  Private/Admin
+const deleteOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
+
+  await order.deleteOne();
+
+  res.json({
+    success: true,
+    message: "Order deleted successfully",
+  });
+});
+
 module.exports = {
   getDashboardStats,
   getAllUsers,
@@ -739,4 +758,5 @@ module.exports = {
   getRevenueReport,
   getUserMetrics,
   deleteUser,
+  deleteOrder,
 };

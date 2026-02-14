@@ -22,27 +22,23 @@ const orderSchema = new mongoose.Schema(
           min: 1,
         },
         image: String,
-        // NEW: Store the product's shipping fee for record
         shippingFee: {
           type: Number,
           default: 0,
         },
       },
     ],
-    // Products total before shipping
     productsTotal: {
       type: Number,
       required: true,
       min: 0,
     },
-    // NEW: Shipping fee for the order
     shippingFee: {
       type: Number,
       required: true,
       default: 0,
       min: 0,
     },
-    // Total price including shipping
     totalPrice: {
       type: Number,
       required: true,
@@ -55,6 +51,11 @@ const orderSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: [true, "Please provide phone number"],
+    },
+    // NEW: Optional description field for customer notes (color, special instructions, etc.)
+    description: {
+      type: String,
+      default: "",
     },
     status: {
       type: String,
@@ -71,7 +72,6 @@ const orderSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    // NEW: Free shipping flag
     freeShipping: {
       type: Boolean,
       default: false,
@@ -86,7 +86,6 @@ const orderSchema = new mongoose.Schema(
   },
 );
 
-// Index for user orders and status
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
 

@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   fetchAllOrders,
   updateOrderStatus,
+  deleteOrder, // NEW
 } from "../../redux/slices/order.slice";
 import { formatPrice } from "../../utils/formatPrice";
 import Loader from "../../components/common/Loader";
@@ -29,6 +30,8 @@ import {
   ChevronDown,
   Filter,
   RefreshCw,
+  FileText, // NEW icon for description
+  Trash2, // NEW icon for delete
 } from "lucide-react";
 
 const statusOptions = [
@@ -73,6 +76,7 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false); // NEW
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -102,6 +106,29 @@ const Orders = () => {
         toast.error("Failed to update order status");
       } finally {
         setStatusUpdateLoading(false);
+      }
+    }
+  };
+
+  // NEW: Delete order
+  const handleDeleteOrder = async (orderId) => {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this order? This action cannot be undone.",
+      )
+    ) {
+      try {
+        setDeleteLoading(true);
+        await dispatch(deleteOrder(orderId)).unwrap();
+        toast.success("Order deleted successfully");
+        if (selectedOrder?._id === orderId) {
+          setIsModalOpen(false);
+          setSelectedOrder(null);
+        }
+      } catch (error) {
+        toast.error("Failed to delete order");
+      } finally {
+        setDeleteLoading(false);
       }
     }
   };
@@ -454,6 +481,15 @@ const Orders = () => {
                           >
                             <Eye className="h-5 w-5" />
                           </button>
+                          {/* NEW: Delete button */}
+                          <button
+                            onClick={() => handleDeleteOrder(order._id)}
+                            disabled={deleteLoading}
+                            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete order"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
                           <select
                             value={order.status}
                             onChange={(e) =>
@@ -585,6 +621,19 @@ const Orders = () => {
                       </div>
                     </div>
 
+                    {/* NEW: Order Description Card */}
+                    {selectedOrder.description && (
+                      <div className="bg-gray-50/80 rounded-2xl p-6 border border-gray-100">
+                        <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-gray-500" />
+                          Order Notes
+                        </h3>
+                        <p className="text-gray-800 text-sm whitespace-pre-wrap">
+                          {selectedOrder.description}
+                        </p>
+                      </div>
+                    )}
+
                     {/* Payment Card */}
                     <div className="bg-gray-50/80 rounded-2xl p-6 border border-gray-100">
                       <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -641,7 +690,7 @@ const Orders = () => {
                     </div>
                   </div>
 
-                  {/* Right column – Status Update */}
+                  {/* Right column – Status Update & Delete */}
                   <div className="lg:col-span-1">
                     <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 sticky top-24">
                       <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -681,6 +730,18 @@ const Orders = () => {
                             )}
                           </button>
                         ))}
+                      </div>
+
+                      {/* NEW: Delete button in modal */}
+                      <div className="mt-6 pt-4 border-t border-blue-200">
+                        <button
+                          onClick={() => handleDeleteOrder(selectedOrder._id)}
+                          disabled={deleteLoading}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors disabled:opacity-50"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                          {deleteLoading ? "Deleting..." : "Delete Order"}
+                        </button>
                       </div>
                     </div>
                   </div>
