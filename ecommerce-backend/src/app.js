@@ -12,6 +12,7 @@ const commentRoutes = require("./routes/comment.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
 const wishlistRoutes = require("./routes/wishlist.routes");
 const sponsorRoutes = require("./routes/sponsor.routes");
+const promoRoutes = require("./routes/promo.routes");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/api", commentRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/sponsors", sponsorRoutes);
+app.use("/api/promo", promoRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {

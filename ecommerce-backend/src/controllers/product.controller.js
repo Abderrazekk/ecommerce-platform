@@ -90,7 +90,8 @@ const getProducts = asyncHandler(async (req, res) => {
   const category = req.query.category;
   const search = req.query.search;
   const brand = req.query.brand;
-  const isAliExpress = req.query.isAliExpress; // NEW
+  const isAliExpress = req.query.isAliExpress;
+  const isOnSale = req.query.isOnSale;
 
   let filter = { isVisible: true };
 
@@ -99,6 +100,12 @@ const getProducts = asyncHandler(async (req, res) => {
     filter.isAliExpress = true;
   } else if (isAliExpress === "false") {
     filter.isAliExpress = false;
+  }
+
+  if (isOnSale === "true") {
+    filter.isOnSale = true;
+  } else if (isOnSale === "false") {
+    filter.isOnSale = false;
   }
 
   if (category && productCategories.includes(category)) {

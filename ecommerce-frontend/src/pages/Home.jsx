@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import Hero from "../components/hero/Hero";
 import FeaturedProducts from "../components/product/FeaturedProducts";
 import Sponsors from "../components/sponsors/Sponsors";
+import PromoBanner from "../components/promo/PromoBanner";
 
 const Home = () => {
   const { t } = useTranslation("home");
@@ -12,6 +13,7 @@ const Home = () => {
 
       <div>
         <FeaturedProducts />
+        <PromoBanner />
         <Sponsors />
       </div>
 

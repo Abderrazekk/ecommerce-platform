@@ -312,6 +312,7 @@ const Navbar = () => {
     { name: t("menu.home"), path: "/", icon: <FaHome className="h-4 w-4" /> },
   ];
 
+  // Admin menu items – added "Promo Banner"
   const adminMenuItems = [
     { name: t("admin.dashboard"), path: "/admin/dashboard" },
     { name: t("admin.hero"), path: "/admin/hero" },
@@ -319,6 +320,7 @@ const Navbar = () => {
     { name: t("admin.orders"), path: "/admin/orders" },
     { name: t("admin.users"), path: "/admin/users" },
     { name: t("admin.sponsors"), path: "/admin/sponsors" },
+    { name: t("admin.promo"), path: "/admin/promo" }, // NEW
   ];
 
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);

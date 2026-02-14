@@ -43,6 +43,7 @@ import Orders from "./pages/admin/Orders";
 import Users from "./pages/admin/Users";
 import Hero from "./pages/admin/Hero";
 import AdminSponsors from "./pages/admin/Sponsors";
+import Promo from "./pages/admin/Promo";
 
 // Optional: Not Found page
 import NotFound from "./pages/NotFound";
@@ -177,6 +178,14 @@ function App() {
               element={
                 <AdminRoute>
                   <AdminSponsors />
+                </AdminRoute>
+              }
+            />
+             <Route
+              path="/admin/Promo"
+              element={
+                <AdminRoute>
+                  <Promo />
                 </AdminRoute>
               }
             />

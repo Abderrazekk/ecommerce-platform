@@ -79,6 +79,7 @@ const Shop = () => {
     { value: ALIEXPRESS_CATEGORY_VALUE, label: t("categories.aliexpress") },
   ];
 
+  // Read URL parameters
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const categoryParam = params.get("category");
@@ -102,6 +103,8 @@ const Shop = () => {
     if (searchParam) setSearchTerm(searchParam);
     if (brandParam) setSelectedBrand(brandParam);
     if (pageParam) setCurrentPage(parseInt(pageParam, 10) || 1);
+
+    // Store onSale flag in local state if needed, but we'll pass it directly to fetchProducts
   }, [location.search]);
 
   useEffect(() => {
@@ -117,6 +120,10 @@ const Shop = () => {
       category = "";
     }
 
+    // Get onSale from URL
+    const params = new URLSearchParams(location.search);
+    const onSaleParam = params.get("onSale");
+
     dispatch(
       fetchProducts({
         page: currentPage,
@@ -125,9 +132,17 @@ const Shop = () => {
         search: searchTerm,
         brand: selectedBrand,
         isAliExpress,
+        isOnSale: onSaleParam === "true" ? "true" : undefined, // <-- string "true"
       }),
     );
-  }, [dispatch, currentPage, selectedCategory, searchTerm, selectedBrand]);
+  }, [
+    dispatch,
+    currentPage,
+    selectedCategory,
+    searchTerm,
+    selectedBrand,
+    location.search,
+  ]);
 
   const filteredProducts = useCallback(() => {
     let filtered = [...products];
