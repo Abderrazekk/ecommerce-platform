@@ -42,8 +42,8 @@ const FeaturedProducts = () => {
         </div>
 
         {featuredProducts.length > 0 ? (
-          // Responsive grid: 2 columns on mobile, up to 6 on very large screens
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-4 lg:gap-6 2xl:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 lg:gap-6">
+            {/* Fixed column grid: 2 on mobile, up to 5 on large screens */}
             {featuredProducts.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
