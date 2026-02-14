@@ -108,6 +108,12 @@ const productService = {
     const response = await api.get(`/products/${productId}/similar`);
     return response.data; // ✅ returns { success, products }
   },
+
+  getOnSaleProducts: (limit = 8) => {
+    const params = new URLSearchParams();
+    if (limit) params.append("limit", limit);
+    return api.get(`/products/onsale?${params.toString()}`);
+  },
 };
 
 export default productService;

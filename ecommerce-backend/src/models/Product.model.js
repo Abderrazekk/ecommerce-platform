@@ -150,7 +150,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    // NEW: Review statistics
+    isOnSaleSection: {
+      type: Boolean,
+      default: false,
+    },
     averageRating: {
       type: Number,
       default: 0,

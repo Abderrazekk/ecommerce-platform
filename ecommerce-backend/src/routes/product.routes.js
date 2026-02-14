@@ -12,6 +12,7 @@ const {
   getCategories,
   getBrands,
   getSimilarProducts,
+  getOnSaleProducts,
 } = require("../controllers/product.controller");
 const { protect } = require("../middlewares/auth.middleware");
 const { adminOnly } = require("../middlewares/admin.middleware");
@@ -23,6 +24,7 @@ const {
 // Public routes (unchanged)
 router.get("/", getProducts);
 router.get("/featured", getFeaturedProducts);
+router.get("/onsale", getOnSaleProducts);
 router.get("/categories", getCategories);
 router.get("/brands", getBrands);
 router.get("/:id/similar", getSimilarProducts);

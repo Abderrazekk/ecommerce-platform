@@ -3,6 +3,7 @@ import Hero from "../components/hero/Hero";
 import FeaturedProducts from "../components/product/FeaturedProducts";
 import Sponsors from "../components/sponsors/Sponsors";
 import PromoBanner from "../components/promo/PromoBanner";
+import OnSaleProducts from "../components/product/OnSaleProducts";
 
 const Home = () => {
   const { t } = useTranslation("home");
@@ -14,6 +15,7 @@ const Home = () => {
       <div>
         <FeaturedProducts />
         <PromoBanner />
+        <OnSaleProducts />
         <Sponsors />
       </div>
 

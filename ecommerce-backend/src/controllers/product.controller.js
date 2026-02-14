@@ -262,6 +262,7 @@ const createProduct = asyncHandler(async (req, res) => {
     isVisible,
     tags,
     isAliExpress,
+    isOnSaleSection,
   } = req.body;
 
   // ----- Process uploaded files -----
@@ -404,6 +405,7 @@ const createProduct = asyncHandler(async (req, res) => {
       isFeatured: isFeatured === "true" || isFeatured === true,
       isVisible: isVisible !== "false",
       isAliExpress: isAliExpress === "true" || isAliExpress === true,
+      isOnSaleSection: isOnSaleSection === "true" || isOnSaleSection === true,
       colors: colors,
     });
 
@@ -481,6 +483,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     isVisible,
     tags,
     isAliExpress,
+    isOnSaleSection,
   } = req.body;
 
   // Validate category if provided
@@ -731,6 +734,11 @@ const updateProduct = asyncHandler(async (req, res) => {
     updateData.isAliExpress = isAliExpress === "true" || isAliExpress === true;
   }
 
+  if (isOnSaleSection !== undefined) {
+    updateData.isOnSaleSection =
+      isOnSaleSection === "true" || isOnSaleSection === true;
+  }
+
   console.log("Updating product with data:", updateData);
 
   const updatedProduct = await Product.findByIdAndUpdate(
@@ -921,6 +929,27 @@ const extractColorIndex = (fieldname) => {
   return match ? parseInt(match[1], 10) : null;
 };
 
+// @desc    Get on‑sale products (discountPrice > 0, visible, and admin‑selected)
+// @route   GET /api/products/onsale
+// @access  Public
+const getOnSaleProducts = asyncHandler(async (req, res) => {
+  const limit = parseInt(req.query.limit) || 8;
+
+  const products = await Product.find({
+    discountPrice: { $gt: 0 },
+    isVisible: true,
+    isOnSaleSection: true,
+  })
+    .select("-__v")
+    .limit(limit)
+    .sort({ createdAt: -1 });
+
+  res.json({
+    success: true,
+    products,
+  });
+});
+
 module.exports = {
   getProducts,
   getAdminProducts,
@@ -932,4 +961,5 @@ module.exports = {
   getCategories,
   getBrands,
   getSimilarProducts,
+  getOnSaleProducts,
 };

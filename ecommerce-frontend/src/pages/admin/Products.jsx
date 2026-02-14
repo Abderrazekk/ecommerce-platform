@@ -57,6 +57,7 @@ const Products = () => {
     isFeatured: false,
     isVisible: true,
     isAliExpress: false,
+    isOnSaleSection: false, // NEW FIELD
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -104,6 +105,7 @@ const Products = () => {
         isFeatured: product.isFeatured || false,
         isVisible: product.isVisible !== false,
         isAliExpress: product.isAliExpress || false,
+        isOnSaleSection: product.isOnSaleSection || false, // NEW FIELD
       });
       setImageFiles([]);
       setImagePreviews(
@@ -143,6 +145,7 @@ const Products = () => {
         isFeatured: false,
         isVisible: true,
         isAliExpress: false,
+        isOnSaleSection: false, // NEW FIELD
       });
       setImageFiles([]);
       setImagePreviews([]);
@@ -171,6 +174,7 @@ const Products = () => {
       isFeatured: false,
       isVisible: true,
       isAliExpress: false,
+      isOnSaleSection: false,
     });
     setImageFiles([]);
     setImagePreviews([]);
@@ -453,6 +457,8 @@ const Products = () => {
     productData.append("isFeatured", formData.isFeatured);
     productData.append("isVisible", formData.isVisible);
     productData.append("isAliExpress", formData.isAliExpress);
+    // NEW FIELD
+    productData.append("isOnSaleSection", formData.isOnSaleSection);
 
     imageFiles.forEach((file) => {
       productData.append("images", file);
@@ -569,6 +575,21 @@ const Products = () => {
                 <div className="absolute top-2 right-2">
                   <div className="px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
                     Featured
+                  </div>
+                </div>
+              )}
+              {product.discountPrice > 0 && (
+                <div className="absolute top-12 left-2">
+                  <div className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
+                    SALE
+                  </div>
+                </div>
+              )}
+              {/* NEW: On Sale Section badge */}
+              {product.isOnSaleSection && (
+                <div className="absolute bottom-2 left-2">
+                  <div className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
+                    On Sale Section
                   </div>
                 </div>
               )}
@@ -1040,6 +1061,7 @@ const Products = () => {
                   {/* Checkboxes */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-4">
+                      {/* AliExpress */}
                       <div
                         className={`flex items-start gap-3 p-4 border rounded-xl transition-all ${
                           formData.isAliExpress
@@ -1078,6 +1100,7 @@ const Products = () => {
                         </label>
                       </div>
 
+                      {/* Featured */}
                       <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl">
                         <input
                           type="checkbox"
@@ -1094,8 +1117,33 @@ const Products = () => {
                           </p>
                         </label>
                       </div>
+
+                      {/* NEW: Show in On Sale section */}
+                      <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl">
+                        <input
+                          type="checkbox"
+                          id="isOnSaleSection"
+                          name="isOnSaleSection"
+                          checked={formData.isOnSaleSection}
+                          onChange={handleInputChange}
+                          className="h-5 w-5 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500/20 focus:ring-offset-1 transition-all duration-200"
+                        />
+                        <label
+                          htmlFor="isOnSaleSection"
+                          className="text-gray-700"
+                        >
+                          <span className="font-medium">
+                            Show in On Sale section
+                          </span>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Display this product on the homepage “On Sale” block
+                            (only if discounted)
+                          </p>
+                        </label>
+                      </div>
                     </div>
 
+                    {/* Visible in Store */}
                     <div className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl h-fit">
                       <input
                         type="checkbox"
