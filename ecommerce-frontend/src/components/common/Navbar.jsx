@@ -503,7 +503,7 @@ const Navbar = () => {
 
       {/* Premium Main Navigation */}
       <nav className="bg-white/95 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-gray-100">
-        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-14">
           <div className="flex justify-between items-center h-20">
             {/* Logo - REMOVED TEXT, ONLY LOGO IMAGE */}
             <div className="flex items-center">

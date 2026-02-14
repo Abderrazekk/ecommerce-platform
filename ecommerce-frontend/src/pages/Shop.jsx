@@ -588,6 +588,14 @@ const Shop = () => {
       <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
         <MobileFilterDrawer />
 
+        {/* Page Title & Subtitle - visible on all screens */}
+        <div className="mb-8">
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">SHOP</h1>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">
+            Browse our collection of amazing products
+          </p>
+        </div>
+
         {selectedCategory === ALIEXPRESS_CATEGORY_VALUE && (
           <div className="mb-8 animate-fadeIn">
             <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-6 shadow-sm">
@@ -1060,21 +1068,19 @@ const Shop = () => {
           {/* Products Section */}
           <div className="flex-1">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setIsMobileFilterOpen(true)}
-                    className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300"
-                  >
-                    <Filter className="h-4 w-4" />
-                    Filters
-                    {activeFiltersCount > 0 && (
-                      <span className="ml-1 px-2 py-0.5 bg-white text-primary-600 text-xs font-bold rounded-full">
-                        {activeFiltersCount}
-                      </span>
-                    )}
-                  </button>
-                </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setIsMobileFilterOpen(true)}
+                  className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300"
+                >
+                  <Filter className="h-4 w-4" />
+                  Filters
+                  {activeFiltersCount > 0 && (
+                    <span className="ml-1 px-2 py-0.5 bg-white text-primary-600 text-xs font-bold rounded-full">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
 
@@ -1089,7 +1095,8 @@ const Shop = () => {
               <>
                 {filteredProducts().length > 0 ? (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6 mb-8">
+                    {/* Auto‑fit grid with minimum card widths */}
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(160px,1fr))] md:grid-cols-[repeat(auto-fit,minmax(180px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] xl:grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-2 sm:gap-4 lg:gap-6 mb-8">
                       {filteredProducts().map((product) => (
                         <div
                           key={product._id}

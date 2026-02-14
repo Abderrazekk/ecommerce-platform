@@ -382,22 +382,22 @@ const Hero = () => {
       <div className="absolute inset-0 flex items-center z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="max-w-2xl text-white">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fadeInUp drop-shadow-2xl leading-tight">
+            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-3 sm:mb-6 animate-fadeInUp drop-shadow-2xl leading-tight">
               {hero.title}
             </h1>
             {hero.subtitle && (
-              <p className="text-xl md:text-2xl lg:text-3xl mb-10 text-white/90 animate-fadeInUp animation-delay-200 drop-shadow-lg leading-relaxed">
+              <p className="text-sm sm:text-lg md:text-2xl lg:text-3xl mb-6 sm:mb-10 text-white/90 animate-fadeInUp animation-delay-200 drop-shadow-lg leading-relaxed">
                 {hero.subtitle}
               </p>
             )}
-            <div className="flex flex-col sm:flex-row gap-4 animate-fadeInUp animation-delay-400">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 animate-fadeInUp animation-delay-400 w-fit">
               <Link
                 to="/shop"
-                className="inline-flex items-center justify-center bg-white text-primary-600 hover:bg-gray-50 font-semibold py-4 px-10 rounded-xl text-lg transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-2xl hover:shadow-3xl"
+                className="inline-flex items-center justify-center bg-white text-primary-600 hover:bg-gray-50 font-semibold py-2 sm:py-4 px-6 sm:px-10 rounded-xl text-sm sm:text-lg transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-2xl hover:shadow-3xl"
               >
                 Shop Now
                 <svg
-                  className="ml-3 w-5 h-5"
+                  className="ml-2 sm:ml-3 w-4 h-4 sm:w-5 sm:h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -412,52 +412,14 @@ const Hero = () => {
               </Link>
               <Link
                 to="/about"
-                className="inline-flex items-center justify-center border-2 border-white/30 text-white hover:bg-white/10 font-semibold py-4 px-10 rounded-xl text-lg transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 backdrop-blur-sm"
+                className="inline-flex items-center justify-center border-2 border-white/30 text-white hover:bg-white/10 font-semibold py-2 sm:py-4 px-6 sm:px-10 rounded-xl text-sm sm:text-lg transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 backdrop-blur-sm"
               >
                 Learn More
               </Link>
             </div>
-            <div className="mt-12 flex items-center space-x-4 text-sm">
-              <span className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full drop-shadow-lg border border-white/10">
-                {hero.season.charAt(0).toUpperCase() + hero.season.slice(1)}{" "}
-                Collection
-              </span>
-            </div>
           </div>
         </div>
       </div>
-
-      {/* Navigation Controls for Slideshow */}
-      {isSlideshowMode && hero?.images?.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex items-center space-x-4">
-          <button
-            onClick={handlePrev}
-            className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300 hover:scale-110"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-
-          <div className="flex space-x-2">
-            {hero.images.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex ? "bg-white w-8" : "bg-white/50"}`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
-
-          <button
-            onClick={handleNext}
-            className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-all duration-300 hover:scale-110"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      )}
 
       <style>{`
         @keyframes fadeInUp {

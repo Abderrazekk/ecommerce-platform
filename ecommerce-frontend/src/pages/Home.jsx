@@ -10,7 +10,7 @@ const Home = () => {
     <div className="min-h-screen">
       <Hero />
 
-      <div className="space-y-20 py-12 lg:py-20">
+      <div>
         <FeaturedProducts />
         <Sponsors />
       </div>
