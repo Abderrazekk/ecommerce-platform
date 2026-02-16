@@ -375,94 +375,55 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative">
-      {isSlideshowMode ? renderSlideshowLayout() : renderStaticLayout()}
+    <Link to="/shop" className="block cursor-pointer">
+      <div className="relative">
+        {isSlideshowMode ? renderSlideshowLayout() : renderStaticLayout()}
 
-      {/* Hero Content Overlay - This contains the title, subtitle, and buttons */}
-      <div className="absolute inset-0 flex items-center z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="max-w-2xl text-white">
-            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-3 sm:mb-6 animate-fadeInUp drop-shadow-2xl leading-tight">
-              {hero.title}
-            </h1>
-            {hero.subtitle && (
-              <p className="text-sm sm:text-lg md:text-2xl lg:text-3xl mb-6 sm:mb-10 text-white/90 animate-fadeInUp animation-delay-200 drop-shadow-lg leading-relaxed">
-                {hero.subtitle}
-              </p>
-            )}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 animate-fadeInUp animation-delay-400 w-fit">
-              <Link
-                to="/shop"
-                className="inline-flex items-center justify-center bg-white text-primary-600 hover:bg-gray-50 font-semibold py-2 sm:py-4 px-6 sm:px-10 rounded-xl text-sm sm:text-lg transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-2xl hover:shadow-3xl"
-              >
-                Shop Now
-                <svg
-                  className="ml-2 sm:ml-3 w-4 h-4 sm:w-5 sm:h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-              </Link>
-              <Link
-                to="/about"
-                className="inline-flex items-center justify-center border-2 border-white/30 text-white hover:bg-white/10 font-semibold py-2 sm:py-4 px-6 sm:px-10 rounded-xl text-sm sm:text-lg transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 backdrop-blur-sm"
-              >
-                Learn More
-              </Link>
-            </div>
-          </div>
-        </div>
+        {/* Hero Content Overlay removed – now clicking anywhere goes to /shop */}
+
+        <style>{`
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(40px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          @keyframes timer {
+            from {
+              width: 0%;
+            }
+            to {
+              width: 100%;
+            }
+          }
+          @keyframes pulse {
+            0%,
+            100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.5;
+            }
+          }
+          .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out forwards;
+          }
+          .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+          .animation-delay-200 {
+            animation-delay: 200ms;
+          }
+          .animation-delay-400 {
+            animation-delay: 400ms;
+          }
+        `}</style>
       </div>
-
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(40px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes timer {
-          from {
-            width: 0%;
-          }
-          to {
-            width: 100%;
-          }
-        }
-        @keyframes pulse {
-          0%,
-          100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-        .animate-fadeInUp {
-          animation: fadeInUp 0.8s ease-out forwards;
-        }
-        .animate-pulse {
-          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        .animation-delay-200 {
-          animation-delay: 200ms;
-        }
-        .animation-delay-400 {
-          animation-delay: 400ms;
-        }
-      `}</style>
-    </div>
+    </Link>
   );
 };
 
