@@ -108,9 +108,9 @@ const Sponsors = () => {
   ];
 
   return (
-    <div className="py-12 lg:py-20 bg-gradient-to-b from-white to-gray-50 w-full overflow-hidden">
+    <div className="py-12 lg:py-10 bg-gradient-to-b from-white to-gray-50 w-full overflow-hidden">
       {/* Header */}
-      <div className="w-full text-center mb-12 lg:mb-16">
+      <div className="w-full text-center mb-6 lg:mb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
             {t("title")}

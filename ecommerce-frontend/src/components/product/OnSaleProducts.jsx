@@ -27,18 +27,35 @@ const OnSaleProducts = ({ limit = 8 }) => {
   }, [limit]);
 
   if (loading) return <Loader />;
-  if (error) return null; // Silently fail – no section shown
+  if (error) return null;
   if (products.length === 0) return null;
 
   return (
-    <section className="py-12 bg-gradient-to-b from-white to-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
-          {t("onSale.title", "On Sale")}
-        </h2>
+    <section className="relative py-16 md:py-10 bg-white overflow-hidden">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-10 animate-fade-in text-center">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
+            {t("onSale.title", "On Sale")}
+          </h2>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            {t(
+              "onSale.description",
+              "Discover our handpicked selection of premium products on special discount.",
+            )}
+          </p>
+        </div>
+
+        {/* Products Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
+          {products.map((product, index) => (
+            <div
+              key={product._id}
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
       </div>
