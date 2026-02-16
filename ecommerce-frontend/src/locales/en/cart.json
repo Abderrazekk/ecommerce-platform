@@ -1,0 +1,34 @@
+{
+  "empty": {
+    "title": "Your cart is empty",
+    "message": "Add items to get started",
+    "continueShopping": "Continue Shopping"
+  },
+  "header": {
+    "title": "Shopping Cart"
+  },
+  "debug": {
+    "shippingCalculation": "Shipping calculation",
+    "highestFee": "Highest fee: {{price}}",
+    "noFees": "No shipping fees found"
+  },
+  "items": {
+    "title": "Items in your cart",
+    "clearCart": "Clear Cart",
+    "continueShopping": "Continue Shopping"
+  },
+  "summary": {
+    "title": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "free": "FREE",
+    "basedOnHighest": "based on highest product fee",
+    "add": "Add",
+    "moreForFreeShipping": "more for free shipping",
+    "freeShippingApplied": "Free shipping applied!",
+    "freeShippingMessage": "Your order qualifies for FREE shipping.",
+    "total": "Total",
+    "proceedToCheckout": "Proceed to Checkout"
+  },
+  "clearConfirm": "Are you sure you want to clear your cart?"
+}

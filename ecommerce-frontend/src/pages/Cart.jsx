@@ -1,13 +1,14 @@
-// Cart.jsx – Premium green‑themed UI with primary color palette
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { clearCart, debugCart } from "../redux/slices/cart.slice";
 import CartItem from "../components/cart/CartItem";
 import { formatPrice } from "../utils/formatPrice";
 import { ShoppingBag, Trash2, Truck, Bug, ChevronRight } from "lucide-react";
 
 const Cart = () => {
+  const { t } = useTranslation("cart");
   const { cartItems } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ const Cart = () => {
   const total = subtotal + shipping;
 
   const handleClearCart = () => {
-    if (window.confirm("Are you sure you want to clear your cart?")) {
+    if (window.confirm(t("clearConfirm"))) {
       dispatch(clearCart());
     }
   };
@@ -70,16 +71,14 @@ const Cart = () => {
               <ShoppingBag className="h-12 w-12 text-primary-500" />
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-              Your cart is empty
+              {t("empty.title")}
             </h2>
-            <p className="text-gray-500 mb-8 text-lg">
-              Add items to get started
-            </p>
+            <p className="text-gray-500 mb-8 text-lg">{t("empty.message")}</p>
             <Link
               to="/shop"
               className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-full shadow-button hover:shadow-button-hover text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all"
             >
-              Continue Shopping
+              {t("empty.continueShopping")}
               <ChevronRight className="ml-2 h-5 w-5" />
             </Link>
           </div>
@@ -95,7 +94,7 @@ const Cart = () => {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
           <div>
             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-              Shopping Cart
+              {t("header.title")}
             </h1>
           </div>
         </div>
@@ -104,11 +103,15 @@ const Cart = () => {
         <div className="mb-10 p-5 bg-white border border-gray-100 rounded-2xl shadow-card text-sm">
           <div className="flex items-center gap-2 text-primary-600">
             <Truck className="h-4 w-4" />
-            <span className="font-medium">Shipping calculation</span>
+            <span className="font-medium">
+              {t("debug.shippingCalculation")}
+            </span>
             <span className="text-xs text-gray-400 ml-auto bg-gray-50 px-2 py-1 rounded-full">
               {highestShippingFee > 0
-                ? `Highest fee: ${formatPrice(highestShippingFee)}`
-                : "No shipping fees found"}
+                ? t("debug.highestFee", {
+                    price: formatPrice(highestShippingFee),
+                  })
+                : t("debug.noFees")}
             </span>
           </div>
           <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-2 text-xs text-gray-600">
@@ -135,14 +138,14 @@ const Cart = () => {
                 <span className="bg-primary-100 text-primary-800 rounded-full w-6 h-6 flex items-center justify-center text-sm">
                   {cartItems.length}
                 </span>
-                Items in your cart
+                {t("items.title")}
               </h2>
               <button
                 onClick={handleClearCart}
                 className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-red-600 transition-colors bg-gray-50 px-4 py-2 rounded-full hover:bg-red-50"
               >
                 <Trash2 className="h-4 w-4 mr-1.5" />
-                Clear Cart
+                {t("items.clearCart")}
               </button>
             </div>
 
@@ -165,7 +168,7 @@ const Cart = () => {
                 className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-primary-600 transition-colors"
               >
                 <ChevronRight className="h-4 w-4 rotate-180 mr-1" />
-                Continue Shopping
+                {t("items.continueShopping")}
               </Link>
             </div>
           </div>
@@ -175,13 +178,13 @@ const Cart = () => {
             <div className="bg-white rounded-3xl shadow-card-hover border border-gray-100 p-7 lg:sticky lg:top-24">
               <h2 className="text-xl font-bold text-gray-900 mb-7 flex items-center gap-2">
                 <span className="w-1 h-6 bg-primary-500 rounded-full"></span>
-                Order Summary
+                {t("summary.title")}
               </h2>
 
               <div className="space-y-6">
                 {/* Subtotal */}
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-gray-600">{t("summary.subtotal")}</span>
                   <span className="font-semibold text-gray-900 text-lg">
                     {formatPrice(subtotal)}
                   </span>
@@ -191,12 +194,14 @@ const Cart = () => {
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
                     <Truck className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-600">Shipping</span>
+                    <span className="text-gray-600">
+                      {t("summary.shipping")}
+                    </span>
                   </div>
                   <div className="text-right">
                     {isFreeShipping ? (
                       <span className="text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-full text-sm">
-                        FREE
+                        {t("summary.free")}
                       </span>
                     ) : (
                       <>
@@ -205,7 +210,7 @@ const Cart = () => {
                         </span>
                         {highestShippingFee > 0 && (
                           <div className="text-xs text-gray-500 mt-1">
-                            based on highest product fee
+                            {t("summary.basedOnHighest")}
                           </div>
                         )}
                       </>
@@ -217,12 +222,12 @@ const Cart = () => {
                 {!isFreeShipping && subtotal < FREE_SHIPPING_THRESHOLD && (
                   <div className="mt-4 bg-gray-50 rounded-2xl p-5">
                     <div className="flex justify-between text-sm mb-3">
-                      <span className="text-gray-600">Add</span>
+                      <span className="text-gray-600">{t("summary.add")}</span>
                       <span className="font-bold text-primary-600">
                         {formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)}
                       </span>
                       <span className="text-gray-600">
-                        more for free shipping
+                        {t("summary.moreForFreeShipping")}
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
@@ -251,10 +256,10 @@ const Cart = () => {
                     </div>
                     <div>
                       <p className="font-bold text-primary-800">
-                        Free shipping applied!
+                        {t("summary.freeShippingApplied")}
                       </p>
                       <p className="text-sm text-primary-600 mt-1">
-                        Your order qualifies for FREE shipping.
+                        {t("summary.freeShippingMessage")}
                       </p>
                     </div>
                   </div>
@@ -264,7 +269,7 @@ const Cart = () => {
                 <div className="border-t border-gray-200 pt-6 mt-4">
                   <div className="flex justify-between items-baseline">
                     <span className="text-lg font-medium text-gray-900">
-                      Total
+                      {t("summary.total")}
                     </span>
                     <span className="text-3xl font-extrabold text-gray-900">
                       {formatPrice(total)}
@@ -278,7 +283,7 @@ const Cart = () => {
                 onClick={() => navigate("/checkout")}
                 className="mt-8 w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold py-4 px-6 rounded-2xl shadow-button hover:shadow-button-hover transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
               >
-                Proceed to Checkout
+                {t("summary.proceedToCheckout")}
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>

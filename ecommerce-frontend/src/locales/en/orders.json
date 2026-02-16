@@ -1,0 +1,31 @@
+{
+  "header": {
+    "title": "My Orders",
+    "subtitle": "Track, manage, and review your orders"
+  },
+  "empty": {
+    "title": "No orders yet",
+    "message": "Ready to start shopping? Explore our collection.",
+    "shopNow": "Shop Now"
+  },
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "processing": "Processing",
+    "outForDelivery": "Out for Delivery",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "order": {
+    "placedOn": "Placed on {{date}}",
+    "totalAmount": "Total amount",
+    "quantity": "Quantity:",
+    "unitPrice": "Unit price:",
+    "deliveryAddress": "Delivery Address",
+    "notes": "Order Notes",
+    "subtotal": "Subtotal:",
+    "shipping": "Shipping:",
+    "free": "FREE",
+    "total": "Total:"
+  }
+}

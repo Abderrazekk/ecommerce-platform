@@ -519,7 +519,7 @@ const Navbar = () => {
               <Link to="/" className="flex items-center group">
                 <div className="relative">
                   <img
-                    src="/shoppina00.png"
+                    src="/shopina.png"
                     alt="Shoppina Logo"
                     className="h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {

@@ -3,8 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { register } from "../redux/slices/auth.slice";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
+  const { t } = useTranslation("auth");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,7 +32,7 @@ const Register = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      alert(t("passwordsDoNotMatch"));
       return;
     }
 
@@ -53,28 +55,25 @@ const Register = () => {
           <div className="hidden flex-col justify-between rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 p-8 text-white shadow-lg md:flex">
             <div>
               <p className="text-sm font-semibold uppercase tracking-widest text-white/70">
-                Create account
+                {t("createAccount")}
               </p>
               <h2 className="mt-4 text-3xl font-semibold leading-tight">
-                Join the marketplace and unlock member-only benefits today.
+                {t("joinMarketplace")}
               </h2>
-              <p className="mt-4 text-sm text-white/70">
-                Enjoy faster checkout, wishlist syncing, and personalized deal
-                alerts tailored to your style.
-              </p>
+              <p className="mt-4 text-sm text-white/70">{t("enjoyBenefits")}</p>
             </div>
             <div className="space-y-3 text-sm text-white/80">
               <div className="flex items-center gap-3">
                 <span className="h-2.5 w-2.5 rounded-full bg-white/80" />
-                Save your shipping details securely
+                {t("benefitShipping")}
               </div>
               <div className="flex items-center gap-3">
                 <span className="h-2.5 w-2.5 rounded-full bg-white/80" />
-                Track returns and order history
+                {t("benefitReturns")}
               </div>
               <div className="flex items-center gap-3">
                 <span className="h-2.5 w-2.5 rounded-full bg-white/80" />
-                Unlock early access to sales
+                {t("benefitEarlyAccess")}
               </div>
             </div>
           </div>
@@ -82,15 +81,15 @@ const Register = () => {
           <div className="space-y-8 rounded-2xl bg-white/90 p-6 shadow-xl md:p-8">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-gray-900">
-                Create your account
+                {t("createYourAccount")}
               </h2>
               <p className="mt-2 text-center text-sm text-gray-600">
-                Or{" "}
+                {t("or")}{" "}
                 <Link
                   to="/login"
                   className="font-medium text-primary-600 hover:text-primary-500"
                 >
-                  sign in to existing account
+                  {t("signInExisting")}
                 </Link>
               </p>
             </div>
@@ -102,7 +101,7 @@ const Register = () => {
                     htmlFor="name"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Full Name
+                    {t("fullName")}
                   </label>
                   <input
                     id="name"
@@ -112,7 +111,7 @@ const Register = () => {
                     value={formData.name}
                     onChange={handleChange}
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:ring-2 focus:ring-primary-500"
-                    placeholder="John Doe"
+                    placeholder={t("fullNamePlaceholder")}
                   />
                 </div>
 
@@ -121,7 +120,7 @@ const Register = () => {
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Email address
+                    {t("email")}
                   </label>
                   <input
                     id="email"
@@ -131,7 +130,7 @@ const Register = () => {
                     value={formData.email}
                     onChange={handleChange}
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:ring-2 focus:ring-primary-500"
-                    placeholder="you@example.com"
+                    placeholder={t("emailPlaceholder")}
                   />
                 </div>
 
@@ -140,7 +139,7 @@ const Register = () => {
                     htmlFor="phone"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Phone Number
+                    {t("phoneNumber")}
                   </label>
                   <input
                     id="phone"
@@ -149,7 +148,7 @@ const Register = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:ring-2 focus:ring-primary-500"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder={t("phonePlaceholder")}
                   />
                 </div>
 
@@ -158,7 +157,7 @@ const Register = () => {
                     htmlFor="address"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Address
+                    {t("address")}
                   </label>
                   <textarea
                     id="address"
@@ -167,7 +166,7 @@ const Register = () => {
                     value={formData.address}
                     onChange={handleChange}
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:ring-2 focus:ring-primary-500"
-                    placeholder="123 Main St, City, Country"
+                    placeholder={t("addressPlaceholder")}
                   />
                 </div>
 
@@ -176,7 +175,7 @@ const Register = () => {
                     htmlFor="password"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Password
+                    {t("password")}
                   </label>
                   <div className="relative">
                     <input
@@ -188,7 +187,7 @@ const Register = () => {
                       value={formData.password}
                       onChange={handleChange}
                       className="w-full rounded-xl border border-gray-200 px-4 py-3 pr-10 text-sm focus:border-transparent focus:ring-2 focus:ring-primary-500"
-                      placeholder="••••••••"
+                      placeholder={t("passwordPlaceholder")}
                     />
                     <button
                       type="button"
@@ -209,7 +208,7 @@ const Register = () => {
                     htmlFor="confirmPassword"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Confirm Password
+                    {t("confirmPassword")}
                   </label>
                   <input
                     id="confirmPassword"
@@ -219,7 +218,7 @@ const Register = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:ring-2 focus:ring-primary-500"
-                    placeholder="••••••••"
+                    placeholder={t("confirmPasswordPlaceholder")}
                   />
                 </div>
               </div>
@@ -230,7 +229,7 @@ const Register = () => {
                   disabled={loading}
                   className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-500 focus:ring-opacity-50 disabled:opacity-50 shadow-md hover:shadow-lg transition-all"
                 >
-                  {loading ? "Creating account..." : "Create Account"}
+                  {loading ? t("creatingAccount") : t("createAccountButton")}
                 </button>
               </div>
             </form>

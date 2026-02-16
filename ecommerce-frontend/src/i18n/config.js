@@ -2,7 +2,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 
-// Import translation files
+// Import translation files - English
 import navbarEN from "../locales/en/navbar.json";
 import footerEN from "../locales/en/footer.json";
 import homeEN from "../locales/en/home.json";
@@ -10,7 +10,13 @@ import sponsorsEN from "../locales/en/sponsors.json";
 import featuredEN from "../locales/en/featured.json";
 import shopEN from "../locales/en/shop.json";
 import commonEN from "../locales/en/common.json";
+import authEN from "../locales/en/auth.json";
+import checkoutEN from "../locales/en/checkout.json";
+import cartEN from "../locales/en/cart.json";
+import ordersEN from "../locales/en/orders.json";
+import wishlistEN from "../locales/en/wishlist.json";
 
+// Import translation files - French
 import navbarFR from "../locales/fr/navbar.json";
 import footerFR from "../locales/fr/footer.json";
 import homeFR from "../locales/fr/home.json";
@@ -18,7 +24,13 @@ import sponsorsFR from "../locales/fr/sponsors.json";
 import featuredFR from "../locales/fr/featured.json";
 import shopFR from "../locales/fr/shop.json";
 import commonFR from "../locales/fr/common.json";
+import authFR from "../locales/fr/auth.json";
+import checkoutFR from "../locales/fr/checkout.json";
+import cartFR from "../locales/fr/cart.json";
+import ordersFR from "../locales/fr/orders.json";
+import wishlistFR from "../locales/fr/wishlist.json";
 
+// Import translation files - Arabic
 import navbarAR from "../locales/ar/navbar.json";
 import footerAR from "../locales/ar/footer.json";
 import homeAR from "../locales/ar/home.json";
@@ -26,6 +38,11 @@ import sponsorsAR from "../locales/ar/sponsors.json";
 import featuredAR from "../locales/ar/featured.json";
 import shopAR from "../locales/ar/shop.json";
 import commonAR from "../locales/ar/common.json";
+import authAR from "../locales/ar/auth.json";
+import checkoutAR from "../locales/ar/checkout.json";
+import cartAR from "../locales/ar/cart.json";
+import ordersAR from "../locales/ar/orders.json";
+import wishlistAR from "../locales/ar/wishlist.json";
 
 // Function to set direction based on language
 const setDirection = (lng) => {
@@ -37,9 +54,6 @@ const setDirection = (lng) => {
   // Update body classes
   document.body.classList.remove("ltr", "rtl");
   document.body.classList.add(dir);
-
-  // Update document direction attribute
-  document.documentElement.setAttribute("dir", dir);
 
   // Store in localStorage
   localStorage.setItem("i18nextLng", lng);
@@ -60,6 +74,11 @@ i18n
         featured: featuredEN,
         shop: shopEN,
         common: commonEN,
+        auth: authEN,
+        checkout: checkoutEN,
+        cart: cartEN,
+        orders: ordersEN,
+        wishlist: wishlistEN
       },
       fr: {
         navbar: navbarFR,
@@ -69,6 +88,11 @@ i18n
         featured: featuredFR,
         shop: shopFR,
         common: commonFR,
+        auth: authFR,
+        checkout: checkoutFR,
+        cart: cartFR,
+        orders: ordersFR,
+        wishlist: wishlistFR
       },
       ar: {
         navbar: navbarAR,
@@ -78,6 +102,11 @@ i18n
         featured: featuredAR,
         shop: shopAR,
         common: commonAR,
+        auth: authAR,
+        checkout: checkoutAR,
+        cart: cartAR,
+        orders: ordersAR,
+        wishlist: wishlistAR
       },
     },
     fallbackLng: "en",

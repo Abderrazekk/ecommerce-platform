@@ -1,7 +1,7 @@
-// Checkout.jsx – Premium green‑themed with primary color palette
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { createOrder } from "../redux/slices/order.slice";
 import {
   clearCart,
@@ -19,10 +19,11 @@ import {
   Check,
   ChevronRight,
   Home,
-  FileText, // NEW icon for description
+  FileText,
 } from "lucide-react";
 
 const Checkout = () => {
+  const { t } = useTranslation("checkout");
   const { cartItems } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -30,7 +31,6 @@ const Checkout = () => {
 
   const [shippingAddress, setShippingAddress] = useState(user?.address || "");
   const [phone, setPhone] = useState(user?.phone || "");
-  // NEW: state for description
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -76,18 +76,16 @@ const Checkout = () => {
     const newErrors = {};
 
     if (!shippingAddress.trim()) {
-      newErrors.shippingAddress = "Shipping address is required";
+      newErrors.shippingAddress = t("errors.shippingRequired");
     } else if (shippingAddress.trim().length < 10) {
-      newErrors.shippingAddress = "Please enter a complete address";
+      newErrors.shippingAddress = t("errors.shippingComplete");
     }
 
     if (!phone.trim()) {
-      newErrors.phone = "Phone number is required";
+      newErrors.phone = t("errors.phoneRequired");
     } else if (!/^[0-9+\-\s()]{8,15}$/.test(phone)) {
-      newErrors.phone = "Please enter a valid phone number";
+      newErrors.phone = t("errors.phoneValid");
     }
-
-    // Description is optional, no validation needed
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -106,7 +104,6 @@ const Checkout = () => {
       dispatch(saveShippingAddress(shippingAddress));
       dispatch(savePhone(phone));
 
-      // Create order - include description
       console.log(
         "📤 Creating order with items:",
         cartItems.map((item) => ({
@@ -123,7 +120,7 @@ const Checkout = () => {
         })),
         deliveryAddress: shippingAddress,
         phone: phone,
-        description: description.trim() || undefined, // send only if not empty
+        description: description.trim() || undefined,
       };
 
       await dispatch(createOrder(orderData)).unwrap();
@@ -131,7 +128,7 @@ const Checkout = () => {
       navigate("/my-orders");
     } catch (error) {
       console.error("Order creation failed:", error);
-      alert("Failed to create order. Please try again.");
+      alert(t("errors.orderFailed"));
     } finally {
       setLoading(false);
     }
@@ -148,31 +145,28 @@ const Checkout = () => {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-            Checkout
+            {t("header.title")}
           </h1>
-          <p className="text-gray-500 mt-2 text-lg">
-            Complete your purchase in a few steps
-          </p>
+          <p className="text-gray-500 mt-2 text-lg">{t("header.subtitle")}</p>
         </div>
 
-        {/* Debug Warning Banner – subtle, expandable */}
+        {/* Debug Warning Banner */}
         {highestShippingFee === 0 && cartItems.length > 0 && (
           <div className="mb-8 p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4 animate-fade-in">
             <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-amber-800 flex-1">
-              <p className="font-semibold">Shipping Fee Warning</p>
-              <p className="text-amber-700">
-                No shipping fees found in cart items. This may indicate a data
-                issue.
-              </p>
+              <p className="font-semibold">{t("debug.warningTitle")}</p>
+              <p className="text-amber-700">{t("debug.warningMessage")}</p>
               <details className="mt-2 text-xs text-amber-600">
                 <summary className="cursor-pointer hover:text-amber-800 font-medium">
-                  Debug details
+                  {t("debug.details")}
                 </summary>
                 <div className="mt-2 bg-amber-100/50 p-3 rounded-xl">
-                  <strong>Cart Items:</strong> {cartItems.length} items
+                  <strong>{t("debug.cartItems")}</strong> {cartItems.length}{" "}
+                  items
                   <br />
-                  <strong>Shipping Fees:</strong> {JSON.stringify(shippingFees)}
+                  <strong>{t("debug.shippingFees")}</strong>{" "}
+                  {JSON.stringify(shippingFees)}
                 </div>
               </details>
             </div>
@@ -192,7 +186,7 @@ const Checkout = () => {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-gray-900">
-                      Shipping Information
+                      {t("shipping.title")}
                     </h2>
                   </div>
                 </div>
@@ -202,7 +196,7 @@ const Checkout = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Full Name
+                        {t("shipping.fullName")}
                       </label>
                       <div className="relative">
                         <input
@@ -217,7 +211,7 @@ const Checkout = () => {
                     {/* Email (disabled) */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email
+                        {t("shipping.email")}
                       </label>
                       <input
                         type="email"
@@ -232,7 +226,7 @@ const Checkout = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <Phone className="h-4 w-4 inline mr-1.5" />
-                      Phone Number *
+                      {t("shipping.phone")} *
                     </label>
                     <input
                       type="tel"
@@ -244,7 +238,7 @@ const Checkout = () => {
                           ? "border-red-300 bg-red-50"
                           : "border-gray-200"
                       }`}
-                      placeholder="+216 XX XXX XXX"
+                      placeholder={t("shipping.phonePlaceholder")}
                     />
                     {errors.phone && (
                       <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -258,7 +252,7 @@ const Checkout = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <MapPin className="h-4 w-4 inline mr-1.5" />
-                      Shipping Address *
+                      {t("shipping.address")} *
                     </label>
                     <textarea
                       value={shippingAddress}
@@ -270,7 +264,7 @@ const Checkout = () => {
                           ? "border-red-300 bg-red-50"
                           : "border-gray-200"
                       }`}
-                      placeholder="Street address, City, Postal code, Country"
+                      placeholder={t("shipping.addressPlaceholder")}
                     />
                     {errors.shippingAddress && (
                       <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
@@ -280,21 +274,21 @@ const Checkout = () => {
                     )}
                   </div>
 
-                  {/* NEW: Optional Description Field */}
+                  {/* Optional Description Field */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <FileText className="h-4 w-4 inline mr-1.5" />
-                      Order Notes (Optional)
+                      {t("shipping.notes")}
                     </label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       rows="3"
                       className="w-full px-4 py-3.5 border border-gray-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-shadow resize-none"
-                      placeholder="Any special instructions, color preferences, etc."
+                      placeholder={t("shipping.notesPlaceholder")}
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      Add any notes for your order (optional)
+                      {t("shipping.notesHint")}
                     </p>
                   </div>
                 </div>
@@ -308,22 +302,21 @@ const Checkout = () => {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-gray-900">
-                      Payment Method
+                      {t("payment.title")}
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5">
-                      Pay when you receive your order
+                      {t("payment.subtitle")}
                     </p>
                   </div>
                   <span className="ml-auto bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-xs font-medium border border-gray-200">
-                    Cash on Delivery
+                    {t("payment.method")}
                   </span>
                 </div>
                 <div className="pl-14">
                   <div className="bg-primary-50 border border-primary-100 rounded-2xl p-5 flex items-center gap-3">
                     <CreditCard className="h-5 w-5 text-primary-600" />
                     <p className="text-sm text-primary-700">
-                      You'll pay <strong>Cash on Delivery</strong> when your
-                      order arrives.
+                      {t("payment.description")}
                     </p>
                   </div>
                 </div>
@@ -338,7 +331,7 @@ const Checkout = () => {
                     <Package className="h-5 w-5 text-gray-700" />
                   </div>
                   <h2 className="text-xl font-bold text-gray-900">
-                    Your Order
+                    {t("summary.title")}
                   </h2>
                 </div>
 
@@ -361,16 +354,17 @@ const Checkout = () => {
                           {item.name}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          Qty: {item.quantity}
+                          {t("summary.qty")} {item.quantity}
                         </p>
                         <div className="flex items-center gap-1.5 mt-2">
                           <Truck className="h-3 w-3 text-gray-400" />
                           <span className="text-xs text-gray-500">
-                            Shipping: {formatPrice(item.shippingFee || 0)}
+                            {t("summary.shipping")}{" "}
+                            {formatPrice(item.shippingFee || 0)}
                           </span>
                           {item.shippingFee === 0 && (
                             <span className="text-xs bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-medium">
-                              Missing
+                              {t("summary.missing")}
                             </span>
                           )}
                         </div>
@@ -387,7 +381,9 @@ const Checkout = () => {
                 {/* Totals */}
                 <div className="space-y-4 border-t border-gray-200 pt-6 mt-6">
                   <div className="flex justify-between text-base">
-                    <span className="text-gray-600">Subtotal</span>
+                    <span className="text-gray-600">
+                      {t("summary.subtotal")}
+                    </span>
                     <span className="font-semibold text-gray-900">
                       {formatPrice(subtotal)}
                     </span>
@@ -396,12 +392,14 @@ const Checkout = () => {
                   <div className="flex justify-between text-base">
                     <div className="flex items-center gap-1.5">
                       <Truck className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-600">Shipping</span>
+                      <span className="text-gray-600">
+                        {t("summary.shippingLabel")}
+                      </span>
                     </div>
                     <div className="text-right">
                       {isFreeShipping ? (
                         <span className="text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-full text-sm">
-                          FREE
+                          {t("summary.free")}
                         </span>
                       ) : (
                         <>
@@ -410,7 +408,7 @@ const Checkout = () => {
                           </span>
                           {highestShippingFee > 0 && (
                             <div className="text-xs text-gray-500 mt-0.5">
-                              (highest product fee)
+                              {t("summary.highestFee")}
                             </div>
                           )}
                         </>
@@ -421,14 +419,16 @@ const Checkout = () => {
                   <div className="border-t border-gray-200 pt-4 mt-4">
                     <div className="flex justify-between items-baseline">
                       <span className="text-lg font-bold text-gray-900">
-                        Total
+                        {t("summary.total")}
                       </span>
                       <span className="text-3xl font-extrabold text-gray-900">
                         {formatPrice(total)}
                       </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-2">
-                      Including {formatPrice(shipping)} shipping fee
+                      {t("summary.including", {
+                        shipping: formatPrice(shipping),
+                      })}
                     </p>
                   </div>
                 </div>
@@ -461,12 +461,12 @@ const Checkout = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Placing Order...
+                      {t("summary.placingOrder")}
                     </>
                   ) : (
                     <>
                       <CreditCard className="h-5 w-5" />
-                      Place Order
+                      {t("summary.placeOrder")}
                       <ChevronRight className="h-5 w-5" />
                     </>
                   )}
@@ -475,11 +475,11 @@ const Checkout = () => {
                 {/* Order breakdown – subtle */}
                 <div className="mt-6 pt-5 border-t border-gray-100">
                   <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-                    Order Summary
+                    {t("summary.breakdown")}
                   </h3>
                   <div className="text-xs text-gray-600 space-y-2 bg-gray-50 p-4 rounded-2xl">
                     <div className="flex justify-between">
-                      <span>Items:</span>
+                      <span>{t("summary.items")}</span>
                       <span className="font-medium">
                         {cartItems.reduce(
                           (acc, item) => acc + item.quantity,
@@ -488,20 +488,20 @@ const Checkout = () => {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Products total:</span>
+                      <span>{t("summary.productsTotal")}</span>
                       <span className="font-medium">
                         {formatPrice(subtotal)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Shipping fee:</span>
+                      <span>{t("summary.shippingFee")}</span>
                       <span className="font-medium">
                         {formatPrice(shipping)}
                       </span>
                     </div>
                     <div className="flex justify-between pt-2 border-t border-gray-200 mt-2">
                       <span className="font-semibold text-gray-900">
-                        Order total:
+                        {t("summary.orderTotal")}
                       </span>
                       <span className="font-bold text-gray-900">
                         {formatPrice(total)}

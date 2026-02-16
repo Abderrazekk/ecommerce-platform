@@ -1,7 +1,7 @@
-// MyOrders.jsx – Premium green‑themed order management
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { fetchMyOrders } from "../redux/slices/order.slice";
 import { formatPrice } from "../utils/formatPrice";
 import Loader from "../components/common/Loader";
@@ -17,10 +17,11 @@ import {
   ChevronRight,
   MapPin,
   Phone as PhoneIcon,
-  FileText, // NEW: import for description
+  FileText,
 } from "lucide-react";
 
 const MyOrders = () => {
+  const { t } = useTranslation("orders");
   const dispatch = useDispatch();
   const { myOrders, loading } = useSelector((state) => state.orders);
 
@@ -58,6 +59,25 @@ const MyOrders = () => {
     }
   };
 
+  const getStatusTranslation = (status) => {
+    switch (status) {
+      case "pending":
+        return t("status.pending");
+      case "confirmed":
+        return t("status.confirmed");
+      case "processing":
+        return t("status.processing");
+      case "out_for_delivery":
+        return t("status.outForDelivery");
+      case "delivered":
+        return t("status.delivered");
+      case "cancelled":
+        return t("status.cancelled");
+      default:
+        return status.replace(/_/g, " ").toUpperCase();
+    }
+  };
+
   if (loading) return <Loader />;
 
   return (
@@ -66,11 +86,9 @@ const MyOrders = () => {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-            My Orders
+            {t("header.title")}
           </h1>
-          <p className="text-gray-500 mt-2 text-lg">
-            Track, manage, and review your orders
-          </p>
+          <p className="text-gray-500 mt-2 text-lg">{t("header.subtitle")}</p>
         </div>
 
         {myOrders.length === 0 ? (
@@ -79,16 +97,14 @@ const MyOrders = () => {
               <Package className="h-16 w-16 text-primary-500" />
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-              No orders yet
+              {t("empty.title")}
             </h2>
-            <p className="text-gray-500 mb-8 text-lg">
-              Ready to start shopping? Explore our collection.
-            </p>
+            <p className="text-gray-500 mb-8 text-lg">{t("empty.message")}</p>
             <Link
               to="/shop"
               className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-full shadow-button hover:shadow-button-hover text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all"
             >
-              Shop Now
+              {t("empty.shopNow")}
               <ChevronRight className="ml-2 h-5 w-5" />
             </Link>
           </div>
@@ -99,7 +115,7 @@ const MyOrders = () => {
                 key={order._id}
                 className="group bg-white rounded-3xl shadow-card border border-gray-100 overflow-hidden hover:shadow-card-hover transition-all duration-300"
               >
-                {/* Order Header – premium, with status and total */}
+                {/* Order Header */}
                 <div className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white px-7 py-6 sm:px-9 sm:py-7">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
                     <div className="space-y-2">
@@ -117,28 +133,24 @@ const MyOrders = () => {
                         >
                           {getStatusIcon(order.status)}
                           <span className="ml-1.5">
-                            {order.status.replace(/_/g, " ").toUpperCase()}
+                            {getStatusTranslation(order.status)}
                           </span>
                         </span>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-gray-500">
                         <Calendar className="h-4 w-4" />
                         <span>
-                          Placed on{" "}
-                          {new Date(order.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            },
-                          )}
+                          {t("order.placedOn", {
+                            date: new Date(
+                              order.createdAt,
+                            ).toLocaleDateString(),
+                          })}
                         </span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end">
                       <span className="text-sm text-gray-500">
-                        Total amount
+                        {t("order.totalAmount")}
                       </span>
                       <span className="text-2xl font-bold text-gray-900">
                         {formatPrice(order.totalPrice)}
@@ -147,7 +159,7 @@ const MyOrders = () => {
                   </div>
                 </div>
 
-                {/* Order Items – elegant product listing */}
+                {/* Order Items */}
                 <div className="px-7 py-6 sm:px-9 sm:py-8">
                   <div className="space-y-6 divide-y divide-gray-100">
                     {order.items.map((item, index) => (
@@ -168,11 +180,15 @@ const MyOrders = () => {
                           </h4>
                           <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                             <span className="text-gray-600 flex items-center gap-1">
-                              <span className="font-medium">Quantity:</span>{" "}
+                              <span className="font-medium">
+                                {t("order.quantity")}
+                              </span>{" "}
                               {item.quantity}
                             </span>
                             <span className="text-gray-600 flex items-center gap-1">
-                              <span className="font-medium">Unit price:</span>{" "}
+                              <span className="font-medium">
+                                {t("order.unitPrice")}
+                              </span>{" "}
                               {formatPrice(item.price)}
                             </span>
                           </div>
@@ -185,10 +201,10 @@ const MyOrders = () => {
                   </div>
                 </div>
 
-                {/* Order Footer – delivery & price summary, and optional description */}
+                {/* Order Footer */}
                 <div className="border-t border-gray-100 bg-gray-50/50 px-7 py-6 sm:px-9 sm:py-7">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Delivery Address with icon */}
+                    {/* Delivery Address */}
                     <div className="flex gap-4">
                       <div className="flex-shrink-0">
                         <div className="bg-white rounded-2xl p-3 shadow-sm border border-gray-100">
@@ -197,7 +213,7 @@ const MyOrders = () => {
                       </div>
                       <div>
                         <h5 className="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
-                          Delivery Address
+                          {t("order.deliveryAddress")}
                         </h5>
                         <div className="space-y-1 text-sm text-gray-600">
                           <p className="flex items-start gap-2">
@@ -212,7 +228,7 @@ const MyOrders = () => {
                       </div>
                     </div>
 
-                    {/* NEW: Order Description – if present */}
+                    {/* Order Description – if present */}
                     {order.description && (
                       <div className="flex gap-4">
                         <div className="flex-shrink-0">
@@ -222,7 +238,7 @@ const MyOrders = () => {
                         </div>
                         <div>
                           <h5 className="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
-                            Order Notes
+                            {t("order.notes")}
                           </h5>
                           <p className="text-sm text-gray-600 whitespace-pre-wrap">
                             {order.description}
@@ -231,21 +247,25 @@ const MyOrders = () => {
                       </div>
                     )}
 
-                    {/* Price Summary – elegant, right-aligned */}
+                    {/* Price Summary */}
                     <div className="flex flex-col items-end justify-center">
                       <div className="space-y-2 w-full max-w-xs bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Subtotal:</span>
+                          <span className="text-gray-500">
+                            {t("order.subtotal")}
+                          </span>
                           <span className="font-medium text-gray-900">
                             {formatPrice(order.productsTotal)}
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Shipping:</span>
+                          <span className="text-gray-500">
+                            {t("order.shipping")}
+                          </span>
                           <span className="font-medium text-gray-900">
                             {order.freeShipping ? (
                               <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                                FREE
+                                {t("order.free")}
                               </span>
                             ) : (
                               formatPrice(order.shippingFee)
@@ -253,7 +273,9 @@ const MyOrders = () => {
                           </span>
                         </div>
                         <div className="flex justify-between text-base font-bold border-t border-gray-200 pt-3 mt-1">
-                          <span className="text-gray-900">Total:</span>
+                          <span className="text-gray-900">
+                            {t("order.total")}
+                          </span>
                           <span className="text-gray-900 text-xl">
                             {formatPrice(order.totalPrice)}
                           </span>

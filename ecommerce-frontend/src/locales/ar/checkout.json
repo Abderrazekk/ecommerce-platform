@@ -1,0 +1,57 @@
+{
+  "header": {
+    "title": "إنهاء الطلب",
+    "subtitle": "أكمل عملية الشراء في خطوات قليلة"
+  },
+  "debug": {
+    "warningTitle": "تحذير رسوم الشحن",
+    "warningMessage": "لم يتم العثور على رسوم شحن في عناصر السلة. قد يشير هذا إلى مشكلة في البيانات.",
+    "details": "تفاصيل التصحيح",
+    "cartItems": "عناصر السلة:",
+    "shippingFees": "رسوم الشحن:"
+  },
+  "shipping": {
+    "title": "معلومات الشحن",
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "phonePlaceholder": "+216 XX XXX XXX",
+    "address": "عنوان الشحن",
+    "addressPlaceholder": "العنوان، المدينة، الرمز البريدي، البلد",
+    "notes": "ملاحظات الطلب (اختياري)",
+    "notesPlaceholder": "أي تعليمات خاصة، تفضيلات الألوان، إلخ.",
+    "notesHint": "أضف أي ملاحظات لطلبك (اختياري)"
+  },
+  "payment": {
+    "title": "طريقة الدفع",
+    "subtitle": "ادفع عند استلام طلبك",
+    "method": "الدفع عند الاستلام",
+    "description": "ستدفع نقداً عند الاستلام عندما يصل طلبك."
+  },
+  "summary": {
+    "title": "طلبك",
+    "qty": "الكمية:",
+    "shipping": "الشحن:",
+    "missing": "مفقود",
+    "subtotal": "المجموع الفرعي",
+    "shippingLabel": "الشحن",
+    "free": "مجاني",
+    "highestFee": "(أعلى رسوم منتج)",
+    "total": "الإجمالي",
+    "including": "بما في ذلك {{shipping}} رسوم شحن",
+    "placeOrder": "تقديم الطلب",
+    "placingOrder": "جاري تقديم الطلب...",
+    "breakdown": "ملخص الطلب",
+    "items": "العناصر:",
+    "productsTotal": "إجمالي المنتجات:",
+    "shippingFee": "رسوم الشحن:",
+    "orderTotal": "إجمالي الطلب:"
+  },
+  "errors": {
+    "shippingRequired": "عنوان الشحن مطلوب",
+    "shippingComplete": "يرجى إدخال عنوان كامل",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "phoneValid": "يرجى إدخال رقم هاتف صحيح",
+    "orderFailed": "فشل إنشاء الطلب. يرجى المحاولة مرة أخرى."
+  }
+}

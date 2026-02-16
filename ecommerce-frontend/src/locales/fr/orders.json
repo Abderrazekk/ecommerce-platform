@@ -1,0 +1,31 @@
+{
+  "header": {
+    "title": "Mes commandes",
+    "subtitle": "Suivez, gérez et révisez vos commandes"
+  },
+  "empty": {
+    "title": "Aucune commande pour l'instant",
+    "message": "Prêt à faire vos achats ? Explorez notre collection.",
+    "shopNow": "Acheter maintenant"
+  },
+  "status": {
+    "pending": "En attente",
+    "confirmed": "Confirmée",
+    "processing": "En cours",
+    "outForDelivery": "En livraison",
+    "delivered": "Livrée",
+    "cancelled": "Annulée"
+  },
+  "order": {
+    "placedOn": "Passée le {{date}}",
+    "totalAmount": "Montant total",
+    "quantity": "Quantité :",
+    "unitPrice": "Prix unitaire :",
+    "deliveryAddress": "Adresse de livraison",
+    "notes": "Notes de commande",
+    "subtotal": "Sous-total :",
+    "shipping": "Livraison :",
+    "free": "GRATUITE",
+    "total": "Total :"
+  }
+}

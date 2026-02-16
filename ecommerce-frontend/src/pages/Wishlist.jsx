@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   fetchWishlist,
   removeFromWishlist,
@@ -39,6 +40,7 @@ import {
 } from "lucide-react";
 
 const Wishlist = () => {
+  const { t } = useTranslation("wishlist");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -54,10 +56,10 @@ const Wishlist = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [filteredItems, setFilteredItems] = useState([]);
-  const [sortBy, setSortBy] = useState("recent"); // recent, name, price-low, price-high
+  const [sortBy, setSortBy] = useState("recent");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(false);
-  const [viewMode, setViewMode] = useState("list"); // 'list' or 'grid' for mobile
+  const [viewMode, setViewMode] = useState("list");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Fetch wishlist and featured products
@@ -147,7 +149,7 @@ const Wishlist = () => {
         quantity: 1,
       }),
     );
-    toast.success("Added to cart!");
+    toast.success(t("addedToCart"));
   };
 
   // Add all to cart
@@ -157,7 +159,7 @@ const Wishlist = () => {
     );
 
     if (inStockItems.length === 0) {
-      toast.error("No items in stock to add to cart");
+      toast.error(t("noStockItems"));
       return;
     }
 
@@ -173,7 +175,7 @@ const Wishlist = () => {
       );
     });
 
-    toast.success(`${inStockItems.length} item(s) added to cart!`);
+    toast.success(t("itemsAddedToCart", { count: inStockItems.length }));
   };
 
   // Clear wishlist
@@ -207,7 +209,7 @@ const Wishlist = () => {
     try {
       await Promise.all(promises);
       setSelectedItems([]);
-      toast.success(`${selectedItems.length} item(s) removed`);
+      toast.success(t("itemsRemoved", { count: selectedItems.length }));
     } catch (error) {
       console.error("Failed to remove selected items:", error);
     }
@@ -249,17 +251,17 @@ const Wishlist = () => {
       .filter(Boolean)
       .join(", ");
 
-    const shareText = `Check out my wishlist with ${itemCount} items including: ${productNames}...`;
+    const shareText = t("shareText", { count: itemCount, names: productNames });
 
     if (navigator.share) {
       navigator.share({
-        title: "My Wishlist",
+        title: t("shareTitle"),
         text: shareText,
         url: window.location.href,
       });
     } else {
       navigator.clipboard.writeText(shareText);
-      toast.success("Wishlist copied to clipboard!");
+      toast.success(t("copiedToClipboard"));
     }
   };
 
@@ -269,7 +271,7 @@ const Wishlist = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader size="lg" />
-          <p className="mt-6 text-gray-600">Loading your wishlist...</p>
+          <p className="mt-6 text-gray-600">{t("loading")}</p>
         </div>
       </div>
     );
@@ -284,23 +286,23 @@ const Wishlist = () => {
             <Heart className="h-10 w-10 sm:h-16 sm:w-16 text-rose-500" />
           </div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-            Sign In Required
+            {t("signInRequired")}
           </h2>
           <p className="text-gray-600 text-sm sm:text-base mb-6 sm:mb-8">
-            Please sign in to view and manage your wishlist.
+            {t("signInMessage")}
           </p>
           <div className="space-y-3 sm:space-y-4">
             <button
               onClick={() => navigate("/login")}
               className="w-full py-3 sm:py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 font-semibold shadow-lg text-sm sm:text-base"
             >
-              Sign In to Your Account
+              {t("signInButton")}
             </button>
             <button
               onClick={() => navigate("/shop")}
               className="w-full py-3 sm:py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 font-medium text-sm sm:text-base"
             >
-              Continue Shopping
+              {t("continueShopping")}
             </button>
           </div>
         </div>
@@ -321,7 +323,9 @@ const Wishlist = () => {
             <div className="p-2 rounded-full group-hover:bg-gray-100 transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </div>
-            <span className="ml-2 font-medium text-sm sm:text-base">Back</span>
+            <span className="ml-2 font-medium text-sm sm:text-base">
+              {t("back")}
+            </span>
           </button>
 
           {/* Empty State */}
@@ -335,12 +339,11 @@ const Wishlist = () => {
               </div>
 
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-                Your Wishlist is Empty
+                {t("emptyTitle")}
               </h1>
 
               <p className="text-gray-600 text-sm sm:text-base mb-8 sm:mb-10 max-w-md mx-auto">
-                Save items you love for later. Click the heart icon on any
-                product to add it here.
+                {t("emptyMessage")}
               </p>
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12">
@@ -349,7 +352,7 @@ const Wishlist = () => {
                   className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:opacity-90 transition-all duration-300 font-semibold shadow-lg flex items-center justify-center text-sm sm:text-base"
                 >
                   <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3" />
-                  Start Shopping
+                  {t("startShopping")}
                 </button>
               </div>
             </div>
@@ -375,11 +378,10 @@ const Wishlist = () => {
                 </button>
                 <div>
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
-                    My Wishlist
+                    {t("myWishlist")}
                   </h1>
                   <p className="text-gray-600 text-xs sm:text-sm md:text-base mt-1">
-                    {itemCount} item{itemCount !== 1 ? "s" : ""} • Last updated
-                    today
+                    {t("itemCount", { count: itemCount })} • {t("lastUpdated")}
                   </p>
                 </div>
               </div>
@@ -392,7 +394,7 @@ const Wishlist = () => {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search in wishlist..."
+                    placeholder={t("searchPlaceholder")}
                     className="w-full pl-9 sm:pl-12 pr-4 py-2.5 sm:py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent text-sm sm:text-base"
                   />
                 </div>
@@ -424,13 +426,13 @@ const Wishlist = () => {
                     className="px-4 py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 flex items-center shadow-lg text-sm"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Remove ({selectedItems.length})
+                    {t("removeSelected", { count: selectedItems.length })}
                   </button>
                   <button
                     onClick={deselectAllItems}
                     className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 text-sm"
                   >
-                    Deselect All
+                    {t("deselectAll")}
                   </button>
                 </>
               )}
@@ -440,7 +442,7 @@ const Wishlist = () => {
                 className="px-4 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 flex items-center shadow-lg text-sm"
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
-                Add All to Cart
+                {t("addAllToCart")}
               </button>
             </div>
           </div>
@@ -454,7 +456,7 @@ const Wishlist = () => {
               className="flex-1 px-3 py-2.5 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 flex items-center justify-center text-xs font-medium"
             >
               <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-              Add All
+              {t("addAll")}
             </button>
             {selectedItems.length > 0 && (
               <button
@@ -462,7 +464,7 @@ const Wishlist = () => {
                 className="flex-1 px-3 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 flex items-center justify-center text-xs font-medium"
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                Remove ({selectedItems.length})
+                {t("removeMobile", { count: selectedItems.length })}
               </button>
             )}
           </div>
@@ -477,7 +479,7 @@ const Wishlist = () => {
                 {itemCount}
               </div>
               <div className="text-xs sm:text-sm text-gray-600 mt-1">
-                Total Items
+                {t("totalItems")}
               </div>
             </div>
             <div className="text-center p-3 sm:p-4">
@@ -485,7 +487,7 @@ const Wishlist = () => {
                 {wishlistItems.filter((item) => item.product?.stock > 0).length}
               </div>
               <div className="text-xs sm:text-sm text-gray-600 mt-1">
-                In Stock
+                {t("inStock")}
               </div>
             </div>
             <div className="text-center p-3 sm:p-4">
@@ -499,7 +501,7 @@ const Wishlist = () => {
                 }
               </div>
               <div className="text-xs sm:text-sm text-gray-600 mt-1">
-                On Sale
+                {t("onSale")}
               </div>
             </div>
 
@@ -510,7 +512,7 @@ const Wishlist = () => {
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 flex items-center justify-center text-xs sm:text-sm"
               >
                 <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />
-                Sort & Filter
+                {t("sortFilter")}
               </button>
               {showMobileFilters && (
                 <div className="absolute mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-48">
@@ -519,10 +521,10 @@ const Wishlist = () => {
                     onChange={(e) => setSortBy(e.target.value)}
                     className="w-full px-3 py-2 text-sm border-none focus:outline-none"
                   >
-                    <option value="recent">Recently Added</option>
-                    <option value="name">Name A-Z</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
+                    <option value="recent">{t("sort.recent")}</option>
+                    <option value="name">{t("sort.name")}</option>
+                    <option value="price-low">{t("sort.priceLow")}</option>
+                    <option value="price-high">{t("sort.priceHigh")}</option>
                   </select>
                 </div>
               )}
@@ -538,11 +540,14 @@ const Wishlist = () => {
                     onClick={selectAllItems}
                     className="text-xs sm:text-sm text-rose-600 hover:text-rose-700 font-medium"
                   >
-                    Select All
+                    {t("selectAll")}
                   </button>
                   <span className="text-gray-400">•</span>
                   <span className="text-xs sm:text-sm text-gray-600">
-                    {selectedItems.length} of {itemCount} selected
+                    {t("selectedCount", {
+                      selected: selectedItems.length,
+                      total: itemCount,
+                    })}
                   </span>
                 </div>
                 <button
@@ -550,7 +555,7 @@ const Wishlist = () => {
                   className="px-3 py-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors flex items-center text-xs sm:text-sm"
                 >
                   <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5" />
-                  Clear All
+                  {t("clearAll")}
                 </button>
               </div>
             </div>
@@ -564,17 +569,16 @@ const Wishlist = () => {
               <Search className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400" />
             </div>
             <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-3 sm:mb-4">
-              No matching items found
+              {t("noMatchesTitle")}
             </h3>
             <p className="text-gray-600 text-sm sm:text-base mb-6 sm:mb-8">
-              Try adjusting your search or filter to find what you're looking
-              for.
+              {t("noMatchesMessage")}
             </p>
             <button
               onClick={() => setSearchQuery("")}
               className="px-4 py-2.5 sm:px-6 sm:py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors text-sm sm:text-base"
             >
-              Clear Search
+              {t("clearSearch")}
             </button>
           </div>
         ) : (
@@ -611,7 +615,7 @@ const Wishlist = () => {
                         />
                         {discountPercentage > 0 && (
                           <div className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                            {discountPercentage}% OFF
+                            {t("discount", { percent: discountPercentage })}
                           </div>
                         )}
                       </div>
@@ -651,7 +655,9 @@ const Wishlist = () => {
                         }`}
                       >
                         <ShoppingCart className="h-3 w-3 mr-1" />
-                        {product.stock === 0 ? "Out" : "Add"}
+                        {product.stock === 0
+                          ? t("outOfStockShort")
+                          : t("addShort")}
                       </button>
                     </div>
                   </div>
@@ -692,7 +698,7 @@ const Wishlist = () => {
                           <div className="text-center p-4">
                             <Package className="h-6 w-6 text-gray-400 mx-auto mb-1" />
                             <div className="text-gray-900 font-semibold text-sm">
-                              Out of Stock
+                              {t("outOfStock")}
                             </div>
                           </div>
                         </div>
@@ -700,7 +706,7 @@ const Wishlist = () => {
 
                       {discountPercentage > 0 && (
                         <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-rose-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                          {discountPercentage}% OFF
+                          {t("discount", { percent: discountPercentage })}
                         </div>
                       )}
                     </div>
@@ -731,7 +737,7 @@ const Wishlist = () => {
                       <button
                         onClick={() => handleRemoveItem(product._id)}
                         className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors sm:p-2"
-                        title="Remove from wishlist"
+                        title={t("removeTooltip")}
                       >
                         <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
                       </button>
@@ -749,10 +755,11 @@ const Wishlist = () => {
                               {formatPrice(product.price)}
                             </span>
                             <span className="text-xs sm:text-sm font-medium text-emerald-600">
-                              Save{" "}
-                              {formatPrice(
-                                product.price - product.discountPrice,
-                              )}
+                              {t("save", {
+                                amount: formatPrice(
+                                  product.price - product.discountPrice,
+                                ),
+                              })}
                             </span>
                           </>
                         )}
@@ -766,10 +773,10 @@ const Wishlist = () => {
                       />
                       <span className="text-xs sm:text-sm text-gray-600">
                         {product.stock === 0
-                          ? "Out of stock"
+                          ? t("stock.out")
                           : product.stock <= 5
-                            ? `Only ${product.stock} left`
-                            : "In stock"}
+                            ? t("stock.low", { count: product.stock })
+                            : t("stock.in")}
                       </span>
                     </div>
 
@@ -785,7 +792,9 @@ const Wishlist = () => {
                         }`}
                       >
                         <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                        {product.stock === 0 ? "Out of Stock" : "Move to Cart"}
+                        {product.stock === 0
+                          ? t("outOfStock")
+                          : t("moveToCart")}
                       </button>
 
                       <Link
@@ -808,17 +817,17 @@ const Wishlist = () => {
             <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div>
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
-                  You might also like
+                  {t("featuredTitle")}
                 </h2>
                 <p className="text-gray-600 text-xs sm:text-sm mt-1">
-                  Based on your wishlist
+                  {t("featuredSubtitle")}
                 </p>
               </div>
               <Link
                 to="/shop"
                 className="text-rose-600 hover:text-rose-700 font-medium flex items-center text-sm sm:text-base group"
               >
-                View all
+                {t("viewAll")}
                 <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
@@ -880,12 +889,12 @@ const Wishlist = () => {
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                 <div className="mb-4 sm:mb-0">
                   <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
-                    Wishlist Summary
+                    {t("summaryTitle")}
                   </h3>
                   <p className="text-gray-600 text-sm sm:text-base">
-                    You have {itemCount} items saved. Total value:{" "}
-                    <span className="font-bold text-gray-900">
-                      {formatPrice(
+                    {t("summaryText", {
+                      count: itemCount,
+                      total: formatPrice(
                         wishlistItems.reduce((total, item) => {
                           const price =
                             item.product?.discountPrice ||
@@ -893,8 +902,8 @@ const Wishlist = () => {
                             0;
                           return total + price;
                         }, 0),
-                      )}
-                    </span>
+                      ),
+                    })}
                   </p>
                 </div>
                 <div className="flex gap-3 sm:gap-4">
@@ -902,7 +911,7 @@ const Wishlist = () => {
                     onClick={() => navigate("/shop")}
                     className="flex-1 sm:flex-none px-4 py-2.5 sm:px-6 sm:py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-lg text-sm sm:text-base"
                   >
-                    Continue Shopping
+                    {t("continueShopping")}
                   </button>
                 </div>
               </div>
@@ -925,10 +934,10 @@ const Wishlist = () => {
               </div>
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900">
-                  Clear Entire Wishlist
+                  {t("confirmClearTitle")}
                 </h3>
                 <p className="text-gray-600 text-sm sm:text-base mt-1">
-                  Are you sure? This will remove all {itemCount} items.
+                  {t("confirmClearMessage", { count: itemCount })}
                 </p>
               </div>
             </div>
@@ -937,13 +946,13 @@ const Wishlist = () => {
                 onClick={() => setShowClearConfirm(false)}
                 className="px-6 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-xl font-medium transition-colors text-sm sm:text-base"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 onClick={handleClearWishlist}
                 className="px-6 py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white hover:opacity-90 rounded-xl font-medium transition-all duration-300 shadow-lg text-sm sm:text-base"
               >
-                Clear All Items
+                {t("confirmClearButton")}
               </button>
             </div>
           </div>
@@ -955,7 +964,9 @@ const Wishlist = () => {
         {selectedItems.length > 0 && (
           <div className="bg-gradient-to-r from-emerald-500 to-green-500 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center animate-slide-up text-sm">
             <CheckCircle className="h-4 w-4 mr-2" />
-            <span>{selectedItems.length} selected</span>
+            <span>
+              {t("selectedFloating", { count: selectedItems.length })}
+            </span>
           </div>
         )}
       </div>

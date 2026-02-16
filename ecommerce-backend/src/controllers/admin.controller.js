@@ -69,34 +69,20 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/orders
 // @access  Private/Admin
 const getAllOrders = asyncHandler(async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
   const status = req.query.status;
-
   let filter = {};
   if (status) {
     filter.status = status;
   }
 
+  // ❌ No .skip(), no .limit() – fetch ALL orders
   const orders = await Order.find(filter)
-    .populate("user", "name email")
-    .skip(skip)
-    .limit(limit)
+    .populate("user", "name email phone address")
     .sort({ createdAt: -1 });
-
-  const total = await Order.countDocuments(filter);
-  const totalPages = Math.ceil(total / limit);
 
   res.json({
     success: true,
-    orders,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages,
-    },
+    orders, // only the array, no pagination info
   });
 });
 

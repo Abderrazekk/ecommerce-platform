@@ -1,0 +1,34 @@
+{
+  "empty": {
+    "title": "سلتك فارغة",
+    "message": "أضف منتجات للبدء",
+    "continueShopping": "متابعة التسوق"
+  },
+  "header": {
+    "title": "سلة التسوق"
+  },
+  "debug": {
+    "shippingCalculation": "حساب الشحن",
+    "highestFee": "أعلى رسوم: {{price}}",
+    "noFees": "لم يتم العثور على رسوم شحن"
+  },
+  "items": {
+    "title": "العناصر في سلتك",
+    "clearCart": "تفريغ السلة",
+    "continueShopping": "متابعة التسوق"
+  },
+  "summary": {
+    "title": "ملخص الطلب",
+    "subtotal": "المجموع الفرعي",
+    "shipping": "الشحن",
+    "free": "مجاني",
+    "basedOnHighest": "بناءً على أعلى رسوم منتج",
+    "add": "أضف",
+    "moreForFreeShipping": "المزيد للحصول على شحن مجاني",
+    "freeShippingApplied": "تم تطبيق الشحن المجاني!",
+    "freeShippingMessage": "طلبك مؤهل للشحن المجاني.",
+    "total": "الإجمالي",
+    "proceedToCheckout": "المتابعة للدفع"
+  },
+  "clearConfirm": "هل أنت متأكد من رغبتك في تفريغ السلة؟"
+}

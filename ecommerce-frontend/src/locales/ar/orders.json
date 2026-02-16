@@ -1,0 +1,31 @@
+{
+  "header": {
+    "title": "طلباتي",
+    "subtitle": "تتبع وإدارة ومراجعة طلباتك"
+  },
+  "empty": {
+    "title": "لا توجد طلبات بعد",
+    "message": "مستعد لبدء التسوق؟ استكشف مجموعتنا.",
+    "shopNow": "تسوق الآن"
+  },
+  "status": {
+    "pending": "قيد الانتظار",
+    "confirmed": "مؤكد",
+    "processing": "قيد المعالجة",
+    "outForDelivery": "خرج للتوصيل",
+    "delivered": "تم التوصيل",
+    "cancelled": "ملغي"
+  },
+  "order": {
+    "placedOn": "تم الطلب في {{date}}",
+    "totalAmount": "المبلغ الإجمالي",
+    "quantity": "الكمية:",
+    "unitPrice": "سعر الوحدة:",
+    "deliveryAddress": "عنوان التوصيل",
+    "notes": "ملاحظات الطلب",
+    "subtotal": "المجموع الفرعي:",
+    "shipping": "الشحن:",
+    "free": "مجاني",
+    "total": "الإجمالي:"
+  }
+}

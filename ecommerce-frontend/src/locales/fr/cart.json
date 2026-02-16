@@ -1,0 +1,34 @@
+{
+  "empty": {
+    "title": "Votre panier est vide",
+    "message": "Ajoutez des articles pour commencer",
+    "continueShopping": "Continuer les achats"
+  },
+  "header": {
+    "title": "Panier"
+  },
+  "debug": {
+    "shippingCalculation": "Calcul des frais de livraison",
+    "highestFee": "Frais le plus élevé : {{price}}",
+    "noFees": "Aucun frais de livraison trouvé"
+  },
+  "items": {
+    "title": "Articles dans votre panier",
+    "clearCart": "Vider le panier",
+    "continueShopping": "Continuer les achats"
+  },
+  "summary": {
+    "title": "Récapitulatif",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "free": "GRATUITE",
+    "basedOnHighest": "basé sur les frais produit les plus élevés",
+    "add": "Ajoutez",
+    "moreForFreeShipping": "de plus pour la livraison gratuite",
+    "freeShippingApplied": "Livraison gratuite appliquée !",
+    "freeShippingMessage": "Votre commande est éligible à la livraison GRATUITE.",
+    "total": "Total",
+    "proceedToCheckout": "Passer à la caisse"
+  },
+  "clearConfirm": "Êtes-vous sûr de vouloir vider votre panier ?"
+}

@@ -9,8 +9,10 @@ import {
   FaGoogle,
 } from "react-icons/fa";
 import { toast } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
+  const { t } = useTranslation("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -38,13 +40,13 @@ const Login = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const message = urlParams.get("message");
     if (message === "Your account has been banned") {
-      toast.error("Your account has been banned. Please contact support.", {
+      toast.error(t("bannedMessage"), {
         duration: 10000,
         icon: <FaExclamationTriangle className="text-red-500" />,
       });
       navigate("/login", { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, t]);
 
   // Load Google Identity Services script
   useEffect(() => {
@@ -55,7 +57,6 @@ const Login = () => {
 
     const scriptId = "google-identity-script";
     if (document.getElementById(scriptId)) {
-      // Script already exists, wait for it to load
       const existingScript = document.getElementById(scriptId);
       existingScript.onload = () => setGoogleScriptLoaded(true);
       return;
@@ -74,15 +75,12 @@ const Login = () => {
 
     script.onerror = () => {
       console.error("Failed to load Google Identity Services");
-      toast.error(
-        "Failed to load Google Sign-In. Please check your connection.",
-      );
+      toast.error(t("googleLoadError"));
     };
 
     document.head.appendChild(script);
 
     return () => {
-      // Clean up on unmount
       if (window.google && window.google.accounts) {
         try {
           window.google.accounts.id.cancel();
@@ -91,7 +89,7 @@ const Login = () => {
         }
       }
     };
-  }, []);
+  }, [t]);
 
   // Initialize Google button when script is loaded
   useEffect(() => {
@@ -106,12 +104,11 @@ const Login = () => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) {
       console.error("Google Client ID not configured");
-      toast.error("Google Sign-In is not configured. Please contact support.");
+      toast.error(t("googleConfigError"));
       return;
     }
 
     try {
-      // Initialize Google Identity Services
       window.google.accounts.id.initialize({
         client_id: clientId,
         callback: handleGoogleResponse,
@@ -119,7 +116,6 @@ const Login = () => {
         cancel_on_tap_outside: false,
       });
 
-      // Render the button
       window.google.accounts.id.renderButton(googleButtonContainerRef.current, {
         type: "standard",
         theme: "outline",
@@ -127,22 +123,22 @@ const Login = () => {
         text: "signin_with",
         shape: "rectangular",
         logo_alignment: "left",
-        width: "300", // Fixed width in pixels
+        width: "300",
       });
 
       googleInitializedRef.current = true;
       console.log("Google button initialized and rendered");
     } catch (error) {
       console.error("Failed to initialize Google button:", error);
-      toast.error("Failed to initialize Google Sign-In");
+      toast.error(t("googleInitError"));
     }
-  }, [googleScriptLoaded]);
+  }, [googleScriptLoaded, t]);
 
   // Handle Google Sign-In response
   const handleGoogleResponse = async (response) => {
     try {
       setIsGoogleLoading(true);
-      toast.loading("Signing in with Google...", { id: "google-login" });
+      toast.loading(t("googleSigningIn"), { id: "google-login" });
 
       const apiUrl =
         import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -165,44 +161,40 @@ const Login = () => {
       const data = await result.json();
 
       if (data.success) {
-        // Store user data
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        // Dispatch to Redux store
         dispatch({
           type: "auth/googleLogin/fulfilled",
           payload: data,
         });
 
-        toast.success("Signed in with Google!", { id: "google-login" });
+        toast.success(t("googleSuccess"), { id: "google-login" });
         navigate("/");
       } else {
-        throw new Error(data.message || "Google login failed");
+        throw new Error(data.message || t("googleFailed"));
       }
     } catch (error) {
       console.error("Google login error:", error);
 
-      let errorMessage = "Google Sign-In failed. Please try again.";
+      let errorMessage = t("googleGenericError");
 
       if (
         error.message.includes("already exists") ||
         error.message.includes("409")
       ) {
-        errorMessage =
-          "An account with this email already exists. Please use email/password login.";
+        errorMessage = t("googleEmailExists");
       } else if (
         error.message.includes("banned") ||
         error.message.includes("403")
       ) {
-        errorMessage = "Your account has been banned. Please contact support.";
+        errorMessage = t("bannedMessage");
       } else if (error.message.includes("Invalid Google token")) {
-        errorMessage = "Invalid Google token. Please try again.";
+        errorMessage = t("googleInvalidToken");
       }
 
       toast.error(errorMessage, { id: "google-login" });
 
-      // Reset Google button
       if (
         window.google &&
         window.google.accounts &&
@@ -226,17 +218,16 @@ const Login = () => {
   // Handle manual Google Sign-In button click (fallback)
   const handleManualGoogleSignIn = () => {
     if (!googleScriptLoaded) {
-      toast.error("Google Sign-In is still loading. Please wait.");
+      toast.error(t("googleNotLoaded"));
       return;
     }
 
-    // Try to trigger the Google button programmatically
     const googleButton =
       googleButtonContainerRef.current?.querySelector('div[role="button"]');
     if (googleButton) {
       googleButton.click();
     } else {
-      toast.error("Google Sign-In button not ready. Please refresh the page.");
+      toast.error(t("googleButtonNotReady"));
     }
   };
 
@@ -245,13 +236,13 @@ const Login = () => {
     e.preventDefault();
 
     if (!email.trim() || !password.trim()) {
-      toast.error("Please enter both email and password");
+      toast.error(t("enterCredentials"));
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      toast.error("Please enter a valid email address");
+      toast.error(t("validEmail"));
       return;
     }
 
@@ -266,11 +257,11 @@ const Login = () => {
   const handleAdminLogin = () => {
     setEmail("admin@example.com");
     setPassword("admin123");
-    toast.success("Admin credentials loaded. Click Sign in.");
+    toast.success(t("adminCredentialsLoaded"));
   };
 
   const handleForgotPassword = () => {
-    toast("Forgot password feature coming soon!", { icon: "🔒" });
+    toast(t("forgotPasswordSoon"), { icon: "🔒" });
   };
 
   return (
@@ -282,49 +273,47 @@ const Login = () => {
           <div className="hidden flex-col justify-between rounded-2xl bg-gradient-to-br from-primary-600 via-indigo-600 to-purple-600 p-8 text-white shadow-lg md:flex">
             <div>
               <p className="text-sm font-semibold uppercase tracking-widest text-white/80">
-                Welcome back
+                {t("welcomeBack")}
               </p>
               <h2 className="mt-4 text-3xl font-semibold leading-tight">
-                Sign in to manage orders, save favorites, and check out faster.
+                {t("signInSubtitle")}
               </h2>
-              <p className="mt-4 text-sm text-white/80">
-                Access curated deals, personalized picks, and exclusive member
-                rewards on every purchase.
-              </p>
+              <p className="mt-4 text-sm text-white/80">{t("accessDeals")}</p>
             </div>
             <div className="space-y-3 text-sm text-white/90">
               <div className="flex items-center gap-3">
                 <span className="h-2.5 w-2.5 rounded-full bg-white/90" />
-                Secure checkout and saved carts
+                {t("benefitSecureCheckout")}
               </div>
               <div className="flex items-center gap-3">
                 <span className="h-2.5 w-2.5 rounded-full bg-white/90" />
-                Personalized product recommendations
+                {t("benefitPersonalized")}
               </div>
               <div className="flex items-center gap-3">
                 <span className="h-2.5 w-2.5 rounded-full bg-white/90" />
-                Track orders in real time
+                {t("benefitTrackOrders")}
               </div>
             </div>
           </div>
 
           <div className="space-y-8 rounded-2xl bg-white/90 p-6 shadow-xl md:p-8">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
+              <h2 className="text-3xl font-bold text-gray-900">
+                {t("welcomeBackHeading")}
+              </h2>
               <p className="mt-2 text-sm text-gray-600">
-                Sign in to your account or{" "}
+                {t("signInPrompt")}{" "}
                 <Link
                   to="/register"
                   className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
                 >
-                  create a new account
+                  {t("createNewAccount")}
                 </Link>
               </p>
             </div>
 
             {/* Google Sign-In Section */}
             <div className="space-y-4">
-              {/* Google button container */}
               <div
                 ref={googleButtonContainerRef}
                 className="min-h-[42px] flex items-center justify-center"
@@ -333,13 +322,12 @@ const Login = () => {
                   <div className="flex items-center justify-center w-full py-3 px-4 border border-gray-200 rounded-xl bg-gray-50">
                     <div className="flex items-center space-x-2 text-gray-500">
                       <div className="w-5 h-5 border-2 border-gray-300 border-t-primary-600 rounded-full animate-spin"></div>
-                      <span className="text-sm">Loading Google Sign-In...</span>
+                      <span className="text-sm">{t("loadingGoogle")}</span>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Fallback button (hidden when Google button is loaded) */}
               {googleScriptLoaded && (
                 <button
                   onClick={handleManualGoogleSignIn}
@@ -350,28 +338,27 @@ const Login = () => {
                     <>
                       <div className="w-5 h-5 border-2 border-gray-300 border-t-primary-600 rounded-full animate-spin"></div>
                       <span className="text-sm text-gray-600">
-                        Signing in...
+                        {t("signingIn")}
                       </span>
                     </>
                   ) : (
                     <>
                       <FaGoogle className="h-5 w-5 text-red-600" />
                       <span className="text-gray-700 font-medium">
-                        Sign in with Google
+                        {t("signInWithGoogle")}
                       </span>
                     </>
                   )}
                 </button>
               )}
 
-              {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-4 bg-white text-gray-500">
-                    Or continue with email
+                    {t("orContinueWithEmail")}
                   </span>
                 </div>
               </div>
@@ -385,7 +372,7 @@ const Login = () => {
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Email address
+                    {t("email")}
                   </label>
                   <input
                     id="email"
@@ -396,7 +383,7 @@ const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:ring-2 focus:ring-primary-500"
-                    placeholder="you@example.com"
+                    placeholder={t("emailPlaceholder")}
                     disabled={loading || isGoogleLoading}
                   />
                 </div>
@@ -407,7 +394,7 @@ const Login = () => {
                       htmlFor="password"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Password
+                      {t("password")}
                     </label>
                     <button
                       type="button"
@@ -415,7 +402,7 @@ const Login = () => {
                       className="text-sm text-primary-600 hover:text-primary-500 font-medium"
                       disabled={loading || isGoogleLoading}
                     >
-                      Forgot password?
+                      {t("forgotPassword")}
                     </button>
                   </div>
                   <div className="relative">
@@ -429,7 +416,7 @@ const Login = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-transparent focus:ring-2 focus:ring-primary-500 pr-12"
-                      placeholder="••••••••"
+                      placeholder={t("passwordPlaceholder")}
                       disabled={loading || isGoogleLoading}
                     />
                     <button
@@ -457,7 +444,7 @@ const Login = () => {
                     className="text-sm text-primary-600 hover:text-primary-500 font-medium border border-primary-200 px-4 py-2 rounded-xl hover:bg-primary-50 transition-colors"
                     disabled={loading || isGoogleLoading}
                   >
-                    Load Admin Credentials
+                    {t("loadAdminCredentials")}
                   </button>
                 </div>
               )}
@@ -472,10 +459,10 @@ const Login = () => {
                   {loading ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                      Signing in...
+                      {t("signingInWithEmail")}
                     </>
                   ) : (
-                    "Sign in with Email"
+                    t("signInWithEmail")
                   )}
                 </button>
               </div>
@@ -484,12 +471,12 @@ const Login = () => {
             {/* Registration Prompt */}
             <div className="text-center pt-4 border-t border-gray-200">
               <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
+                {t("noAccount")}{" "}
                 <Link
                   to="/register"
                   className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
                 >
-                  Sign up here
+                  {t("signUpHere")}
                 </Link>
               </p>
             </div>
@@ -498,12 +485,13 @@ const Login = () => {
             {process.env.NODE_ENV === "development" && (
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
                 <p className="text-sm text-blue-800">
-                  <strong className="font-semibold">Development Mode:</strong>
+                  <strong className="font-semibold">{t("devMode")}</strong>
                   <br />
-                  • Default Admin: admin@example.com / admin123
+                  {t("devAdmin")}
                   <br />
-                  • Google Sign-In: Use any Google account
-                  <br />• Test Email: test@example.com / test123
+                  {t("devGoogle")}
+                  <br />
+                  {t("devTest")}
                 </p>
               </div>
             )}
@@ -514,7 +502,7 @@ const Login = () => {
                 <div className="flex items-center">
                   <FaExclamationTriangle className="h-5 w-5 text-red-500 mr-2" />
                   <p className="text-sm text-red-800 font-medium">
-                    Your account has been banned. Please contact support.
+                    {t("bannedMessage")}
                   </p>
                 </div>
               </div>
@@ -523,25 +511,25 @@ const Login = () => {
             {/* Privacy Notice */}
             <div className="text-center text-xs text-gray-500 pt-4">
               <p>
-                By signing in, you agree to our{" "}
+                {t("agreeTerms")}{" "}
                 <Link to="/terms" className="underline hover:text-gray-700">
-                  Terms of Service
+                  {t("termsOfService")}
                 </Link>{" "}
-                and{" "}
+                {t("and")}{" "}
                 <Link to="/privacy" className="underline hover:text-gray-700">
-                  Privacy Policy
+                  {t("privacyPolicy")}
                 </Link>
                 .
               </p>
               <p className="mt-1">
-                Google Sign-In is subject to Google's{" "}
+                {t("googlePrivacy")}{" "}
                 <a
                   href="https://policies.google.com/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline hover:text-gray-700"
                 >
-                  Privacy Policy
+                  {t("privacyPolicy")}
                 </a>
                 .
               </p>

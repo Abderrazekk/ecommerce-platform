@@ -1,0 +1,57 @@
+{
+  "header": {
+    "title": "Checkout",
+    "subtitle": "Complete your purchase in a few steps"
+  },
+  "debug": {
+    "warningTitle": "Shipping Fee Warning",
+    "warningMessage": "No shipping fees found in cart items. This may indicate a data issue.",
+    "details": "Debug details",
+    "cartItems": "Cart Items:",
+    "shippingFees": "Shipping Fees:"
+  },
+  "shipping": {
+    "title": "Shipping Information",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "phonePlaceholder": "+216 XX XXX XXX",
+    "address": "Shipping Address",
+    "addressPlaceholder": "Street address, City, Postal code, Country",
+    "notes": "Order Notes (Optional)",
+    "notesPlaceholder": "Any special instructions, color preferences, etc.",
+    "notesHint": "Add any notes for your order (optional)"
+  },
+  "payment": {
+    "title": "Payment Method",
+    "subtitle": "Pay when you receive your order",
+    "method": "Cash on Delivery",
+    "description": "You'll pay Cash on Delivery when your order arrives."
+  },
+  "summary": {
+    "title": "Your Order",
+    "qty": "Qty:",
+    "shipping": "Shipping:",
+    "missing": "Missing",
+    "subtotal": "Subtotal",
+    "shippingLabel": "Shipping",
+    "free": "FREE",
+    "highestFee": "(highest product fee)",
+    "total": "Total",
+    "including": "Including {{shipping}} shipping fee",
+    "placeOrder": "Place Order",
+    "placingOrder": "Placing Order...",
+    "breakdown": "Order Summary",
+    "items": "Items:",
+    "productsTotal": "Products total:",
+    "shippingFee": "Shipping fee:",
+    "orderTotal": "Order total:"
+  },
+  "errors": {
+    "shippingRequired": "Shipping address is required",
+    "shippingComplete": "Please enter a complete address",
+    "phoneRequired": "Phone number is required",
+    "phoneValid": "Please enter a valid phone number",
+    "orderFailed": "Failed to create order. Please try again."
+  }
+}

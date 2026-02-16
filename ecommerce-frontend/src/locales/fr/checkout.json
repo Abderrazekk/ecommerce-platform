@@ -1,0 +1,57 @@
+{
+  "header": {
+    "title": "Commande",
+    "subtitle": "Finalisez votre achat en quelques étapes"
+  },
+  "debug": {
+    "warningTitle": "Avertissement sur les frais de livraison",
+    "warningMessage": "Aucun frais de livraison trouvé dans le panier. Cela peut indiquer un problème de données.",
+    "details": "Détails de débogage",
+    "cartItems": "Articles du panier :",
+    "shippingFees": "Frais de livraison :"
+  },
+  "shipping": {
+    "title": "Informations de livraison",
+    "fullName": "Nom complet",
+    "email": "E-mail",
+    "phone": "Numéro de téléphone",
+    "phonePlaceholder": "+216 XX XXX XXX",
+    "address": "Adresse de livraison",
+    "addressPlaceholder": "Adresse, Ville, Code postal, Pays",
+    "notes": "Notes de commande (optionnel)",
+    "notesPlaceholder": "Instructions spéciales, préférences de couleur, etc.",
+    "notesHint": "Ajoutez des notes pour votre commande (optionnel)"
+  },
+  "payment": {
+    "title": "Mode de paiement",
+    "subtitle": "Payez à la réception de votre commande",
+    "method": "Paiement à la livraison",
+    "description": "Vous paierez à la livraison lorsque votre commande arrivera."
+  },
+  "summary": {
+    "title": "Votre commande",
+    "qty": "Qté :",
+    "shipping": "Livraison :",
+    "missing": "Manquant",
+    "subtotal": "Sous-total",
+    "shippingLabel": "Livraison",
+    "free": "GRATUITE",
+    "highestFee": "(frais produit le plus élevé)",
+    "total": "Total",
+    "including": "Dont {{shipping}} de frais de livraison",
+    "placeOrder": "Passer la commande",
+    "placingOrder": "Commande en cours...",
+    "breakdown": "Récapitulatif",
+    "items": "Articles :",
+    "productsTotal": "Total produits :",
+    "shippingFee": "Frais de livraison :",
+    "orderTotal": "Total commande :"
+  },
+  "errors": {
+    "shippingRequired": "L'adresse de livraison est requise",
+    "shippingComplete": "Veuillez saisir une adresse complète",
+    "phoneRequired": "Le numéro de téléphone est requis",
+    "phoneValid": "Veuillez saisir un numéro de téléphone valide",
+    "orderFailed": "Échec de la création de la commande. Veuillez réessayer."
+  }
+}
