@@ -74,11 +74,26 @@ const HelpFAQ = () => {
 
   const categories = [
     { name: "Tous", count: faqs.length },
-    { name: "Commande", count: faqs.filter(f => f.category === "Commande").length },
-    { name: "Livraison", count: faqs.filter(f => f.category === "Livraison").length },
-    { name: "Paiement", count: faqs.filter(f => f.category === "Paiement").length },
-    { name: "Retour", count: faqs.filter(f => f.category === "Retour").length },
-    { name: "Support", count: faqs.filter(f => f.category === "Support").length },
+    {
+      name: "Commande",
+      count: faqs.filter((f) => f.category === "Commande").length,
+    },
+    {
+      name: "Livraison",
+      count: faqs.filter((f) => f.category === "Livraison").length,
+    },
+    {
+      name: "Paiement",
+      count: faqs.filter((f) => f.category === "Paiement").length,
+    },
+    {
+      name: "Retour",
+      count: faqs.filter((f) => f.category === "Retour").length,
+    },
+    {
+      name: "Support",
+      count: faqs.filter((f) => f.category === "Support").length,
+    },
   ];
 
   return (
@@ -94,37 +109,6 @@ const HelpFAQ = () => {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             Trouvez rapidement des réponses à vos questions les plus fréquentes
           </p>
-          
-          <div className="relative max-w-md mx-auto">
-            <input
-              type="text"
-              placeholder="Rechercher une question..."
-              className="w-full px-6 py-4 bg-white rounded-xl shadow-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-            <svg className="absolute right-4 top-4 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-3 justify-center mb-12">
-          {categories.map((category, idx) => (
-            <button
-              key={idx}
-              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-300 ${
-                idx === 0
-                  ? "bg-primary-600 text-white shadow-lg"
-                  : "bg-white text-gray-700 hover:bg-gray-50 shadow hover:shadow-md"
-              }`}
-            >
-              {category.name}
-              <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                idx === 0 ? "bg-white text-primary-600" : "bg-gray-100 text-gray-600"
-              }`}>
-                {category.count}
-              </span>
-            </button>
-          ))}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
@@ -142,8 +126,19 @@ const HelpFAQ = () => {
                     <span className="text-xs font-semibold text-primary-600 bg-primary-50 px-3 py-1 rounded-full">
                       {faq.category}
                     </span>
-                    <svg className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <svg
+                      className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-primary-700 transition-colors">
@@ -154,23 +149,6 @@ const HelpFAQ = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center space-x-4 bg-white rounded-xl p-6 shadow-lg">
-            <div className="w-16 h-16 bg-primary-50 rounded-xl flex items-center justify-center">
-              <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-            <div className="text-left">
-              <h3 className="text-xl font-bold text-gray-900">Vous n'avez pas trouvé votre réponse ?</h3>
-              <p className="text-gray-600">Notre équipe de support est disponible pour vous aider personnellement</p>
-            </div>
-            <button className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl">
-              Contacter le support
-            </button>
-          </div>
         </div>
       </div>
     </div>

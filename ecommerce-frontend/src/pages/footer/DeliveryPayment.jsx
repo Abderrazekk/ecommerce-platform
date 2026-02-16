@@ -96,7 +96,8 @@ const DeliveryPayment = () => {
             Livraison & Paiement
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Tout ce que vous devez savoir sur nos services de livraison et options de paiement
+            Tout ce que vous devez savoir sur nos services de livraison et
+            options de paiement
           </p>
         </div>
 
@@ -108,7 +109,9 @@ const DeliveryPayment = () => {
                   <span className="text-2xl">{section.icon}</span>
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900">{section.title}</h2>
+                  <h2 className="text-3xl font-bold text-gray-900">
+                    {section.title}
+                  </h2>
                   <div className="w-20 h-1 bg-gradient-to-r from-primary-500 to-primary-300 rounded-full mt-2"></div>
                 </div>
               </div>
@@ -121,15 +124,28 @@ const DeliveryPayment = () => {
                   >
                     <div className="flex items-start">
                       <div className="flex-shrink-0 w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center mr-4 group-hover:bg-primary-100 transition-colors">
-                        <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg
+                          className="w-5 h-5 text-primary-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
                         </svg>
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-primary-700 transition-colors">
                           {item.question}
                         </h3>
-                        <p className="text-gray-600 leading-relaxed">{item.answer}</p>
+                        <p className="text-gray-600 leading-relaxed">
+                          {item.answer}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -137,18 +153,6 @@ const DeliveryPayment = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="mt-16 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-8 text-white">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="mb-6 md:mb-0">
-              <h3 className="text-2xl font-bold mb-2">Besoin d'aide supplémentaire ?</h3>
-              <p className="text-primary-100">Notre équipe est disponible pour répondre à vos questions</p>
-            </div>
-            <button className="bg-white text-primary-600 hover:bg-gray-100 font-semibold px-8 py-3 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl">
-              Contacter le support
-            </button>
-          </div>
         </div>
       </div>
     </div>
