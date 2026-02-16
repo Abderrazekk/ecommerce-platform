@@ -1048,23 +1048,6 @@ const Shop = () => {
                       </span>
                     </label>
                   </div>
-
-                  <div className="flex items-center group hover:bg-gray-50 p-2 rounded-xl transition-all duration-300">
-                    <input
-                      type="checkbox"
-                      id="free-shipping"
-                      className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-1 transition-all duration-200"
-                    />
-                    <label
-                      htmlFor="free-shipping"
-                      className="ms-3 text-sm text-gray-700 cursor-pointer hover:text-gray-900 flex-1"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Truck className="h-4 w-4 text-blue-500" />
-                        {t("features.freeShipping")}
-                      </span>
-                    </label>
-                  </div>
                 </div>,
               )}
 
@@ -1110,8 +1093,8 @@ const Shop = () => {
               <>
                 {filteredProducts().length > 0 ? (
                   <>
-                    {/* Auto‑fit grid with minimum card widths */}
-                    <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(160px,1fr))] md:grid-cols-[repeat(auto-fit,minmax(180px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] xl:grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-2 sm:gap-4 lg:gap-6 mb-8">
+                    {/* ✅ FIX: Use auto-fill instead of auto-fit to keep column width consistent */}
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] xl:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 sm:gap-4 lg:gap-6 mb-8">
                       {filteredProducts().map((product) => (
                         <div
                           key={product._id}
