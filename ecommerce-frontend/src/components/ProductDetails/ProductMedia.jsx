@@ -14,7 +14,7 @@ import {
 const ProductMedia = ({
   product,
   selectedColor,
-  setSelectedColor, // ✅ Added
+  setSelectedColor,
   selectedImageIndex,
   setSelectedImageIndex,
 }) => {
@@ -265,17 +265,19 @@ const ProductMedia = ({
   const zoomStyle = calculateZoomStyle();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
       {/* Images Section */}
-      <div className="space-y-5">
+      <div className="space-y-3 sm:space-y-4 lg:space-y-5">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-900">{t("productMedia.galleryTitle")}</h3>
+          <h3 className="text-base sm:text-lg font-medium text-gray-900">
+            {t("productMedia.galleryTitle")}
+          </h3>
         </div>
 
         {/* Main Image Container */}
         <div
           ref={imageContainerRef}
-          className="relative overflow-hidden bg-white rounded-xl border border-gray-200 group"
+          className="relative overflow-hidden bg-white rounded-lg sm:rounded-xl border border-gray-200 group"
           onMouseMove={handleMouseMove}
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={handleMouseLeave}
@@ -288,23 +290,23 @@ const ProductMedia = ({
                 images[selectedImageIndex]?.url || images[selectedImageIndex]
               }
               alt={`${product.name} - Image ${selectedImageIndex + 1}`}
-              className="w-full h-[500px] lg:h-[600px] object-contain transition-transform duration-700 group-hover:scale-105"
+              className="w-full h-[300px] sm:h-[400px] lg:h-[600px] object-contain transition-transform duration-700 group-hover:scale-105"
               onLoad={handleImageLoad}
             />
           )}
 
-          {/* Zoom Lens */}
+          {/* Zoom Lens - hidden on mobile, only visible on md+ screens */}
           {isHovering &&
             images.length > 0 &&
             imageLoaded &&
             images[selectedImageIndex] && (
               <div
-                className="absolute pointer-events-none z-20 overflow-hidden rounded-full"
+                className="absolute pointer-events-none z-20 overflow-hidden rounded-full hidden md:block"
                 style={{
                   left: `${zoomStyle.lensPosition?.x || 0}px`,
                   top: `${zoomStyle.lensPosition?.y || 0}px`,
-                  width: "200px",
-                  height: "200px",
+                  width: "180px",
+                  height: "180px",
                   border: "3px solid rgba(255, 255, 255, 0.9)",
                   boxShadow:
                     "0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255,255,255,0.5)",
@@ -329,9 +331,10 @@ const ProductMedia = ({
                   );
                   setIsHovering(false);
                 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200 z-10"
+                aria-label="Previous image"
               >
-                <ChevronLeft className="h-5 w-5 text-gray-800" />
+                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 text-gray-800" />
               </button>
               <button
                 onClick={() => {
@@ -340,22 +343,23 @@ const ProductMedia = ({
                   );
                   setIsHovering(false);
                 }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200 z-10"
+                aria-label="Next image"
               >
-                <ChevronRight className="h-5 w-5 text-gray-800" />
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-800" />
               </button>
             </>
           )}
 
           {/* Image Counter */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm text-white px-3.5 py-1.5 rounded-full text-xs font-medium shadow-md">
+          <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm text-white px-2 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium shadow-md z-10">
             {selectedImageIndex + 1} / {images.length || 1}
           </div>
         </div>
 
         {/* Unified Thumbnail Strip – all images from main + colors */}
         {allImages.length > 1 && (
-          <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
+          <div className="flex space-x-2 sm:space-x-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
             {allImages.map((thumb, idx) => (
               <button
                 key={idx}
@@ -369,12 +373,12 @@ const ProductMedia = ({
                 <img
                   src={thumb.url}
                   alt={`Thumbnail ${idx + 1}`}
-                  className="w-20 h-20 object-cover rounded-lg"
+                  className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 object-cover rounded-lg"
                 />
                 {/* Optional: small color indicator for thumbnails belonging to a color */}
                 {thumb.color && (
                   <div
-                    className="absolute bottom-1 right-1 w-3 h-3 rounded-full border border-white"
+                    className="absolute bottom-1 right-1 w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 rounded-full border border-white"
                     style={{ backgroundColor: thumb.color.hex }}
                   />
                 )}
@@ -386,19 +390,22 @@ const ProductMedia = ({
 
       {/* Video Section */}
       {product.video && (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">{t("productMedia.videoTitle")}</h3>
+            <h3 className="text-base sm:text-lg font-medium text-gray-900">
+              {t("productMedia.videoTitle")}
+            </h3>
             <button
               onClick={() => toggleFullscreen(videoRef.current)}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Toggle fullscreen"
             >
-              <Maximize2 className="h-5 w-5" />
+              <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
 
           <div
-            className="relative rounded-xl overflow-hidden bg-black border border-gray-800 shadow-xl"
+            className="relative rounded-lg sm:rounded-xl overflow-hidden bg-black border border-gray-800 shadow-xl"
             onMouseMove={resetVideoControlsTimeout}
             onMouseLeave={() => {
               if (videoControlsTimeout.current) {
@@ -412,7 +419,7 @@ const ProductMedia = ({
             <video
               ref={videoRef}
               src={product.video}
-              className="w-full h-[400px] lg:h-[500px] object-contain"
+              className="w-full h-[250px] sm:h-[350px] lg:h-[500px] object-contain"
               onTimeUpdate={handleVideoTimeUpdate}
               onLoadedMetadata={handleVideoLoaded}
               onEnded={handleVideoEnded}
@@ -427,19 +434,19 @@ const ProductMedia = ({
               }`}
             >
               {/* Top Controls Bar */}
-              <div className="absolute top-0 left-0 right-0 p-5 flex justify-between items-center">
-                <div className="flex items-center space-x-3">
+              <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 lg:p-5 flex justify-between items-center">
+                <div className="flex items-center space-x-2 sm:space-x-3">
                   <button
                     onClick={toggleMute}
-                    className="p-2.5 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors"
+                    className="p-1.5 sm:p-2 lg:p-2.5 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors"
                   >
                     {isMuted ? (
-                      <VolumeX className="h-4 w-4 text-white" />
+                      <VolumeX className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 text-white" />
                     ) : (
-                      <Volume2 className="h-4 w-4 text-white" />
+                      <Volume2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 text-white" />
                     )}
                   </button>
-                  <div className="w-24">
+                  <div className="w-16 sm:w-20 lg:w-24 hidden sm:block">
                     <input
                       type="range"
                       min="0"
@@ -454,22 +461,22 @@ const ProductMedia = ({
                           videoRef.current.volume = volume;
                         }
                       }}
-                      className="w-full h-1.5 bg-gray-600 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:hover:scale-125 transition-all"
+                      className="w-full h-1 sm:h-1.5 bg-gray-600 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-2.5 sm:[&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-2.5 sm:[&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:hover:scale-125 transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <div className="relative group">
-                    <button className="p-2.5 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors">
-                      <Settings className="h-4 w-4 text-white" />
+                    <button className="p-1.5 sm:p-2 lg:p-2.5 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors">
+                      <Settings className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 text-white" />
                     </button>
-                    <div className="absolute right-0 top-full mt-2 w-36 bg-gray-900/95 backdrop-blur-sm rounded-lg p-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-xl">
+                    <div className="absolute right-0 top-full mt-2 w-28 sm:w-32 lg:w-36 bg-gray-900/95 backdrop-blur-sm rounded-lg p-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-xl z-20">
                       {[0.5, 1, 1.5, 2].map((speed) => (
                         <button
                           key={speed}
                           onClick={() => changeVideoSpeed(speed)}
-                          className={`w-full text-left px-3 py-1.5 rounded-md text-xs text-white hover:bg-white/10 transition-colors ${
+                          className={`w-full text-left px-2 sm:px-3 py-1 sm:py-1.5 rounded-md text-[10px] sm:text-xs text-white hover:bg-white/10 transition-colors ${
                             videoSpeed === speed ? "bg-white/20" : ""
                           }`}
                         >
@@ -485,17 +492,17 @@ const ProductMedia = ({
               {!videoPlaying && (
                 <button
                   onClick={handleVideoPlayPause}
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-300 animate-pulse-slow"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-300 animate-pulse-slow"
                 >
-                  <Play className="h-10 w-10 text-white ml-1.5" />
+                  <Play className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-white ml-0.5 sm:ml-1" />
                 </button>
               )}
 
               {/* Bottom Controls Bar */}
-              <div className="absolute bottom-0 left-0 right-0 p-5 space-y-3">
+              <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 lg:p-5 space-y-2 sm:space-y-3">
                 {/* Progress Bar */}
                 <div
-                  className="relative h-1.5 bg-gray-700/50 rounded-full cursor-pointer group"
+                  className="relative h-1 sm:h-1.5 bg-gray-700/50 rounded-full cursor-pointer group"
                   onClick={handleSeek}
                 >
                   <div
@@ -503,29 +510,29 @@ const ProductMedia = ({
                     style={{ width: `${videoProgress}%` }}
                   />
                   <div
-                    className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                    style={{ left: `calc(${videoProgress}% - 8px)` }}
+                    className="absolute top-1/2 -translate-y-1/2 w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                    style={{ left: `calc(${videoProgress}% - 4px)` }}
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
                     <button
                       onClick={handleVideoPlayPause}
-                      className="p-2.5 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors"
+                      className="p-1.5 sm:p-2 lg:p-2.5 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors"
                     >
                       {videoPlaying ? (
-                        <Pause className="h-4 w-4 text-white" />
+                        <Pause className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 text-white" />
                       ) : (
-                        <Play className="h-4 w-4 text-white" />
+                        <Play className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 text-white" />
                       )}
                     </button>
-                    <div className="text-white text-xs font-medium">
+                    <div className="text-white text-[10px] sm:text-xs font-medium">
                       {formatTime(videoRef.current?.currentTime || 0)} /{" "}
                       {formatTime(videoDuration)}
                     </div>
                   </div>
-                  <div className="text-white text-xs bg-white/20 backdrop-blur-sm px-2 py-1 rounded-md">
+                  <div className="text-white text-[10px] sm:text-xs bg-white/20 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">
                     {videoSpeed}x
                   </div>
                 </div>
