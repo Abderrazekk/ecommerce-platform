@@ -15,6 +15,7 @@ import checkoutEN from "../locales/en/checkout.json";
 import cartEN from "../locales/en/cart.json";
 import ordersEN from "../locales/en/orders.json";
 import wishlistEN from "../locales/en/wishlist.json";
+import productdetailsEN from "../locales/en/productdetails.json";
 
 // Import translation files - French
 import navbarFR from "../locales/fr/navbar.json";
@@ -29,6 +30,7 @@ import checkoutFR from "../locales/fr/checkout.json";
 import cartFR from "../locales/fr/cart.json";
 import ordersFR from "../locales/fr/orders.json";
 import wishlistFR from "../locales/fr/wishlist.json";
+import productdetailsFR from "../locales/fr/productdetails.json";
 
 // Import translation files - Arabic
 import navbarAR from "../locales/ar/navbar.json";
@@ -43,6 +45,7 @@ import checkoutAR from "../locales/ar/checkout.json";
 import cartAR from "../locales/ar/cart.json";
 import ordersAR from "../locales/ar/orders.json";
 import wishlistAR from "../locales/ar/wishlist.json";
+import productdetailsAR from "../locales/ar/productdetails.json";
 
 // Function to set direction based on language
 const setDirection = (lng) => {
@@ -78,7 +81,8 @@ i18n
         checkout: checkoutEN,
         cart: cartEN,
         orders: ordersEN,
-        wishlist: wishlistEN
+        wishlist: wishlistEN,
+        productdetails: productdetailsEN
       },
       fr: {
         navbar: navbarFR,
@@ -92,7 +96,8 @@ i18n
         checkout: checkoutFR,
         cart: cartFR,
         orders: ordersFR,
-        wishlist: wishlistFR
+        wishlist: wishlistFR,
+        productdetails: productdetailsFR
       },
       ar: {
         navbar: navbarAR,
@@ -106,7 +111,8 @@ i18n
         checkout: checkoutAR,
         cart: cartAR,
         orders: ordersAR,
-        wishlist: wishlistAR
+        wishlist: wishlistAR,
+        productdetails: productdetailsAR
       },
     },
     fallbackLng: "en",

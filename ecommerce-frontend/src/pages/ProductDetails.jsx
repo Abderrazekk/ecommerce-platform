@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { fetchProductById } from "../redux/slices/product.slice";
 import {
   fetchProductComments,
@@ -15,6 +16,7 @@ import ProductComments from "../components/ProductDetails/ProductComments";
 import SimilarProducts from "../components/ProductDetails/SimilarProducts";
 
 const ProductDetails = () => {
+  const { t } = useTranslation("productdetails");
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -50,16 +52,16 @@ const ProductDetails = () => {
             <Package className="h-12 w-12 text-gray-400" />
           </div>
           <h2 className="text-3xl font-light text-gray-900 mb-4">
-            Product Not Found
+            {t("productDetails.notFoundTitle")}
           </h2>
           <p className="text-gray-600 mb-8">
-            The product you're looking for doesn't exist.
+            {t("productDetails.notFoundMessage")}
           </p>
           <button
             onClick={() => navigate("/shop")}
             className="px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors shadow-button hover:shadow-button-hover"
           >
-            Continue Shopping
+             {t("productDetails.continueShopping")}
           </button>
         </div>
       </div>
@@ -68,7 +70,6 @@ const ProductDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
       {/* Full‑width main content */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">

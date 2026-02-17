@@ -1,6 +1,8 @@
+// ecommerce-frontend/src/components/ProductDetails/ProductInfo.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { addToCart } from "../../redux/slices/cart.slice";
 import {
   addToWishlist,
@@ -13,11 +15,9 @@ import {
   Share2,
   CheckCircle,
   Truck,
-  Shield,
   RefreshCw,
   Globe,
   Check,
-  Star,
   ShoppingBag,
   Zap,
   Wallet,
@@ -32,6 +32,7 @@ const ProductInfo = ({
   selectedColor,
   setSelectedColor,
 }) => {
+  const { t } = useTranslation("productdetails");
   const [quantity, setQuantity] = useState(1);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -42,26 +43,23 @@ const ProductInfo = ({
 
   const toggleWishlist = async () => {
     if (!product) return;
-
     const isInWishlist = wishlistChecked[product._id];
-
     try {
       if (isInWishlist) {
         await dispatch(removeFromWishlist(product._id)).unwrap();
-        toast.success("Removed from wishlist");
+        toast.success(t("productInfo.toastRemovedFromWishlist"));
       } else {
         await dispatch(addToWishlist(product._id)).unwrap();
-        toast.success("Added to wishlist");
+        toast.success(t("productInfo.toastAddedToWishlist"));
       }
     } catch (error) {
       console.error("Wishlist error:", error);
-      toast.error(error?.message || "Failed to update wishlist");
+      toast.error(error?.message || t("productInfo.toastWishlistError"));
     }
   };
 
   const handleAddToCart = () => {
     if (!product) return;
-
     dispatch(
       addToCart({
         product: product._id,
@@ -70,16 +68,14 @@ const ProductInfo = ({
         shippingFee: product.shippingFee || 0,
         image: product.images?.[0]?.url || "",
         quantity,
-      }),
+      })
     );
-    toast.success("Added to cart");
+    toast.success(t("productInfo.toastAddedToCart"));
   };
 
   const handleBuyNow = () => {
     if (!product) return;
-
     setIsBuyNowLoading(true);
-
     dispatch(
       addToCart({
         product: product._id,
@@ -88,11 +84,9 @@ const ProductInfo = ({
         shippingFee: product.shippingFee || 0,
         image: product.images?.[0]?.url || "",
         quantity,
-      }),
+      })
     );
-
-    toast.success("Added to cart! Redirecting to checkout...");
-
+    toast.success(t("productInfo.toastAddedToCartRedirect"));
     setTimeout(() => {
       navigate("/checkout");
       setIsBuyNowLoading(false);
@@ -106,7 +100,6 @@ const ProductInfo = ({
 
   const handleShare = async () => {
     const productUrl = getProductUrl();
-
     if (navigator.share && navigator.canShare) {
       try {
         await navigator.share({
@@ -143,7 +136,6 @@ const ProductInfo = ({
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
-
     try {
       const successful = document.execCommand("copy");
       if (successful) {
@@ -156,36 +148,30 @@ const ProductInfo = ({
       console.error("Fallback copy failed:", error);
       alert("Failed to copy link. Please copy the URL manually: " + text);
     }
-
     document.body.removeChild(textArea);
   };
 
   const discountPercentage = product.discountPrice
-    ? Math.round(
-        ((product.price - product.discountPrice) / product.price) * 100,
-      )
+    ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
     : 0;
 
-  // Color selector render
   const renderColorSelector = () => {
     if (!product.colors || product.colors.length === 0) return null;
-
     return (
       <div className="flex items-center gap-2">
-        <h3 className="text-sm font-medium text-gray-700">Colors : </h3>
+        <h3 className="text-sm font-medium text-gray-700">
+          {t("productInfo.colorsLabel")}
+        </h3>
         <div className="flex flex-wrap items-center gap-2">
           {product.colors.map((color) => (
             <button
               key={color.hex + color.name}
               onClick={() => setSelectedColor(color)}
-              className={`
-              w-8 h-8 rounded-full border-2 transition-all
-              ${
+              className={`w-8 h-8 rounded-full border-2 transition-all ${
                 selectedColor?.hex === color.hex
                   ? "border-gray-900 scale-110 ring-offset-2"
                   : "border-gray-300 hover:scale-105"
-              }
-            `}
+              }`}
               style={{ backgroundColor: color.hex }}
               title={color.name}
             />
@@ -202,7 +188,6 @@ const ProductInfo = ({
         <h1 className="text-2xl lg:text-3xl font-semibold text-gray-900 leading-tight tracking-tight">
           {product.name}
         </h1>
-        {/* Right side: wishlist & share icons */}
         <div className="flex items-center space-x-3">
           <button
             onClick={toggleWishlist}
@@ -214,8 +199,8 @@ const ProductInfo = ({
             }`}
             title={
               wishlistChecked[product?._id]
-                ? "Remove from wishlist"
-                : "Add to wishlist"
+                ? t("productInfo.wishlistRemoveTooltip")
+                : t("productInfo.wishlistAddTooltip")
             }
           >
             <Heart
@@ -235,7 +220,7 @@ const ProductInfo = ({
                   ? "bg-green-50 border-green-200 text-green-600"
                   : "border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50"
               }`}
-              title="Share product"
+              title={t("productInfo.shareButtonTooltip")}
             >
               {copySuccess ? (
                 <CheckCircle className="h-5 w-5" />
@@ -243,10 +228,9 @@ const ProductInfo = ({
                 <Share2 className="h-5 w-5" />
               )}
             </button>
-
             {showShareTooltip && !copySuccess && (
               <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-40 bg-gray-900 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-xl z-50 animate-fade-in">
-                Click to copy link
+                {t("productInfo.shareTooltip")}
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-900" />
               </div>
             )}
@@ -254,11 +238,9 @@ const ProductInfo = ({
         </div>
       </div>
 
-      {/* Row 2: Color Selector + Wishlist & Share */}
+      {/* Row 2: Color Selector + Rating */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        {/* Left side: color selector (if exists) */}
         <div className="flex-1">{renderColorSelector()}</div>
-
         <div className="flex-shrink-0">
           {product.averageRating > 0 ? (
             <div className="flex items-center space-x-2">
@@ -270,11 +252,15 @@ const ProductInfo = ({
               />
               <span className="text-sm text-gray-600 whitespace-nowrap">
                 ({product.ratingsCount}{" "}
-                {product.ratingsCount === 1 ? "review" : "reviews"})
+                {product.ratingsCount === 1
+                  ? t("productInfo.reviewSingle")
+                  : t("productInfo.reviewsCount")})
               </span>
             </div>
           ) : (
-            <div className="text-sm text-gray-500">No reviews yet</div>
+            <div className="text-sm text-gray-500">
+              {t("productInfo.noReviews")}
+            </div>
           )}
         </div>
       </div>
@@ -290,7 +276,7 @@ const ProductInfo = ({
               {formatPrice(product.price)}
             </span>
             <span className="inline-flex items-center px-2.5 py-1 bg-red-600 text-white rounded-full text-xs font-bold shadow-sm">
-              Save {discountPercentage}%
+              {t("productInfo.discountBadge", { percentage: discountPercentage })}
             </span>
           </>
         ) : (
@@ -302,14 +288,13 @@ const ProductInfo = ({
 
       {/* Row 4: Stock Status + Shipping */}
       <div className="flex flex-wrap items-center gap-4">
-        {/* Stock status */}
         <div
           className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${
             product.stock > 10
               ? "bg-green-50 text-green-700 border border-green-200"
               : product.stock > 0
-                ? "bg-yellow-50 text-yellow-700 border border-yellow-200 animate-pulse-slow"
-                : "bg-red-50 text-red-700 border border-red-200"
+              ? "bg-yellow-50 text-yellow-700 border border-yellow-200 animate-pulse-slow"
+              : "bg-red-50 text-red-700 border border-red-200"
           }`}
         >
           <div
@@ -317,27 +302,27 @@ const ProductInfo = ({
               product.stock > 10
                 ? "bg-green-500"
                 : product.stock > 0
-                  ? "bg-yellow-500"
-                  : "bg-red-500"
+                ? "bg-yellow-500"
+                : "bg-red-500"
             }`}
           />
           {product.stock > 10
-            ? "In Stock"
+            ? t("productInfo.inStock")
             : product.stock > 0
-              ? `Low Stock (${product.stock} left)`
-              : "Out of Stock"}
+            ? t("productInfo.lowStock", { stock: product.stock })
+            : t("productInfo.outOfStock")}
         </div>
-
-        {/* Shipping fee */}
         {product.shippingFee > 0 && (
           <div className="flex items-center gap-1 text-sm text-gray-600">
             <Truck className="h-4 w-4" />
-            <span>Shipping: {formatPrice(product.shippingFee)}</span>
+            <span>
+              {t("productInfo.shippingLabel")} {formatPrice(product.shippingFee)}
+            </span>
           </div>
         )}
       </div>
 
-      {/* AliExpress Delivery Notice (if applicable) */}
+      {/* AliExpress Delivery Notice */}
       {product.isAliExpress && (
         <div className="bg-orange-50/80 border border-orange-200 rounded-xl p-4 backdrop-blur-sm">
           <div className="flex items-start gap-3">
@@ -348,20 +333,20 @@ const ProductInfo = ({
             </div>
             <div>
               <h3 className="text-sm font-semibold text-orange-800 mb-0.5">
-                AliExpress Product – Delivery Info
+                {t("productInfo.aliExpressTitle")}
               </h3>
               <p className="text-xs text-orange-700">
-                Delivery: 10–20 days • Phone confirmation required within 24h.
+                {t("productInfo.aliExpressDesc")}
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Row 5: Description */}
+      {/* Description */}
       <div className="space-y-2">
         <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-          Description
+          {t("productInfo.descriptionTitle")}
         </h3>
         {product.description ? (
           <div
@@ -375,11 +360,11 @@ const ProductInfo = ({
         )}
       </div>
 
-      {/* Tags (if any) */}
+      {/* Tags */}
       {product.tags && product.tags.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Tags
+            {t("productInfo.tagsTitle")}
           </h3>
           <div className="flex flex-wrap gap-2">
             {product.tags.map((tag, index) => (
@@ -400,10 +385,10 @@ const ProductInfo = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700">
-                Quantity
+                {t("productInfo.quantityLabel")}
               </label>
               <span className="text-xs text-gray-500">
-                Max: {product.stock}
+                {t("productInfo.maxLabel", { stock: product.stock })}
               </span>
             </div>
             <div className="flex items-center space-x-3">
@@ -418,9 +403,7 @@ const ProductInfo = ({
                   {quantity}
                 </span>
                 <button
-                  onClick={() =>
-                    setQuantity(Math.min(product.stock, quantity + 1))
-                  }
+                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                   className="px-4 py-2.5 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-1 focus:ring-gray-300"
                 >
                   <span className="text-lg font-medium">+</span>
@@ -432,12 +415,12 @@ const ProductInfo = ({
             <div className="bg-gray-50/80 p-5 rounded-xl border border-gray-100">
               <div className="flex justify-between items-center">
                 <div>
-                  <div className="text-sm text-gray-800 font-bold">Total</div>
+                  <div className="text-sm text-gray-800 font-bold">
+                    {t("productInfo.totalLabel")}
+                  </div>
                 </div>
                 <span className="text-2xl lg:text-3xl font-light text-gray-900">
-                  {formatPrice(
-                    (product.discountPrice || product.price) * quantity,
-                  )}
+                  {formatPrice((product.discountPrice || product.price) * quantity)}
                 </span>
               </div>
             </div>
@@ -450,7 +433,7 @@ const ProductInfo = ({
                   className="w-full py-3.5 bg-gray-900 hover:bg-black text-white rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 shadow-button hover:shadow-button-hover hover:-translate-y-0.5"
                 >
                   <ShoppingBag className="h-4 w-4" />
-                  Add to Cart
+                  {t("productInfo.addToCart")}
                 </button>
                 <button
                   onClick={handleBuyNow}
@@ -460,12 +443,12 @@ const ProductInfo = ({
                   {isBuyNowLoading ? (
                     <>
                       <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Processing...
+                      {t("productInfo.processing")}
                     </>
                   ) : (
                     <>
                       <Zap className="h-4 w-4" />
-                      Buy Now
+                      {t("productInfo.buyNow")}
                     </>
                   )}
                 </button>
@@ -477,19 +460,19 @@ const ProductInfo = ({
                   onClick={() => setQuantity(Math.min(product.stock, 3))}
                   className="py-2.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
                 >
-                  Add 3
+                  {t("productInfo.add3")}
                 </button>
                 <button
                   onClick={() => setQuantity(Math.min(product.stock, 5))}
                   className="py-2.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
                 >
-                  Add 5
+                  {t("productInfo.add5")}
                 </button>
                 <button
                   onClick={() => setQuantity(product.stock)}
                   className="py-2.5 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
                 >
-                  Add All
+                  {t("productInfo.addAll")}
                 </button>
               </div>
             </div>
@@ -500,24 +483,23 @@ const ProductInfo = ({
             {[
               {
                 icon: Wallet,
-                label: "Cash on Delivery",
-                desc: "Pay when your order arrives",
+                label: t("productInfo.featureCodLabel"),
+                desc: t("productInfo.featureCodDesc"),
               },
-
               {
                 icon: RefreshCw,
-                label: "3-Day Returns",
-                desc: "Easy process",
+                label: t("productInfo.featureReturnsLabel"),
+                desc: t("productInfo.featureReturnsDesc"),
               },
               {
                 icon: Globe,
-                label: "Tunisia-wide Delivery",
-                desc: "All over Tunisia",
+                label: t("productInfo.featureDeliveryLabel"),
+                desc: t("productInfo.featureDeliveryDesc"),
               },
               {
                 icon: Truck,
-                label: "Fast Shipping",
-                desc: "2-3 business days",
+                label: t("productInfo.featureShippingLabel"),
+                desc: t("productInfo.featureShippingDesc"),
               },
             ].map((feature, index) => (
               <div
@@ -545,13 +527,13 @@ const ProductInfo = ({
             </div>
           </div>
           <h4 className="text-base font-medium text-red-700 mb-2">
-            Out of Stock
+            {t("productInfo.outOfStockTitle")}
           </h4>
           <p className="text-sm text-red-600 mb-4">
-            This product is currently unavailable
+            {t("productInfo.outOfStockMessage")}
           </p>
           <button className="w-full py-2.5 border-2 border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium">
-            Notify When Available
+            {t("productInfo.notifyButton")}
           </button>
         </div>
       )}

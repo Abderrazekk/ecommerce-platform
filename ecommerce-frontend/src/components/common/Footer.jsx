@@ -217,11 +217,11 @@ const Footer = () => {
       {/* Premium Back to Top Button */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-11 h-11 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-2xl shadow-primary-500/40 flex items-center justify-center text-white z-50 hover:shadow-3xl hover:shadow-primary-500/50 hover:scale-110 active:scale-95 transition-all duration-300 backdrop-blur-lg border-2 border-primary-500/30 hover:border-primary-400"
+        className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-11 h-11 sm:w-12 sm:h-12 lg:w-12 lg:h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-2xl shadow-primary-500/40 flex items-center justify-center text-white z-50 hover:shadow-3xl hover:shadow-primary-500/50 hover:scale-110 active:scale-95 transition-all duration-300 backdrop-blur-lg border-2 border-primary-500/30 hover:border-primary-400"
         aria-label={t("backToTop")}
       >
         <svg
-          className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7"
+          className="w-5 h-5 sm:w-5 sm:h-5 lg:w-5 lg:h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

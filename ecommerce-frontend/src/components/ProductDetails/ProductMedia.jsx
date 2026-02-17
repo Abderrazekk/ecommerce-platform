@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
   ChevronLeft,
@@ -17,6 +18,7 @@ const ProductMedia = ({
   selectedImageIndex,
   setSelectedImageIndex,
 }) => {
+  const { t } = useTranslation("productdetails");
   const [isHovering, setIsHovering] = useState(false);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -267,7 +269,7 @@ const ProductMedia = ({
       {/* Images Section */}
       <div className="space-y-5">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-900">Gallery</h3>
+          <h3 className="text-lg font-medium text-gray-900">{t("productMedia.galleryTitle")}</h3>
         </div>
 
         {/* Main Image Container */}
@@ -386,7 +388,7 @@ const ProductMedia = ({
       {product.video && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">Product Video</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t("productMedia.videoTitle")}</h3>
             <button
               onClick={() => toggleFullscreen(videoRef.current)}
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"

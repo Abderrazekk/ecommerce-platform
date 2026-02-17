@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import {
   User,
   MessageSquare,
@@ -23,6 +24,7 @@ import {
 } from "../../redux/slices/comment.slice";
 
 const ProductComments = ({ productId }) => {
+  const { t } = useTranslation("productdetails");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -65,15 +67,15 @@ const ProductComments = ({ productId }) => {
     e.preventDefault();
 
     if (!commentText.trim()) {
-      toast.error("Review text is required");
+      toast.error(t("productComments.errorRequiredText"));
       return;
     }
     if (rating === 0) {
-      toast.error("Please select a star rating");
+      toast.error(t("productComments.errorRequiredRating"));
       return;
     }
     if (!isAuthenticated) {
-      toast.error("You must be logged in to leave a review");
+      toast.error(t("productComments.errorLoginRequired"));
       navigate("/login");
       return;
     }
@@ -89,7 +91,9 @@ const ProductComments = ({ productId }) => {
         setRating(0);
         await dispatch(fetchProductComments({ productId, sortBy }));
       } else if (addComment.rejected.match(resultAction)) {
-        throw new Error(resultAction.payload || "Failed to add review");
+        throw new Error(
+          resultAction.payload || t("productComments.errorAddFailed"),
+        );
       }
     } catch (error) {
       console.error("Error adding review:", error);
@@ -112,11 +116,11 @@ const ProductComments = ({ productId }) => {
 
   const handleUpdateComment = async (commentId) => {
     if (!editText.trim()) {
-      toast.error("Review text is required");
+      toast.error(t("productComments.errorRequiredText"));
       return;
     }
     if (editRating === 0) {
-      toast.error("Please select a star rating");
+      toast.error(t("productComments.errorRequiredRating"));
       return;
     }
 
@@ -132,7 +136,9 @@ const ProductComments = ({ productId }) => {
         setEditRating(0);
         await dispatch(fetchProductComments({ productId, sortBy }));
       } else if (editComment.rejected.match(resultAction)) {
-        throw new Error(resultAction.payload || "Failed to update review");
+        throw new Error(
+          resultAction.payload || t("productComments.errorUpdateFailed"),
+        );
       }
     } catch (error) {
       console.error("Error updating review:", error);
@@ -142,14 +148,16 @@ const ProductComments = ({ productId }) => {
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Are you sure you want to delete this review?")) return;
+    if (!window.confirm(t("productComments.deleteConfirm"))) return;
 
     try {
       const resultAction = await dispatch(removeComment(commentId));
       if (removeComment.fulfilled.match(resultAction)) {
         await dispatch(fetchProductComments({ productId, sortBy }));
       } else if (removeComment.rejected.match(resultAction)) {
-        throw new Error(resultAction.payload || "Failed to delete review");
+        throw new Error(
+          resultAction.payload || t("productComments.errorDeleteFailed"),
+        );
       }
     } catch (error) {
       console.error("Error deleting review:", error);
@@ -183,16 +191,18 @@ const ProductComments = ({ productId }) => {
 
     if (diffDays === 0) {
       return (
-        "Today at " +
+        t("productComments.todayAt") +
+        " " +
         date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       );
     } else if (diffDays === 1) {
       return (
-        "Yesterday at " +
+        t("productComments.yesterdayAt") +
+        " " +
         date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       );
     } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
+      return `${diffDays} ${t("productComments.daysAgo")}`;
     } else {
       return date.toLocaleDateString();
     }
@@ -209,19 +219,21 @@ const ProductComments = ({ productId }) => {
   return (
     <div className="space-y-6">
       <div className="text-center sm:text-left">
-        <h2 className="text-xl font-medium text-gray-900">Customer Reviews</h2>
+        <h2 className="text-xl font-medium text-gray-900">
+          {t("productComments.title")}
+        </h2>
       </div>
 
       {/* Add Review Form – cleaner, with focus states */}
       {isAuthenticated ? (
         <div className="bg-gray-50/80 rounded-xl p-5 border border-gray-100">
           <h3 className="text-base font-medium text-gray-900 mb-4">
-            Write a Review
+            {t("productComments.writeReviewTitle")}
           </h3>
           <form onSubmit={handleAddComment} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-2">
-                Your Rating *
+                {t("productComments.ratingLabel")}
               </label>
               <div className="flex items-center gap-2">
                 <StarRating
@@ -230,18 +242,20 @@ const ProductComments = ({ productId }) => {
                   size="md"
                 />
                 <span className="text-xs text-gray-600 ml-2">
-                  {rating > 0 ? `${rating} out of 5` : "Select a rating"}
+                  {rating > 0
+                    ? `${rating} ${t("productComments.ratingOutOf")}`
+                    : t("productComments.ratingPlaceholder")}
                 </span>
               </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-2">
-                Your Review *
+                {t("productComments.reviewLabel")}
               </label>
               <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Share your experience with this product..."
+                placeholder={t("productComments.reviewPlaceholder")}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none bg-white text-sm transition-shadow"
                 rows={3}
                 maxLength={1000}
@@ -265,12 +279,12 @@ const ProductComments = ({ productId }) => {
                 {localSubmitting || submitting ? (
                   <>
                     <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Submitting...
+                    {t("productComments.submitting")}
                   </>
                 ) : (
                   <>
                     <Send className="h-4 w-4" />
-                    Submit Review
+                    {t("productComments.submitButton")}
                   </>
                 )}
               </button>
@@ -288,14 +302,13 @@ const ProductComments = ({ productId }) => {
             <MessageSquare className="h-6 w-6 text-gray-400" />
           </div>
           <p className="text-sm text-gray-700">
-            Please{" "}
+            {t("productComments.signInPrompt")}{" "}
             <button
               onClick={() => navigate("/login")}
               className="text-primary-600 hover:text-primary-700 font-medium underline underline-offset-2"
             >
-              sign in
-            </button>{" "}
-            to leave a review
+              {t("productComments.signInLink")}
+            </button>
           </p>
         </div>
       )}
@@ -311,10 +324,10 @@ const ProductComments = ({ productId }) => {
             <MessageSquare className="h-8 w-8 text-gray-400" />
           </div>
           <h4 className="text-base font-medium text-gray-900 mb-2">
-            No Reviews Yet
+            {t("productComments.noReviewsTitle")}
           </h4>
           <p className="text-sm text-gray-600 max-w-sm mx-auto">
-            Be the first to share your experience with this product.
+            {t("productComments.noReviewsMessage")}
           </p>
         </div>
       ) : (
@@ -333,7 +346,7 @@ const ProductComments = ({ productId }) => {
                     </div>
                     {comment.user?.role === "admin" && (
                       <div className="absolute -top-1 -right-1 bg-primary-600 text-white text-[10px] px-1.5 py-0.5 rounded-full ring-2 ring-white">
-                        Admin
+                        {t("productComments.adminBadge")}
                       </div>
                     )}
                   </div>
@@ -352,7 +365,7 @@ const ProductComments = ({ productId }) => {
                       </time>
                       {comment.isEdited && (
                         <span className="text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                          Edited
+                          {t("productComments.editedBadge")}
                         </span>
                       )}
                     </div>
@@ -364,7 +377,7 @@ const ProductComments = ({ productId }) => {
                       <button
                         onClick={() => handleStartEdit(comment)}
                         className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
-                        title="Edit review"
+                        title={t("productComments.editButtonTooltip")}
                       >
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>
@@ -373,7 +386,7 @@ const ProductComments = ({ productId }) => {
                       <button
                         onClick={() => handleDeleteComment(comment._id)}
                         className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                        title="Delete review"
+                        title={t("productComments.deleteButtonTooltip")}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -387,7 +400,7 @@ const ProductComments = ({ productId }) => {
                 <div className="mt-4 space-y-4 bg-gray-50 p-5 rounded-xl border border-gray-200">
                   <div className="space-y-2">
                     <label className="block text-xs font-medium text-gray-700">
-                      Rating *
+                      {t("productComments.editRatingLabel")}
                     </label>
                     <div className="flex items-center gap-2">
                       <StarRating
@@ -397,14 +410,14 @@ const ProductComments = ({ productId }) => {
                       />
                       <span className="text-xs text-gray-600 ml-2">
                         {editRating > 0
-                          ? `${editRating} out of 5`
-                          : "Select a rating"}
+                          ? `${editRating} ${t("productComments.ratingOutOf")}`
+                          : t("productComments.ratingPlaceholder")}
                       </span>
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Review *
+                      {t("productComments.editReviewLabel")}
                     </label>
                     <textarea
                       value={editText}
@@ -417,7 +430,7 @@ const ProductComments = ({ productId }) => {
                       <span>{editText.length}/1000</span>
                       {editText.length === 1000 && (
                         <span className="text-red-500">
-                          Character limit reached
+                          {t("productComments.characterLimitReached")}
                         </span>
                       )}
                     </div>
@@ -427,7 +440,7 @@ const ProductComments = ({ productId }) => {
                       onClick={handleCancelEdit}
                       className="px-4 py-1.5 text-xs text-gray-600 hover:text-gray-800 font-medium hover:bg-gray-100 rounded-md transition-colors"
                     >
-                      Cancel
+                      {t("productComments.cancelButton")}
                     </button>
                     <button
                       onClick={() => handleUpdateComment(comment._id)}
@@ -440,8 +453,8 @@ const ProductComments = ({ productId }) => {
                       className="px-5 py-1.5 bg-gray-900 hover:bg-black text-white rounded-md text-xs font-medium disabled:opacity-50 transition-all hover:-translate-y-0.5"
                     >
                       {localSubmitting || submitting
-                        ? "Saving..."
-                        : "Save Changes"}
+                        ? t("productComments.saving")
+                        : t("productComments.saveChangesButton")}
                     </button>
                   </div>
                 </div>
@@ -460,7 +473,11 @@ const ProductComments = ({ productId }) => {
                 onClick={() => setShowAllComments(true)}
                 className="inline-flex items-center px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all text-sm font-medium shadow-sm hover:shadow"
               >
-                <span>Show {currentComments.length - 3} More Reviews</span>
+                <span>
+                  {t("productComments.showMoreButton", {
+                    count: currentComments.length - 3,
+                  })}
+                </span>
                 <ChevronDown className="h-4 w-4 ml-2" />
               </button>
             </div>
