@@ -1,4 +1,9 @@
 {
+  "header": {
+    "title": "Premium Shopping",
+    "sectitle": "Experience",
+    "subtitle": "Discover why thousands of discerning shoppers choose us for their premium shopping needs"
+  },
   "features": {
     "fastDelivery": {
       "title": "Fast Delivery",

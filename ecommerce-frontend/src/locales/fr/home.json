@@ -1,4 +1,9 @@
 {
+  "header": {
+    "title": "Achats Premium",
+    "sectitle": "Expérience",
+    "subtitle": "Découvrez pourquoi des milliers d'acheteurs discernants nous choisissent pour leurs achats premium "
+  },
   "features": {
     "fastDelivery": {
       "title": "Livraison Rapide",

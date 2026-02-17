@@ -18,7 +18,9 @@
     "customerService": "Customer Service",
     "deliveryPayment": "Delivery & Payment",
     "orderTracking": "Order Tracking",
-    "returnPolicy": "Return Policy"
+    "returnPolicy": "Return Policy",
+    "aboutUs": "About Us",
+    "contact": "Contact Us"
   },
   "legal": {
     "title": "Legal",

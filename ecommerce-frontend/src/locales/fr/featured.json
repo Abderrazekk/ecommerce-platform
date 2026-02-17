@@ -7,5 +7,10 @@
   },
   "loading": {
     "title": "Produits en Vedette"
+  },
+  
+  "onSale": {
+    "title": "En Solde",
+    "subsubtitle": "Découvrez notre sélection soigneusement choisie de produits premium à prix spéciaux."
   }
 }

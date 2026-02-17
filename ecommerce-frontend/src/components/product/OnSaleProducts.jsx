@@ -5,7 +5,7 @@ import productService from "../../services/product.service";
 import Loader from "../common/Loader";
 
 const OnSaleProducts = ({ limit = 8 }) => {
-  const { t } = useTranslation("home");
+  const { t } = useTranslation("featured");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,12 +36,11 @@ const OnSaleProducts = ({ limit = 8 }) => {
         {/* Header */}
         <div className="mb-10 animate-fade-in text-center">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
-            {t("onSale.title", "On Sale")}
+            {t("onSale.title")}
           </h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
             {t(
-              "onSale.description",
-              "Discover our handpicked selection of premium products on special discount.",
+              "onSale.subsubtitle"
             )}
           </p>
         </div>

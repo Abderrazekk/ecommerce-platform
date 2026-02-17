@@ -605,9 +605,9 @@ const Shop = () => {
 
         {/* Page Title & Subtitle - visible on all screens */}
         <div className="mb-8">
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">SHOP</h1>
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">{t("header.title")}</h1>
           <p className="text-gray-600 mt-2 text-sm sm:text-base">
-            Browse our collection of amazing products
+            {t("header.subtitle")}
           </p>
         </div>
 

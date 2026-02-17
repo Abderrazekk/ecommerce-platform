@@ -18,7 +18,9 @@
     "customerService": "خدمة العملاء",
     "deliveryPayment": "التسليم والدفع",
     "orderTracking": "تتبع الطلب",
-    "returnPolicy": "سياسة الإرجاع"
+    "returnPolicy": "سياسة الإرجاع",
+    "aboutUs": "معلومات عنا",
+    "contact": "اتصل بنا"
   },
   "legal": {
     "title": "قانوني",

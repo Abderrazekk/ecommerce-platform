@@ -28,14 +28,13 @@ const Home = () => {
           {/* Refined header with decorative elements */}
           <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-20">
             <h2 className="text-3xl lg:text-4xl font-light tracking-tight text-gray-900 mb-5">
-              Premium Shopping
+             {t("header.title")}
               <span className="font-semibold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent ml-2">
-                Experience
+                {t("header.sectitle")}
               </span>
             </h2>
             <p className="text-gray-500 text-lg font-light leading-relaxed">
-              Discover why thousands of discerning shoppers choose us for their
-              premium shopping needs
+              {t("header.subtitle")}
             </p>
           </div>
 

@@ -1,7 +1,7 @@
 {
   "header": {
     "title": "Discover Products",
-    "subtitle": "Explore our curated collection of {{count}} premium products"
+    "subtitle": "Explore our curated collection of premium products"
   },
   "search": {
     "placeholder": "Search for products, brands, or keywords...",
@@ -22,7 +22,8 @@
       "min": "Min Price",
       "max": "Max Price"
     },
-    "currency": "DT"
+    "currency": "DT",
+    "applyFilters": "Apply Filters"
   },
   "categories": {
     "all": "All Categories",

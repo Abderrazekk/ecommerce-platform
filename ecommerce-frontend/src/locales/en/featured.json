@@ -7,5 +7,9 @@
   },
   "loading": {
     "title": "Featured Products"
+  },
+    "onSale": {
+        "title": "On Sale",
+    "subsubtitle": "Discover our carefully selected premium products at special prices."
   }
 }
