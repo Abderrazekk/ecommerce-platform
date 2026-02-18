@@ -1,30 +1,44 @@
-import { useState } from 'react'
-import { Mail, Phone, MapPin, Send } from 'lucide-react'
+import { useState } from "react";
+import { Mail, Phone, MapPin, Send } from "lucide-react";
+import api from "../services/api"; // adjust the path if necessary
 
 const Contact = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  })
-  const [submitted, setSubmitted] = useState(false)
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    })
-  }
+    });
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // In a real application, this would connect to a backend API
-    console.log('Contact form submitted:', formData)
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 5000)
-    setFormData({ name: '', email: '', subject: '', message: '' })
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess(false);
+    setError("");
+
+    try {
+      await api.post("/contact", formData);
+      setSuccess(true);
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      setError(
+        err.response?.data?.error ||
+          "Failed to send message. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -41,8 +55,10 @@ const Contact = () => {
           {/* Contact Information */}
           <div>
             <div className="bg-white rounded-lg shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-8">Get in Touch</h2>
-              
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">
+                Get in Touch
+              </h2>
+
               <div className="space-y-6">
                 <div className="flex items-start">
                   <div className="p-3 bg-primary-100 rounded-lg mr-4">
@@ -50,29 +66,37 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Our Address</h3>
-                    <p className="text-gray-600">Kalaat Andalous, Ariana, Tunisia</p>
+                    <p className="text-gray-600">
+                      Kalaat Andalous, Ariana, Tunisia
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start">
                   <div className="p-3 bg-primary-100 rounded-lg mr-4">
                     <Phone className="h-6 w-6 text-primary-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Phone Number</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      Phone Number
+                    </h3>
                     <p className="text-gray-600">+216 22 333 444</p>
                     <p className="text-gray-600">Mon-Fri: 9AM-6PM</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start">
                   <div className="p-3 bg-primary-100 rounded-lg mr-4">
                     <Mail className="h-6 w-6 text-primary-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Email Address</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      Email Address
+                    </h3>
                     <p className="text-gray-600">support@shoppina.com</p>
-                    <p className="text-gray-600">We'll respond within 24 hours</p>
+                    <p className="text-gray-600">
+                      We'll respond within 24 hours
+                    </p>
                   </div>
                 </div>
               </div>
@@ -82,19 +106,27 @@ const Contact = () => {
           {/* Contact Form */}
           <div>
             <div className="bg-white rounded-lg shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-8">Send us a Message</h2>
-              
-              {submitted ? (
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">
+                Send us a Message
+              </h2>
+
+              {success ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
                   <div className="text-green-600 font-semibold mb-2">
                     Thank you for your message!
                   </div>
                   <p className="text-green-700">
-                    We've received your inquiry and will get back to you within 24 hours.
+                    We've received your inquiry and will get back to you within
+                    24 hours.
                   </p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+                      {error}
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Your Name *
@@ -109,7 +141,7 @@ const Contact = () => {
                       placeholder="John Doe"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Email Address *
@@ -124,7 +156,7 @@ const Contact = () => {
                       placeholder="you@example.com"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Subject *
@@ -139,7 +171,7 @@ const Contact = () => {
                       placeholder="How can we help?"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Message *
@@ -154,13 +186,20 @@ const Contact = () => {
                       placeholder="Your message here..."
                     />
                   </div>
-                  
+
                   <button
                     type="submit"
-                    className="w-full btn-primary py-3 flex items-center justify-center"
+                    disabled={loading}
+                    className="w-full btn-primary py-3 flex items-center justify-center disabled:opacity-50"
                   >
-                    <Send className="h-5 w-5 mr-2" />
-                    Send Message
+                    {loading ? (
+                      <span>Sending...</span>
+                    ) : (
+                      <>
+                        <Send className="h-5 w-5 mr-2" />
+                        Send Message
+                      </>
+                    )}
                   </button>
                 </form>
               )}
@@ -169,7 +208,7 @@ const Contact = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Contact
+export default Contact;
