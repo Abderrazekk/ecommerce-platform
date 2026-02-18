@@ -17,8 +17,8 @@ const { forgotPasswordLimiter } = require("../middlewares/rateLimiter");
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/google", googleAuth);
-router.post("/forgot-password", forgotPasswordLimiter, forgotPassword);
-router.post("/reset-password/:token", resetPassword);
+router.post('/forgot-password', forgotPasswordLimiter, forgotPassword);
+router.post('/reset-password/:token', resetPassword);
 
 // Protected routes
 router.get("/profile", protect, getUserProfile);

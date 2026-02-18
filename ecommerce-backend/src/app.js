@@ -19,7 +19,10 @@ const app = express();
 app.set("trust proxy", 1);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['https://shopina.netlify.app', 'http://localhost:3000'],
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
