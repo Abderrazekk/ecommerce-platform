@@ -16,13 +16,17 @@ const promoRoutes = require("./routes/promo.routes");
 
 const app = express();
 
-app.set("trust proxy", 1);
-
 // Middleware
-app.use(cors({
-  origin: ['https://shopina.netlify.app', 'http://localhost:3000'],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000", // local dev
+      "https://shoppina.netlify.app", // production frontend
+    ],
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
