@@ -33,9 +33,13 @@ const authService = {
   updateProfile: (userData) => {
     return api.put("/auth/profile", userData);
   },
-  
+
   deleteUser: (userId) => {
     return api.delete(`/admin/users/${userId}`);
+  },
+
+  changePassword: (newPassword) => {
+    return api.post("/auth/change-password", { newPassword });
   },
 };
 

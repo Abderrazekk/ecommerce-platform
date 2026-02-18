@@ -114,6 +114,27 @@ export const logout = createAsyncThunk(
   },
 );
 
+export const changePassword = createAsyncThunk(
+  "auth/changePassword",
+  async (newPassword, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await authService.changePassword(newPassword);
+      if (response.data.success) {
+        // If backend returns a new token, update it
+        if (response.data.token) {
+          localStorage.setItem("token", response.data.token);
+        }
+        toast.success(response.data.message);
+        return response.data; // contains new token if any
+      }
+      throw new Error(response.data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  },
+);
+
 const initialState = {
   user: JSON.parse(localStorage.getItem("user")) || null,
   token: localStorage.getItem("token") || null,
@@ -239,6 +260,22 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = null;
         state.isBanned = false;
+      })
+
+      .addCase(changePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.token) {
+          state.token = action.payload.token;
+          // The user object remains the same – no need to update
+        }
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

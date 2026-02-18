@@ -119,6 +119,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        authMethod: user.authMethod, // ← ADD THIS LINE
         isBanned: user.isBanned,
         bannedAt: user.bannedAt,
         bannedBy: user.bannedBy
@@ -232,4 +233,52 @@ const googleAuth = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { registerUser, loginUser, getUserProfile, googleAuth };
+// @desc    Change user password (only for local auth)
+// @route   POST /api/auth/change-password
+// @access  Private
+const changePassword = asyncHandler(async (req, res) => {
+  const { newPassword } = req.body;
+
+  // Get user from DB with authMethod (password not needed yet)
+  const user = await User.findById(req.user._id).select("+authMethod");
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  // Only allow password change for local authentication
+  if (user.authMethod !== "local") {
+    res.status(400);
+    throw new Error(
+      "Password change is not allowed for Google authenticated accounts",
+    );
+  }
+
+  // Validate new password
+  if (!newPassword || newPassword.length < 6) {
+    res.status(400);
+    throw new Error("Password must be at least 6 characters long");
+  }
+
+  // Update password (pre-save hook will hash it)
+  user.password = newPassword;
+  await user.save();
+
+  // Optional: generate new token to invalidate old ones
+  const newToken = generateToken(user._id, user.role);
+
+  res.json({
+    success: true,
+    message: "Password changed successfully",
+    token: newToken, // send new token if you want to replace the old one
+  });
+});
+
+module.exports = {
+  registerUser,
+  loginUser,
+  getUserProfile,
+  googleAuth,
+  changePassword,
+};

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import authService from "../services/auth.service";
+import { changePassword } from "../redux/slices/auth.slice"; // <-- import the new thunk
 import {
   User,
   Mail,
@@ -28,6 +29,13 @@ const ProfilePage = () => {
     phone: "",
     address: "",
   });
+
+  // Password change states
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
   const { user: currentUser } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
@@ -79,6 +87,34 @@ const ProfilePage = () => {
       toast.success("Profile updated successfully!");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update profile");
+    }
+  };
+
+  // Password change handler
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+
+    // Validate passwords
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      await dispatch(changePassword(newPassword)).unwrap();
+      setShowPasswordForm(false);
+      setNewPassword("");
+      setConfirmPassword("");
+      // Optionally refetch profile if needed
+    } catch (error) {
+      // Error is already handled in the thunk (toast)
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -340,6 +376,80 @@ const ProfilePage = () => {
                 )}
               </div>
             </div>
+
+            {/* Password Change Section – only for local users */}
+            {userData.authMethod === "local" && (
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  Security
+                </h3>
+                {!showPasswordForm ? (
+                  <button
+                    onClick={() => setShowPasswordForm(true)}
+                    className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+                  >
+                    <Lock className="h-4 w-4 mr-2" />
+                    Change Password
+                  </button>
+                ) : (
+                  <form onSubmit={handlePasswordChange} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        New Password
+                      </label>
+                      <input
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        minLength="6"
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Confirm New Password
+                      </label>
+                      <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        minLength="6"
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowPasswordForm(false);
+                          setNewPassword("");
+                          setConfirmPassword("");
+                        }}
+                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={passwordLoading}
+                        className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
+                      >
+                        {passwordLoading ? (
+                          <>
+                            <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+                            Updating...
+                          </>
+                        ) : (
+                          "Update Password"
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right Column - Quick Actions & Details */}
@@ -378,6 +488,8 @@ const ProfilePage = () => {
                 </div>
               </div>
             </div>
+
+            {/* Optional: quick links or stats */}
           </div>
         </div>
       </div>
