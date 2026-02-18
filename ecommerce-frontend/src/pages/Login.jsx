@@ -260,10 +260,6 @@ const Login = () => {
     toast.success(t("adminCredentialsLoaded"));
   };
 
-  const handleForgotPassword = () => {
-    toast(t("forgotPasswordSoon"), { icon: "🔒" });
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="relative w-full max-w-5xl">
@@ -396,14 +392,13 @@ const Login = () => {
                     >
                       {t("password")}
                     </label>
-                    <button
-                      type="button"
-                      onClick={handleForgotPassword}
+                    {/* Forgot Password Link - Updated */}
+                    <Link
+                      to="/forgot-password"
                       className="text-sm text-primary-600 hover:text-primary-500 font-medium"
-                      disabled={loading || isGoogleLoading}
                     >
                       {t("forgotPassword")}
-                    </button>
+                    </Link>
                   </div>
                   <div className="relative">
                     <input

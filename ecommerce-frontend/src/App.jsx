@@ -18,6 +18,8 @@ import ProductDetails from "./pages/ProductDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Wishlist from "./pages/Wishlist";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 // Protected Pages (User)
 import Cart from "./pages/Cart";
@@ -89,6 +91,8 @@ function App() {
             <Route path="/terms-conditions" element={<TermsConditions />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/legal-notice" element={<LegalNotice />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
             {/* User Protected Routes */}
             <Route
@@ -181,7 +185,7 @@ function App() {
                 </AdminRoute>
               }
             />
-             <Route
+            <Route
               path="/admin/Promo"
               element={
                 <AdminRoute>
