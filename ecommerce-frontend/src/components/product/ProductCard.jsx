@@ -39,7 +39,27 @@ const ProductCard = ({ product }) => {
         quantity: 1,
       }),
     );
-    toast.success("Added to cart!");
+toast.success("Added to cart", {
+  position: "bottom-center",
+  autoClose: 1800,
+  hideProgressBar: true,
+  closeButton: false,
+  pauseOnHover: false,
+  draggable: false,
+  style: {
+    background: "rgba(34,197,94,0.95)", // soft green
+    color: "#fff",
+    fontSize: "13px",
+    fontWeight: "500",
+    padding: "10px 16px",
+    borderRadius: "14px",
+    width: "90%",
+    maxWidth: "360px",
+    textAlign: "center",
+    backdropFilter: "blur(6px)",
+    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+  },
+});
   };
 
   const toggleWishlist = (e) => {
