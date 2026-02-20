@@ -44,6 +44,7 @@ const categories = [
   "Pets",
   "Automotive & Tools",
   "Lifestyle & Hobbies",
+  "Anime",
 ];
 
 const Products = () => {

@@ -11,6 +11,7 @@ const productCategories = [
   "Pets",
   "Automotive & Tools",
   "Lifestyle & Hobbies",
+  "Anime",
 ];
 
 const imageSchema = new mongoose.Schema(

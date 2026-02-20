@@ -238,6 +238,11 @@ const Navbar = () => {
       path: `/shop?category=${encodeURIComponent("Lifestyle & Hobbies")}`,
       desc: t("shopCategories.lifestyle.description"),
     },
+    {
+      name: t("shopCategories.anime.name"),
+      path: `/shop?category=${encodeURIComponent("Anime")}`,
+      desc: t("shopCategories.anime.description"),
+    },
   ];
 
   // Mobile categories (including AliExpress)
@@ -669,27 +674,118 @@ const Navbar = () => {
 
                       {/* Quick Links */}
                       <div className="mt-6 pt-6 border-t border-gray-100">
-                        <div className="flex items-center space-x-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {/* On Sale */}
                           <Link
                             to="/shop?onSale=true"
-                            className="px-4 py-2.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-xl transition-all duration-300 border border-gray-200 hover:border-primary-200"
+                            className="group flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100 hover:border-gray-300 hover:shadow-sm transition-all duration-200"
                             onClick={() => setShopDropdown(false)}
                           >
-                            {t("menu.quickLinks.onSale")}
+                            <svg
+                              className="w-4 h-4 text-gray-500 group-hover:text-gray-700"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.8}
+                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l5 5a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-5-5A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                              />
+                            </svg>
+                            <span>{t("menu.quickLinks.onSale")}</span>
                           </Link>
+
+                          {/* Anime – Improved Icon */}
                           <Link
-                            to="/shop?featured=true"
-                            className="px-4 py-2.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-xl transition-all duration-300 border border-gray-200 hover:border-primary-200"
+                            to="/shop?category=Anime"
                             onClick={() => setShopDropdown(false)}
+                            className="group flex items-center justify-center gap-2 px-4 py-2.5 
+  bg-gradient-to-r from-yellow-50 to-orange-50
+  border border-yellow-200
+  rounded-full text-sm font-medium text-gray-700
+  hover:from-yellow-100 hover:to-orange-100
+  hover:border-yellow-300
+  hover:shadow-md
+  transition-all duration-300"
                           >
-                            {t("menu.quickLinks.featured")}
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="w-5 h-5 text-gray-500 group-hover:text-yellow-600 transition-colors duration-300"
+                            >
+                              {/* Top crown */}
+                              <path
+                                d="M6 9C7.5 5.5 16.5 5.5 18 9"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+
+                              {/* Main hat body */}
+                              <ellipse
+                                cx="12"
+                                cy="10"
+                                rx="6"
+                                ry="2.5"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                              />
+
+                              {/* Red band */}
+                              <rect
+                                x="8"
+                                y="9"
+                                width="8"
+                                height="1.5"
+                                rx="0.75"
+                                fill="currentColor"
+                                className="text-red-500 group-hover:text-red-600"
+                              />
+
+                              {/* Brim */}
+                              <ellipse
+                                cx="12"
+                                cy="13"
+                                rx="9"
+                                ry="2.5"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                              />
+                            </svg>
+
+                            <span className="group-hover:text-gray-900 transition-colors duration-300">
+                              {t("shopCategories.anime.name")}
+                            </span>
                           </Link>
+
+                          {/* AliExpress */}
                           <Link
                             to="/shop?category=aliexpress"
-                            className="px-4 py-2.5 text-sm text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-xl transition-all duration-300 border border-orange-200 hover:border-orange-300 font-semibold"
+                            className="group flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100 hover:border-gray-300 hover:shadow-sm transition-all duration-200"
                             onClick={() => setShopDropdown(false)}
                           >
-                            {t("menu.quickLinks.aliexpress")}
+                            <svg
+                              className="w-4 h-4 text-gray-500 group-hover:text-gray-700"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle cx="12" cy="12" r="8" strokeWidth="1.5" />
+                              <path d="M12 4 L12 20" strokeWidth="1.5" />
+                              <path d="M4 12 L20 12" strokeWidth="1.5" />
+                              <ellipse
+                                cx="12"
+                                cy="12"
+                                rx="4"
+                                ry="8"
+                                strokeWidth="1.5"
+                              />
+                            </svg>
+                            <span>{t("menu.quickLinks.aliexpress")}</span>
                           </Link>
                         </div>
                       </div>

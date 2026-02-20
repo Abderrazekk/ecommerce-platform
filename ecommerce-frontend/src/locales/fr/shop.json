@@ -36,7 +36,8 @@
     "pets": "Animaux de Compagnie",
     "automotive": "Automobile & Outils",
     "lifestyle": "Style de Vie & Loisirs",
-    "aliexpress": "AliExpress"
+    "aliexpress": "AliExpress",
+    "anime": "Anime"
   },
   "features": {
     "inStock": "En Stock Seulement",

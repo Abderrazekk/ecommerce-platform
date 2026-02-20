@@ -59,6 +59,14 @@
     "lifestyle": {
       "name": "Lifestyle & Hobbies",
       "description": "Books, Games, Music"
+    },
+    "aliexpress": {
+      "name": "AliExpress",
+      "description": "Products shipped directly from international suppliers"
+    },
+    "anime": {
+      "name": "Anime",
+      "description": "Anime merchandise, figures, and collectibles"
     }
   },
   "search": {
