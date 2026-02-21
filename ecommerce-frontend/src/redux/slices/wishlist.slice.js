@@ -11,10 +11,8 @@ export const fetchWishlist = createAsyncThunk(
       return response.data;
     } catch (error) {
       const message =
-        error.response?.data?.message ||
-        error.message ||
         "Failed to fetch wishlist";
-      toast.error(message);
+      toast(message);
       return thunkAPI.rejectWithValue(message);
     }
   },
@@ -25,14 +23,12 @@ export const addToWishlist = createAsyncThunk(
   async (productId, thunkAPI) => {
     try {
       const response = await wishlistService.addToWishlist(productId);
-      toast.success("Added to wishlist");
+      toast("Added to wishlist");
       return response.data;
     } catch (error) {
       const message =
-        error.response?.data?.message ||
-        error.message ||
         "Failed to add to wishlist";
-      toast.error(message);
+      toast(message);
       return thunkAPI.rejectWithValue(message);
     }
   },
@@ -43,14 +39,12 @@ export const removeFromWishlist = createAsyncThunk(
   async (productId, thunkAPI) => {
     try {
       const response = await wishlistService.removeFromWishlist(productId);
-      toast.success("Removed from wishlist");
+      toast("Removed from wishlist");
       return response.data;
     } catch (error) {
       const message =
-        error.response?.data?.message ||
-        error.message ||
         "Failed to remove from wishlist";
-      toast.error(message);
+      toast(message);
       return thunkAPI.rejectWithValue(message);
     }
   },
@@ -77,14 +71,12 @@ export const clearWishlist = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const response = await wishlistService.clearWishlist();
-      toast.success("Wishlist cleared");
+      toast("Wishlist cleared");
       return response.data;
     } catch (error) {
       const message =
-        error.response?.data?.message ||
-        error.message ||
         "Failed to clear wishlist";
-      toast.error(message);
+      toast(message);
       return thunkAPI.rejectWithValue(message);
     }
   },

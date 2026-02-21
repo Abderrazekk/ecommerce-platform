@@ -40,7 +40,7 @@ const cartSlice = createSlice({
 
       if (existingItem) {
         existingItem.quantity += item.quantity;
-        toast.success("Product quantity updated in cart!");
+        toast("Product quantity updated in cart");
       } else {
         // Ensure shippingFee is included
         state.cartItems.push({
@@ -52,7 +52,7 @@ const cartSlice = createSlice({
           image: item.image,
           quantity: item.quantity,
         });
-        toast.success("Product added to cart!");
+        toast("Product added to cart");
       }
 
       // Save to localStorage
@@ -73,7 +73,7 @@ const cartSlice = createSlice({
         (item) => item.product !== action.payload,
       );
       localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
-      toast.success("Product removed from cart!");
+      toast("Product removed from cart");
     },
 
     updateQuantity: (state, action) => {

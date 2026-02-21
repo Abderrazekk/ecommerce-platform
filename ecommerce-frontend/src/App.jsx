@@ -201,18 +201,29 @@ function App() {
 
         <Footer />
         <Toaster
-          position="top-right"
+          position="bottom-center"
           toastOptions={{
-            duration: 4000,
+            duration: 1800,
             style: {
-              background: "#363636",
-              color: "#fff",
-            },
-            success: {
-              duration: 3000,
-            },
-            error: {
-              duration: 5000,
+              background: "rgba(255, 255, 255, 0.3)",
+              color: "#1A1A1A",
+              fontSize: "15px",
+              fontWeight: "500",
+              fontFamily: "SF Pro, Inter, sans-serif",
+              padding: "14px 30px",
+              borderRadius: "40px",
+              width: "fit-content",
+              maxWidth: "320px",
+              textAlign: "center",
+              backdropFilter: "blur(16px) saturate(180%)",
+              WebkitBackdropFilter: "blur(16px) saturate(180%)",
+              boxShadow:
+                "0 4px 24px -6px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.4) inset, 0 0 0 2px rgba(255, 255, 255, 0.1)",
+              border: "none",
+              transition: "all 0.3s ease",
+              margin: "0 auto",
+              display: "inline-block",
+              textShadow: "0 1px 2px rgba(255,255,255,0.1)",
             },
           }}
         />

@@ -67,15 +67,15 @@ const ProductComments = ({ productId }) => {
     e.preventDefault();
 
     if (!commentText.trim()) {
-      toast.error(t("productComments.errorRequiredText"));
+      toast(t("productComments.errorRequiredText"));
       return;
     }
     if (rating === 0) {
-      toast.error(t("productComments.errorRequiredRating"));
+      toast(t("productComments.errorRequiredRating"));
       return;
     }
     if (!isAuthenticated) {
-      toast.error(t("productComments.errorLoginRequired"));
+      toast(t("productComments.errorLoginRequired"));
       navigate("/login");
       return;
     }
@@ -116,11 +116,11 @@ const ProductComments = ({ productId }) => {
 
   const handleUpdateComment = async (commentId) => {
     if (!editText.trim()) {
-      toast.error(t("productComments.errorRequiredText"));
+      toast(t("productComments.errorRequiredText"));
       return;
     }
     if (editRating === 0) {
-      toast.error(t("productComments.errorRequiredRating"));
+      toast(t("productComments.errorRequiredRating"));
       return;
     }
 

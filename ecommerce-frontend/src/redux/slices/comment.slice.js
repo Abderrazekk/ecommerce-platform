@@ -1,4 +1,3 @@
-// ecommerce-frontend/src/redux/slices/comment.slice.js
 import {
   createSlice,
   createAsyncThunk,
@@ -23,7 +22,7 @@ export const fetchProductComments = createAsyncThunk(
       );
       return { productId, data: response.data };
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to fetch comments");
+      toast(error.response?.data?.message || "Failed to fetch comments");
       return rejectWithValue(error.response?.data?.message);
     }
   },
@@ -50,10 +49,10 @@ export const addComment = createAsyncThunk(
         text,
         rating,
       );
-      toast.success("Review added successfully!");
+      toast("Review added successfully!");
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to add comment");
+      toast(error.response?.data?.message || "Failed to add comment");
       return rejectWithValue(error.response?.data?.message);
     }
   },
@@ -68,10 +67,10 @@ export const editComment = createAsyncThunk(
         text,
         rating,
       );
-      toast.success("Review updated successfully!");
+      toast("Review updated successfully!");
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update comment");
+      toast(error.response?.data?.message || "Failed to update comment");
       return rejectWithValue(error.response?.data?.message);
     }
   },
@@ -82,10 +81,10 @@ export const removeComment = createAsyncThunk(
   async (commentId, { rejectWithValue }) => {
     try {
       await commentService.deleteComment(commentId);
-      toast.success("Review deleted successfully!");
+      toast("Review deleted successfully!");
       return commentId;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete comment");
+      toast(error.response?.data?.message || "Failed to delete comment");
       return rejectWithValue(error.response?.data?.message);
     }
   },

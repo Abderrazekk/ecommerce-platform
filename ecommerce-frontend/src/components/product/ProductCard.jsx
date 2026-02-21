@@ -1,4 +1,3 @@
-// ecommerce-frontend/src/components/product/ProductCard.jsx
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../redux/slices/cart.slice";
@@ -39,27 +38,6 @@ const ProductCard = ({ product }) => {
         quantity: 1,
       }),
     );
-toast.success("Added to cart", {
-  position: "bottom-center",
-  autoClose: 1800,
-  hideProgressBar: true,
-  closeButton: false,
-  pauseOnHover: false,
-  draggable: false,
-  style: {
-    background: "rgba(34,197,94,0.95)", // soft green
-    color: "#fff",
-    fontSize: "13px",
-    fontWeight: "500",
-    padding: "10px 16px",
-    borderRadius: "14px",
-    width: "90%",
-    maxWidth: "360px",
-    textAlign: "center",
-    backdropFilter: "blur(6px)",
-    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-  },
-});
   };
 
   const toggleWishlist = (e) => {
@@ -67,7 +45,7 @@ toast.success("Added to cart", {
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error("Please login to add items to your wishlist");
+      toast("Please login to add items to your wishlist");
       return;
     }
 
@@ -77,23 +55,21 @@ toast.success("Added to cart", {
       dispatch(removeFromWishlist(product._id))
         .unwrap()
         .then(() => {
-          toast.success("Removed from wishlist");
           setIsWishlisted(false);
         })
         .catch((error) => {
           console.error("Failed to remove from wishlist:", error);
-          toast.error(error || "Failed to remove from wishlist");
+          toast("Failed to remove from wishlist");
         });
     } else {
       dispatch(addToWishlist(product._id))
         .unwrap()
         .then(() => {
-          toast.success("Added to wishlist");
           setIsWishlisted(true);
         })
         .catch((error) => {
           console.error("Failed to add to wishlist:", error);
-          toast.error(error || "Failed to add to wishlist");
+          toast("Failed to add to wishlist");
         });
     }
   };

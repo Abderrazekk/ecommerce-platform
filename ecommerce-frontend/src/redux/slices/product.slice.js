@@ -12,7 +12,7 @@ export const fetchProducts = createAsyncThunk(
       category = "",
       search = "",
       brand = "",
-      isAliExpress = "", // NEW
+      isAliExpress = "",
     },
     { rejectWithValue },
   ) => {
@@ -23,7 +23,7 @@ export const fetchProducts = createAsyncThunk(
         category,
         search,
         brand,
-        isAliExpress, // NEW
+        isAliExpress,
       );
       return response.data;
     } catch (error) {

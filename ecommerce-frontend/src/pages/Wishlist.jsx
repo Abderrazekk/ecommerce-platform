@@ -149,7 +149,6 @@ const Wishlist = () => {
         quantity: 1,
       }),
     );
-    toast.success(t("addedToCart"));
   };
 
   // Add all to cart
@@ -159,7 +158,7 @@ const Wishlist = () => {
     );
 
     if (inStockItems.length === 0) {
-      toast.error(t("noStockItems"));
+      toast(t("noStockItems"));
       return;
     }
 
@@ -175,7 +174,7 @@ const Wishlist = () => {
       );
     });
 
-    toast.success(t("itemsAddedToCart", { count: inStockItems.length }));
+    toast(t("itemsAddedToCart"));
   };
 
   // Clear wishlist
@@ -209,7 +208,7 @@ const Wishlist = () => {
     try {
       await Promise.all(promises);
       setSelectedItems([]);
-      toast.success(t("itemsRemoved", { count: selectedItems.length }));
+      toast(t("itemsRemoved"));
     } catch (error) {
       console.error("Failed to remove selected items:", error);
     }
@@ -261,7 +260,7 @@ const Wishlist = () => {
       });
     } else {
       navigator.clipboard.writeText(shareText);
-      toast.success(t("copiedToClipboard"));
+      toast(t("copiedToClipboard"));
     }
   };
 

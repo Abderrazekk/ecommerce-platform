@@ -13,7 +13,7 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) {
-      toast.error('Please enter your email');
+      toast('Please enter your email');
       return;
     }
     const resultAction = await dispatch(forgotPassword(email));
