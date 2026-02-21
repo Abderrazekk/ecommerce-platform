@@ -86,8 +86,6 @@ const createSponsor = asyncHandler(async (req, res) => {
       sponsor,
     });
   } catch (error) {
-    console.error("Create sponsor error:", error);
-
     // Delete uploaded file if sponsor creation fails
     if (req.file && req.file.buffer) {
       // Note: Cloudinary upload is async, so we can't easily rollback here
@@ -129,7 +127,6 @@ const updateSponsor = asyncHandler(async (req, res) => {
         try {
           await cloudinary.uploader.destroy(sponsor.image.public_id);
         } catch (cloudinaryError) {
-          console.error("Error deleting old image:", cloudinaryError);
           // Continue with upload even if delete fails
         }
       }
@@ -164,7 +161,6 @@ const updateSponsor = asyncHandler(async (req, res) => {
       sponsor: updatedSponsor,
     });
   } catch (error) {
-    console.error("Update sponsor error:", error);
     res.status(500);
     throw new Error("Failed to update sponsor");
   }
@@ -187,7 +183,6 @@ const deleteSponsor = asyncHandler(async (req, res) => {
       try {
         await cloudinary.uploader.destroy(sponsor.image.public_id);
       } catch (cloudinaryError) {
-        console.error("Error deleting image:", cloudinaryError);
         // Continue with deletion even if image delete fails
       }
     }
@@ -199,7 +194,6 @@ const deleteSponsor = asyncHandler(async (req, res) => {
       message: "Sponsor deleted successfully",
     });
   } catch (error) {
-    console.error("Delete sponsor error:", error);
     res.status(500);
     throw new Error("Failed to delete sponsor");
   }
@@ -226,7 +220,6 @@ const toggleSponsorVisibility = asyncHandler(async (req, res) => {
       sponsor,
     });
   } catch (error) {
-    console.error("Toggle visibility error:", error);
     res.status(500);
     throw new Error("Failed to toggle sponsor visibility");
   }
