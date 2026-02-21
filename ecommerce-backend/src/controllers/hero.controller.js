@@ -116,6 +116,8 @@ const createHero = asyncHandler(async (req, res) => {
         },
       );
 
+      // Attach error handler to the stream itself
+      uploadStream.on("error", (err) => reject(err));
       uploadStream.end(file.buffer);
     });
   });
@@ -260,6 +262,7 @@ const updateHero = asyncHandler(async (req, res) => {
   }
 
   // Handle new image uploads
+  // Handle new image uploads
   if (req.files && req.files.length > 0) {
     const totalImages = hero.images.length + req.files.length;
     if (totalImages > 6) {
@@ -279,9 +282,15 @@ const updateHero = asyncHandler(async (req, res) => {
             ],
           },
           (error, result) => {
-            if (error) reject(error);
-            else {
-              // Get overlay data for this new image (if provided)
+            if (error) {
+              // Normalize error
+              reject(
+                error instanceof Error
+                  ? error
+                  : new Error(error || "Cloudinary upload callback error"),
+              );
+            } else {
+              // ✅ Declare overlayIndex here, before it is used
               const overlayIndex = hero.images.length + index;
               resolve({
                 public_id: result.public_id,
@@ -297,6 +306,15 @@ const updateHero = asyncHandler(async (req, res) => {
             }
           },
         );
+
+        // Stream error handler
+        uploadStream.on("error", (err) => {
+          reject(
+            err instanceof Error
+              ? err
+              : new Error(err || "Cloudinary upload stream error"),
+          );
+        });
 
         uploadStream.end(file.buffer);
       });
