@@ -45,18 +45,16 @@ const protect = asyncHandler(async (req, res, next) => {
 
       next();
     } catch (error) {
-      console.error(error);
-      
       // Return specific error for banned users
       if (error.message === "Your account has been banned") {
         res.status(403).json({
           success: false,
           error: "Your account has been banned",
-          code: "ACCOUNT_BANNED"
+          code: "ACCOUNT_BANNED",
         });
         return;
       }
-      
+
       res.status(401);
       throw new Error("Not authorized, token failed");
     }

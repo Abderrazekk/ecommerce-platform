@@ -12,12 +12,11 @@ const uploadImageToCloudinary = (file) => {
       },
       (error, result) => {
         if (error) {
-          console.error("Cloudinary upload error:", error);
           reject(error);
         } else {
           resolve(result.secure_url);
         }
-      }
+      },
     );
     stream.end(file.buffer);
   });
@@ -30,7 +29,8 @@ const deleteImageFromCloudinary = async (imageUrl) => {
     const publicId = imageUrl.split("/").slice(-1)[0].split(".")[0];
     await cloudinary.uploader.destroy(`ecommerce/promo/${publicId}`);
   } catch (error) {
-    console.error("Error deleting image from Cloudinary:", error);
+    // Error is silently ignored to prevent disrupting the main flow
+    // You may want to log this to an external service in production
   }
 };
 
@@ -65,10 +65,7 @@ const createPromo = asyncHandler(async (req, res) => {
 
   // If this promo is visible, make sure all others are hidden
   if (promo.isVisible) {
-    await Promo.updateMany(
-      { _id: { $ne: promo._id } },
-      { isVisible: false }
-    );
+    await Promo.updateMany({ _id: { $ne: promo._id } }, { isVisible: false });
   }
 
   res.status(201).json({
@@ -100,17 +97,15 @@ const updatePromo = asyncHandler(async (req, res) => {
   // Update fields
   promo.image = imageUrl;
   if (req.body.isVisible !== undefined) {
-    promo.isVisible = req.body.isVisible === "true" || req.body.isVisible === true;
+    promo.isVisible =
+      req.body.isVisible === "true" || req.body.isVisible === true;
   }
 
   await promo.save();
 
   // If this promo is now visible, hide all others
   if (promo.isVisible) {
-    await Promo.updateMany(
-      { _id: { $ne: promo._id } },
-      { isVisible: false }
-    );
+    await Promo.updateMany({ _id: { $ne: promo._id } }, { isVisible: false });
   }
 
   res.json({

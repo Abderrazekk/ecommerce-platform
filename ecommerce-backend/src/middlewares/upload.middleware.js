@@ -6,9 +6,6 @@ const storage = multer.memoryStorage();
 
 // File filter for images and videos
 const fileFilter = (req, file, cb) => {
-  console.log("Multer file filter - Original filename:", file.originalname);
-  console.log("Multer file filter - MIME type:", file.mimetype);
-
   // Allowed image types
   const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
   // Allowed video types
@@ -18,10 +15,8 @@ const fileFilter = (req, file, cb) => {
   const isVideo = allowedVideoTypes.test(file.mimetype);
 
   if (isImage || isVideo) {
-    console.log("File accepted by multer:", file.mimetype);
     return cb(null, true);
   } else {
-    console.log("File rejected by multer. Type:", file.mimetype);
     cb(new Error("Only image and video files are allowed!"));
   }
 };
@@ -30,7 +25,6 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    // Image limits
     fileSize: 10 * 1024 * 1024, // 10MB per file (increased for videos)
   },
   fileFilter: fileFilter,
@@ -161,6 +155,6 @@ const handleMulterError = (err, req, res, next) => {
 module.exports = {
   upload,
   validateFiles,
-  validateImageCount, // Keep this for hero routes
+  validateImageCount,
   handleMulterError,
 };
