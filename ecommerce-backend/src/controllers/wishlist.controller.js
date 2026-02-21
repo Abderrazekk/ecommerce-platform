@@ -46,7 +46,6 @@ const getWishlist = asyncHandler(async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching wishlist:", error);
     res.status(500);
     throw new Error("Failed to fetch wishlist");
   }
@@ -128,7 +127,6 @@ const addToWishlist = asyncHandler(async (req, res) => {
       addedProductId: productId,
     });
   } catch (error) {
-    console.error("Error adding to wishlist:", error);
     res.status(500);
     throw new Error(error.message || "Failed to add to wishlist");
   }
@@ -178,9 +176,8 @@ const removeFromWishlist = asyncHandler(async (req, res) => {
     // Save the changes
     await wishlist.save();
 
-    // Verify the save
+    // Verify the save (no console.log needed)
     const savedWishlist = await Wishlist.findById(wishlist._id);
-    console.log("After save - item count:", savedWishlist.items.length);
 
     res.status(200).json({
       success: true,
@@ -189,7 +186,6 @@ const removeFromWishlist = asyncHandler(async (req, res) => {
       itemCount: savedWishlist.items.length,
     });
   } catch (error) {
-    console.error("Error removing from wishlist:", error);
     res.status(500);
     throw new Error(error.message || "Failed to remove from wishlist");
   }
@@ -234,7 +230,6 @@ const checkInWishlist = asyncHandler(async (req, res) => {
       productId,
     });
   } catch (error) {
-    console.error("Error checking wishlist:", error);
     res.status(500);
     throw new Error("Failed to check wishlist status");
   }
@@ -264,7 +259,6 @@ const clearWishlist = asyncHandler(async (req, res) => {
       itemCount: 0,
     });
   } catch (error) {
-    console.error("Error clearing wishlist:", error);
     res.status(500);
     throw new Error("Failed to clear wishlist");
   }
