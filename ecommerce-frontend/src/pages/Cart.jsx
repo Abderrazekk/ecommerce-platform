@@ -17,16 +17,6 @@ const Cart = () => {
 
   // Debug effect - run once when component mounts
   useEffect(() => {
-    console.log("🔍 Cart Component Mounted");
-    console.log("Cart Items:", cartItems);
-    console.log(
-      "Cart Items details:",
-      cartItems.map((item) => ({
-        name: item.name,
-        shippingFee: item.shippingFee,
-        productId: item.product,
-      })),
-    );
   }, []);
 
   // Calculate using discounted price if available
@@ -37,15 +27,12 @@ const Cart = () => {
 
   // Debug: Check shipping fees
   const shippingFees = cartItems.map((item) => item.shippingFee || 0);
-  console.log("📊 Shipping fees in cart:", shippingFees);
 
   // Find highest shipping fee among products
   const highestShippingFee =
     cartItems.length > 0
       ? Math.max(...cartItems.map((item) => item.shippingFee || 0))
       : 0;
-
-  console.log("📦 Highest shipping fee calculated:", highestShippingFee);
 
   // Calculate shipping (free if subtotal > 100 TND)
   const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : highestShippingFee;

@@ -27,12 +27,6 @@ const cartSlice = createSlice({
   reducers: {
     addToCart: (state, action) => {
       const item = action.payload;
-      console.log("📦 Adding to cart:", {
-        product: item.product,
-        name: item.name,
-        shippingFee: item.shippingFee,
-        hasShippingFee: item.shippingFee !== undefined,
-      });
 
       const existingItem = state.cartItems.find(
         (i) => i.product === item.product,
@@ -57,15 +51,6 @@ const cartSlice = createSlice({
 
       // Save to localStorage
       localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
-
-      // Debug log
-      console.log(
-        "🛒 Cart items after adding:",
-        state.cartItems.map((i) => ({
-          name: i.name,
-          shippingFee: i.shippingFee,
-        })),
-      );
     },
 
     removeFromCart: (state, action) => {
@@ -99,20 +84,6 @@ const cartSlice = createSlice({
     savePhone: (state, action) => {
       state.phone = action.payload;
       localStorage.setItem("phone", action.payload);
-    },
-
-    // NEW: Debug action to check cart items
-    debugCart: (state) => {
-      console.log("🔍 Cart Debug Info:");
-      console.log("Total items:", state.cartItems.length);
-      state.cartItems.forEach((item, index) => {
-        console.log(`Item ${index + 1}:`, {
-          name: item.name,
-          productId: item.product,
-          shippingFee: item.shippingFee,
-          price: item.price,
-        });
-      });
     },
   },
 });

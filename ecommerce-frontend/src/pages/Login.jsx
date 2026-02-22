@@ -69,7 +69,6 @@ const Login = () => {
     script.defer = true;
 
     script.onload = () => {
-      console.log("Google Identity Services script loaded");
       setGoogleScriptLoaded(true);
     };
 
@@ -127,7 +126,6 @@ const Login = () => {
       });
 
       googleInitializedRef.current = true;
-      console.log("Google button initialized and rendered");
     } catch (error) {
       console.error("Failed to initialize Google button:", error);
       toast.error(t("googleInitError"));

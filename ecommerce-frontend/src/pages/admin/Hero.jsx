@@ -473,7 +473,6 @@ const Hero = () => {
 
     if (imagesToDelete.length > 0) {
       formDataToSend.append("imagesToDelete", JSON.stringify(imagesToDelete));
-      console.log("Sending images to delete:", imagesToDelete);
     }
 
     images.forEach((image) => {

@@ -39,14 +39,6 @@ const Checkout = () => {
 
   // Debug effect
   useEffect(() => {
-    console.log("🔍 Checkout Component - Cart Items:", cartItems);
-    console.log(
-      "🔍 Shipping Fees:",
-      cartItems.map((item) => ({
-        name: item.name,
-        shippingFee: item.shippingFee,
-      })),
-    );
   }, [cartItems]);
 
   // Calculate using discounted price if available
@@ -59,13 +51,6 @@ const Checkout = () => {
   const shippingFees = cartItems.map((item) => item.shippingFee || 0);
   const highestShippingFee =
     cartItems.length > 0 ? Math.max(...shippingFees) : 0;
-
-  console.log("📦 Shipping calculation:", {
-    shippingFees,
-    highestShippingFee,
-    subtotal,
-    freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
-  });
 
   // Calculate shipping (free if subtotal > 100 TND)
   const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : highestShippingFee;
@@ -103,15 +88,6 @@ const Checkout = () => {
       // Save shipping info
       dispatch(saveShippingAddress(shippingAddress));
       dispatch(savePhone(phone));
-
-      console.log(
-        "📤 Creating order with items:",
-        cartItems.map((item) => ({
-          product: item.product,
-          quantity: item.quantity,
-          shippingFee: item.shippingFee,
-        })),
-      );
 
       const orderData = {
         items: cartItems.map((item) => ({
