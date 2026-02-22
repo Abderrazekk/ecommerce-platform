@@ -10,8 +10,8 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import AnalyticsChart from "../admin/AnalyticsChart";
 import { useState } from "react";
+import ChartCard from "../admin/ChartCard";
 
 const CategoryChart = ({
   data = [],
@@ -20,7 +20,6 @@ const CategoryChart = ({
 }) => {
   const [chartType, setChartType] = useState("bar");
 
-  // Prepare data
   const chartData = [...data]
     .sort((a, b) => b.revenue - a.revenue)
     .map((item) => ({
@@ -40,40 +39,6 @@ const CategoryChart = ({
     0,
   );
 
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const category = payload[0].payload;
-      return (
-        <div className="bg-white p-4 border rounded-lg shadow-lg">
-          <p className="font-medium mb-2">
-            {category.category || category._id}
-          </p>
-          <div className="space-y-1">
-            <p className="text-green-600">
-              <span className="font-medium">Revenue:</span>{" "}
-              {category.revenue.toLocaleString("fr-TN")} TND
-            </p>
-            <p className="text-blue-600">
-              <span className="font-medium">Quantity:</span> {category.quantity}
-            </p>
-            <p className="text-purple-600">
-              <span className="font-medium">Orders:</span>{" "}
-              {category.orderCount || "N/A"}
-            </p>
-            <p className="text-gray-600">
-              <span className="font-medium">Share:</span>{" "}
-              {category.percentage ||
-                ((category.revenue / totalRevenue) * 100).toFixed(1)}
-              %
-            </p>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Enhanced color palette
   const COLORS = [
     "#3b82f6",
     "#10b981",
@@ -85,113 +50,136 @@ const CategoryChart = ({
     "#f97316",
     "#ec4899",
     "#64748b",
-    "#14b8a6",
-    "#f43f5e",
-    "#a855f7",
-    "#22c55e",
-    "#eab308",
   ];
 
   const getColor = (index) => COLORS[index % COLORS.length];
 
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const category = payload[0].payload;
+      return (
+        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm p-4 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
+          <p className="font-medium mb-2 text-gray-900 dark:text-white">
+            {category.category || category._id}
+          </p>
+          <div className="space-y-1">
+            <p className="text-emerald-600 dark:text-emerald-400">
+              <span className="font-medium">Revenue:</span>{" "}
+              {category.revenue.toLocaleString("fr-TN")} TND
+            </p>
+            <p className="text-blue-600 dark:text-blue-400">
+              <span className="font-medium">Quantity:</span> {category.quantity}
+            </p>
+            <p className="text-purple-600 dark:text-purple-400">
+              <span className="font-medium">Share:</span> {category.percentage}%
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <AnalyticsChart
+    <ChartCard
       title={title}
       description="Revenue distribution across product categories"
-      value={chartData.length}
+      value={`${chartData.length} categories`}
     >
-      <div className="h-full flex flex-col">
+      <div className="flex flex-col h-full">
         <div className="flex justify-end mb-4">
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
             <button
               onClick={() => setChartType("bar")}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 chartType === "bar"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
-              Bar Chart
+              Bar
             </button>
             <button
               onClick={() => setChartType("pie")}
-              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 chartType === "pie"
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
-              Pie Chart
+              Pie
             </button>
           </div>
         </div>
 
-        <div className="flex-1">
-          <ResponsiveContainer width="100%" height={height}>
-            {chartType === "bar" ? (
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis
-                  dataKey="category"
-                  stroke="#9ca3af"
-                  fontSize={12}
-                  tickFormatter={(value) =>
-                    value.length > 10 ? value.substring(0, 10) + "..." : value
-                  }
-                />
-                <YAxis
-                  stroke="#9ca3af"
-                  fontSize={12}
-                  tickFormatter={(value) =>
-                    `${value.toLocaleString("fr-TN")} TND`
-                  }
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="revenue" radius={[4, 4, 0, 0]}>
-                  {chartData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={getColor(index)} />
-                  ))}
-                </Bar>
-              </BarChart>
-            ) : (
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={2}
-                  dataKey="revenue"
-                  nameKey="category"
-                  label={(entry) => `${entry.category}: ${entry.percentage}%`}
-                >
-                  {chartData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={getColor(index)} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            )}
-          </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height={height}>
+          {chartType === "bar" ? (
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis
+                dataKey="category"
+                stroke="#9ca3af"
+                fontSize={12}
+                tickFormatter={(v) =>
+                  v.length > 10 ? v.substring(0, 10) + "..." : v
+                }
+                tickLine={false}
+              />
+              <YAxis
+                stroke="#9ca3af"
+                fontSize={12}
+                tickFormatter={(v) => `${v.toLocaleString("fr-TN")} TND`}
+                tickLine={false}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="revenue" radius={[4, 4, 0, 0]}>
+                {chartData.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={getColor(index)} />
+                ))}
+              </Bar>
+            </BarChart>
+          ) : (
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                paddingAngle={2}
+                dataKey="revenue"
+                nameKey="category"
+                label={(entry) => `${entry.category}: ${entry.percentage}%`}
+              >
+                {chartData.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={getColor(index)} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          )}
+        </ResponsiveContainer>
 
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-lg">
-            <div className="text-lg font-semibold text-blue-700">
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-4 rounded-xl">
+            <div className="text-lg font-semibold text-blue-700 dark:text-blue-400">
               {totalRevenue.toLocaleString("fr-TN")} TND
             </div>
-            <div className="text-xs text-blue-600">Total Category Revenue</div>
+            <div className="text-xs text-blue-600 dark:text-blue-300">
+              Total Category Revenue
+            </div>
           </div>
-          <div className="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg">
-            <div className="text-lg font-semibold text-green-700">
+          <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 p-4 rounded-xl">
+            <div className="text-lg font-semibold text-green-700 dark:text-green-400">
               {totalQuantity}
             </div>
-            <div className="text-xs text-green-600">Total Units Sold</div>
+            <div className="text-xs text-green-600 dark:text-green-300">
+              Total Units Sold
+            </div>
           </div>
         </div>
       </div>
-    </AnalyticsChart>
+    </ChartCard>
   );
 };
 

@@ -7,7 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import AnalyticsChart from "../admin/AnalyticsChart";
+import ChartCard from "../admin/ChartCard";
 
 const formatTND = (amount) => {
   return new Intl.NumberFormat("fr-TN", {
@@ -21,24 +21,11 @@ const TopProductsChart = ({
   title = "Top Products",
   height = 300,
 }) => {
-  // Generate colors based on index
   const getColor = (index) => {
-    const colors = [
-      "#3b82f6",
-      "#10b981",
-      "#f59e0b",
-      "#ef4444",
-      "#8b5cf6",
-      "#06b6d4",
-      "#84cc16",
-      "#f97316",
-      "#ec4899",
-      "#64748b",
-    ];
+    const colors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
     return colors[index % colors.length];
   };
 
-  // Sort data by revenue and limit to top 10
   const chartData = [...data]
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 10)
@@ -62,7 +49,7 @@ const TopProductsChart = ({
     if (active && payload && payload.length) {
       const product = payload[0].payload;
       return (
-        <div className="bg-white p-4 border rounded-lg shadow-lg">
+        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm p-4 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
           <div className="flex items-center mb-2">
             {product.image && (
               <img
@@ -72,22 +59,25 @@ const TopProductsChart = ({
               />
             )}
             <div>
-              <p className="font-medium">{product.name}</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {product.name}
+              </p>
               {product.category && (
-                <p className="text-sm text-gray-500">{product.category}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {product.category}
+                </p>
               )}
             </div>
           </div>
           <div className="space-y-1">
-            <p className="text-green-600">
+            <p className="text-emerald-600 dark:text-emerald-400">
               <span className="font-medium">Revenue:</span>{" "}
               {formatTND(product.revenue)}
             </p>
-            <p className="text-blue-600">
-              <span className="font-medium">Quantity Sold:</span>{" "}
-              {product.quantity}
+            <p className="text-blue-600 dark:text-blue-400">
+              <span className="font-medium">Quantity:</span> {product.quantity}
             </p>
-            <p className="text-purple-600">
+            <p className="text-purple-600 dark:text-purple-400">
               <span className="font-medium">Avg Price:</span>{" "}
               {formatTND(product.revenue / product.quantity)}
             </p>
@@ -99,63 +89,71 @@ const TopProductsChart = ({
   };
 
   return (
-    <AnalyticsChart
+    <ChartCard
       title={title}
       description="Top performing products by revenue"
-      value={chartData.length}
+      value={`Top ${chartData.length}`}
     >
-      <div className="h-full flex flex-col">
-        <div className="flex-1">
-          <ResponsiveContainer width="100%" height={height}>
-            <BarChart data={chartData} layout="vertical">
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="#f0f0f0"
-                horizontal={false}
-              />
-              <XAxis
-                type="number"
-                tickFormatter={(value) =>
-                  `${value.toLocaleString("fr-TN")} TND`
-                }
-                stroke="#9ca3af"
-                fontSize={12}
-              />
-              <YAxis
-                type="category"
-                dataKey="shortName"
-                stroke="#9ca3af"
-                fontSize={12}
-                width={80}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="revenue" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="h-full">
+        <ResponsiveContainer width="100%" height={height}>
+          <BarChart
+            data={chartData}
+            layout="vertical"
+            margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#e5e7eb"
+              horizontal={false}
+            />
+            <XAxis
+              type="number"
+              tickFormatter={(v) => `${v.toLocaleString("fr-TN")} TND`}
+              stroke="#9ca3af"
+              fontSize={12}
+              tickLine={false}
+            />
+            <YAxis
+              type="category"
+              dataKey="shortName"
+              stroke="#9ca3af"
+              fontSize={12}
+              width={100}
+              tickLine={false}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="revenue" radius={[0, 4, 4, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
 
-        <div className="grid grid-cols-3 gap-4 mt-4 text-center">
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <div className="text-lg font-semibold text-blue-700">
+        <div className="grid grid-cols-3 gap-4 mt-6">
+          <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl text-center">
+            <div className="text-lg font-semibold text-blue-700 dark:text-blue-400">
               {chartData.length}
             </div>
-            <div className="text-xs text-blue-500">Top Products</div>
+            <div className="text-xs text-blue-600 dark:text-blue-300">
+              Top Products
+            </div>
           </div>
-          <div className="bg-green-50 p-3 rounded-lg">
-            <div className="text-lg font-semibold text-green-700">
+          <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-xl text-center">
+            <div className="text-lg font-semibold text-green-700 dark:text-green-400">
               {formatTND(totalRevenue)}
             </div>
-            <div className="text-xs text-green-500">Total Revenue</div>
+            <div className="text-xs text-green-600 dark:text-green-300">
+              Total Revenue
+            </div>
           </div>
-          <div className="bg-purple-50 p-3 rounded-lg">
-            <div className="text-lg font-semibold text-purple-700">
+          <div className="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-xl text-center">
+            <div className="text-lg font-semibold text-purple-700 dark:text-purple-400">
               {totalQuantity}
             </div>
-            <div className="text-xs text-purple-500">Units Sold</div>
+            <div className="text-xs text-purple-600 dark:text-purple-300">
+              Units Sold
+            </div>
           </div>
         </div>
       </div>
-    </AnalyticsChart>
+    </ChartCard>
   );
 };
 
