@@ -9,8 +9,6 @@ const createOrder = asyncHandler(async (req, res) => {
   // NEW: accept description from request body
   const { items, deliveryAddress, phone, description } = req.body;
 
-  console.log("Creating order with items:", items);
-
   if (!items || items.length === 0) {
     res.status(400);
     throw new Error("No order items");
@@ -89,12 +87,6 @@ const createOrder = asyncHandler(async (req, res) => {
 // @desc    Get all orders (admin)
 // @route   GET /api/admin/orders
 // @access  Private/Admin
-// @desc    Get all orders (admin)
-// @route   GET /api/admin/orders
-// @access  Private/Admin
-// @desc    Get all orders (admin)
-// @route   GET /api/admin/orders
-// @access  Private/Admin
 const getAllOrders = asyncHandler(async (req, res) => {
   const status = req.query.status;
   let filter = {};
@@ -106,13 +98,13 @@ const getAllOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find(filter)
     .populate("user", "name email phone address")
     .sort({ createdAt: -1 });
-  console.log("✅ getAllOrders called – returning ALL orders");
 
   res.json({
     success: true,
     orders, // send only the array, no pagination info
   });
 });
+
 // @desc    Get user's orders
 // @route   GET /api/orders/my
 // @access  Private
