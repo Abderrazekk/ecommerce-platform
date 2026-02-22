@@ -335,9 +335,13 @@ const deleteHero = asyncHandler(async (req, res) => {
     throw new Error("Hero not found");
   }
 
-  // Delete images from Cloudinary
+  // Delete images from Cloudinary – gracefully handle errors
   const deletePromises = hero.images.map((img) => {
-    return cloudinary.uploader.destroy(img.public_id);
+    return cloudinary.uploader.destroy(img.public_id).catch((err) => {
+      // Log the error but don't fail the whole operation
+      console.error(`Failed to delete image ${img.public_id}:`, err);
+      return null;
+    });
   });
   await Promise.all(deletePromises);
 

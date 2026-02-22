@@ -19,7 +19,7 @@ const PromoBanner = () => {
       <img
         src={activePromo.image}
         alt="Promo"
-        className="w-full h-auto object-cover cursor-pointer aspect-[1920/750] md:aspect-[1920/350]"
+        className="w-full h-auto object-cover cursor-pointer aspect-[1920/950] md:aspect-[1920/500]"
       />
     </Link>
   );
