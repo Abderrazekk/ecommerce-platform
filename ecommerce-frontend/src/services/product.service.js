@@ -62,15 +62,11 @@ const productService = {
   },
 
   createProduct: (productData) => {
-    // Log what's being sent for debugging
-    console.log("Creating product with FormData:");
 
     // Log form data entries for debugging
     for (let [key, value] of productData.entries()) {
       if (key === "images" || key === "video") {
-        console.log(`${key}: File - ${value.name || "File object"}`);
       } else {
-        console.log(`${key}: ${value}`);
       }
     }
 
@@ -82,14 +78,11 @@ const productService = {
   },
 
   updateProduct: (id, productData) => {
-    console.log("Updating product with FormData:");
 
     // Log form data entries for debugging
     for (let [key, value] of productData.entries()) {
       if (key === "images" || key === "video") {
-        console.log(`${key}: File - ${value.name || "File object"}`);
       } else {
-        console.log(`${key}: ${value}`);
       }
     }
 

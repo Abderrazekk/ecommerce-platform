@@ -6,7 +6,6 @@ import authService from './auth.service';
  */
 export const initializeGoogleAuth = () => {
   if (!window.google) {
-    console.error('Google Identity Services not loaded');
     return null;
   }
 
