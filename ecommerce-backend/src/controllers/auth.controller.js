@@ -121,7 +121,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        authMethod: user.authMethod, // ← ADD THIS LINE
+        authMethod: user.authMethod,
         isBanned: user.isBanned,
         bannedAt: user.bannedAt,
         bannedBy: user.bannedBy
@@ -220,8 +220,6 @@ const googleAuth = asyncHandler(async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error("Google auth error:", error);
-
     // Handle duplicate email error
     if (error.code === 11000 && error.keyPattern && error.keyPattern.email) {
       res.status(409);
