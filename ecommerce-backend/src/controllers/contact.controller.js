@@ -49,7 +49,6 @@ const contactUs = async (req, res) => {
       message: "Message sent successfully",
     });
   } catch (error) {
-    console.error("Contact form error:", error);
     res.status(500).json({
       success: false,
       error: "Failed to send message. Please try again later.",
