@@ -12,17 +12,8 @@ const createComment = asyncHandler(async (req, res) => {
   const { text, rating } = req.body;
   const userId = req.user._id;
 
-  console.log("DEBUG - Creating review:", {
-    productId,
-    userId,
-    text,
-    rating,
-    userRole: req.user.role,
-  });
-
   // Validate product exists
   const product = await Product.findById(productId);
-  console.log("DEBUG - Product found:", product ? "Yes" : "No");
 
   if (!product) {
     res.status(404);
@@ -64,8 +55,6 @@ const createComment = asyncHandler(async (req, res) => {
     text: text.trim(),
     rating: parseInt(rating),
   });
-
-  console.log("DEBUG - Review created:", comment._id);
 
   // Update product rating statistics IMMEDIATELY
   await updateProductRating(productId);
@@ -172,8 +161,6 @@ const getProductComments = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
   const sortBy = req.query.sortBy || "newest"; // newest, highest, lowest
 
-  console.log("DEBUG - Fetching reviews for product:", productId);
-
   // Check if product exists
   const product = await Product.findById(productId);
   if (!product) {
@@ -208,11 +195,6 @@ const getProductComments = asyncHandler(async (req, res) => {
 
   const total = await Comment.countDocuments({ product: productId });
   const totalPages = Math.ceil(total / limit);
-
-  console.log(
-    `DEBUG - Found ${comments.length} reviews for product ${productId}`,
-  );
-  console.log("DEBUG - Sample review user:", comments[0]?.user);
 
   res.json({
     success: true,
@@ -278,8 +260,6 @@ const getProductRatingSummary = asyncHandler(async (req, res) => {
 // FIXED: Helper function to update product rating statistics
 const updateProductRating = async (productId) => {
   try {
-    console.log(`DEBUG - Updating rating for product: ${productId}`);
-
     const ratingSummary = await Comment.aggregate([
       {
         $match: {
@@ -297,8 +277,6 @@ const updateProductRating = async (productId) => {
         },
       },
     ]);
-
-    console.log("DEBUG - Rating summary result:", ratingSummary);
 
     if (ratingSummary.length > 0) {
       const { averageRating, ratingsCount, ratingDistribution } =
@@ -323,10 +301,6 @@ const updateProductRating = async (productId) => {
         },
         { new: true },
       );
-
-      console.log(
-        `DEBUG - Updated product ${productId} with averageRating: ${parseFloat(averageRating.toFixed(1))}, ratingsCount: ${ratingsCount}`,
-      );
     } else {
       // No reviews, reset to defaults
       await Product.findByIdAndUpdate(
@@ -338,14 +312,9 @@ const updateProductRating = async (productId) => {
         },
         { new: true },
       );
-
-      console.log(
-        `DEBUG - Reset product ${productId} to default ratings (no reviews)`,
-      );
     }
   } catch (error) {
-    console.error("Error updating product rating:", error);
-    // Don't throw error here as it might break the main request
+    // Silently ignore errors to avoid breaking the main request
   }
 };
 
