@@ -13,7 +13,11 @@ import {
 import AnalyticsChart from "../admin/AnalyticsChart";
 import { useState } from "react";
 
-const CategoryChart = ({ data = [], title = "Sales by Category" }) => {
+const CategoryChart = ({
+  data = [],
+  title = "Sales by Category",
+  height = 300,
+}) => {
   const [chartType, setChartType] = useState("bar");
 
   // Prepare data
@@ -123,7 +127,7 @@ const CategoryChart = ({ data = [], title = "Sales by Category" }) => {
         </div>
 
         <div className="flex-1">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={height}>
             {chartType === "bar" ? (
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

@@ -16,7 +16,11 @@ const formatTND = (amount) => {
   }).format(amount);
 };
 
-const TopProductsChart = ({ data = [], title = "Top Products" }) => {
+const TopProductsChart = ({
+  data = [],
+  title = "Top Products",
+  height = 300,
+}) => {
   // Generate colors based on index
   const getColor = (index) => {
     const colors = [
@@ -102,7 +106,7 @@ const TopProductsChart = ({ data = [], title = "Top Products" }) => {
     >
       <div className="h-full flex flex-col">
         <div className="flex-1">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={height}>
             <BarChart data={chartData} layout="vertical">
               <CartesianGrid
                 strokeDasharray="3 3"

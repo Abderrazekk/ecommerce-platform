@@ -12,7 +12,11 @@ import {
 import AnalyticsChart from "../admin/AnalyticsChart";
 import { formatPrice } from "../../utils/formatPrice";
 
-const StatusPieChart = ({ data = [], title = "Orders by Status" }) => {
+const StatusPieChart = ({
+  data = [],
+  title = "Orders by Status",
+  height = 300,
+}) => {
   const COLORS = {
     pending: "#F59E0B",
     confirmed: "#3B82F6",
@@ -104,7 +108,7 @@ const StatusPieChart = ({ data = [], title = "Orders by Status" }) => {
     >
       <div className="h-full flex flex-col">
         <div className="flex-1 min-h-[400px] bg-gradient-to-br from-gray-50 to-white rounded-xl p-6">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={height}>
             <BarChart
               data={chartData}
               margin={{ top: 20, right: 30, left: 20, bottom: 60 }}

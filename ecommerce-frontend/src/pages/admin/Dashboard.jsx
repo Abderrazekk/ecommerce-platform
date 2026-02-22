@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAnalytics,
-  exportAnalytics,
   setPeriod,
   clearAnalytics,
 } from "../../redux/slices/admin.slice";
@@ -18,27 +17,22 @@ import {
   AlertTriangle,
   ShoppingBag,
   Package,
-  Users,
   DollarSign,
-  UserCog,
-  Clock,
   BarChart3,
-  Download,
   Filter,
+  Users,
+  Clock,
+  Eye,
+  Truck,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { formatPrice } from "../../utils/formatPrice";
 import { formatDate } from "../../utils/dateUtils";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const { analytics, loading, period, lastUpdated } = useSelector(
-    (state) => state.admin,
-  );
-  const [dateRange, setDateRange] = useState({
-    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-    end: new Date(),
-  });
-  const [activeTab, setActiveTab] = useState("overview");
+  const { analytics, loading, period } = useSelector((state) => state.admin);
 
   useEffect(() => {
     fetchData();
@@ -46,17 +40,6 @@ const Dashboard = () => {
 
   const fetchData = () => {
     dispatch(fetchAnalytics(period));
-  };
-
-  const handleExport = (format, type) => {
-    dispatch(
-      exportAnalytics({
-        format,
-        type,
-        startDate: dateRange.start.toISOString(),
-        endDate: dateRange.end.toISOString(),
-      }),
-    );
   };
 
   const handlePeriodChange = (newPeriod) => {
@@ -70,55 +53,50 @@ const Dashboard = () => {
 
   if (loading && !analytics) return <Loader fullScreen />;
 
+  // Summary cards data
   const summaryCards = analytics?.summary
     ? [
         {
           title: "Total Users",
           value: analytics.summary.totalUsers,
           icon: "users",
-          type: "primary",
           change: 12.5,
         },
         {
           title: "Total Products",
           value: analytics.summary.totalProducts,
           icon: "products",
-          type: "success",
           change: 8.2,
         },
         {
           title: "Total Orders",
           value: analytics.summary.totalOrders,
           icon: "orders",
-          type: "warning",
           change: 18.7,
         },
         {
           title: "Total Revenue",
           value: analytics.summary.totalRevenue,
           icon: "revenue",
-          type: "success",
+          type: "currency",
           change: 22.3,
         },
         {
           title: "Pending Orders",
           value: analytics.summary.pendingOrders,
           icon: "pending",
-          type: "warning",
           change: -5.2,
         },
         {
           title: "Low Stock",
           value: analytics.summary.lowStockProducts,
           icon: "lowStock",
-          type: "danger",
           change: 3.8,
         },
         {
           title: "Total Admins",
           value: analytics.summary.totalAdmins,
           icon: "admins",
-          type: "purple",
           change: 0,
         },
         {
@@ -132,215 +110,58 @@ const Dashboard = () => {
                 ).toFixed(1)
               : 0,
           icon: "conversion",
-          type: "purple",
-          isPercentage: true,
+          type: "percentage",
+          change: null,
         },
       ]
     : [];
 
-  const recentOrdersColumns = [
-    {
-      key: "_id",
-      label: "Order ID",
-      width: "15%",
-      render: (value) => (
-        <span className="font-mono text-sm">#{value.substring(0, 8)}</span>
-      ),
-    },
-    {
-      key: "user.name",
-      label: "Customer",
-      width: "25%",
-      render: (value, row) => (
-        <div>
-          <p className="font-medium">{value || "Guest"}</p>
-          <p className="text-xs text-gray-500">{row.user?.email || ""}</p>
-        </div>
-      ),
-    },
-    {
-      key: "totalPrice",
-      label: "Amount",
-      width: "15%",
-      format: "price",
-      sortable: true,
-    },
-    {
-      key: "status",
-      label: "Status",
-      width: "15%",
-      render: (value) => {
-        const statusConfig = {
-          pending: { color: "bg-yellow-100 text-yellow-800", label: "Pending" },
-          confirmed: { color: "bg-blue-100 text-blue-800", label: "Confirmed" },
-          out_for_delivery: {
-            color: "bg-purple-100 text-purple-800",
-            label: "Out for Delivery",
-          },
-          delivered: {
-            color: "bg-green-100 text-green-800",
-            label: "Delivered",
-          },
-          cancelled: { color: "bg-red-100 text-red-800", label: "Cancelled" },
-        };
+  // Table data
+  const recentOrders = analytics?.tables?.recentOrders || [];
+  const lowStockProducts = analytics?.tables?.lowStockProducts || [];
+  const topCustomers = analytics?.analytics?.topCustomers || [];
 
-        const config = statusConfig[value] || {
-          color: "bg-gray-100 text-gray-800",
-          label: value,
-        };
-
-        return (
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}
-          >
-            {config.label}
-          </span>
-        );
-      },
-    },
-    {
-      key: "createdAt",
-      label: "Date",
-      width: "15%",
-      format: "date",
-      sortable: true,
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      width: "15%",
-      render: (_, row) => (
-        <button
-          onClick={() => (window.location.href = `/admin/orders/${row._id}`)}
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-        >
-          View Details
-        </button>
-      ),
-    },
-  ];
-
-  const lowStockColumns = [
-    {
-      key: "name",
-      label: "Product Name",
-      width: "30%",
-      render: (value, row) => (
-        <div className="flex items-center">
-          {row.images?.[0]?.url && (
-            <img
-              src={row.images[0].url}
-              alt={value}
-              className="w-10 h-10 rounded mr-3 object-cover"
-            />
-          )}
-          <div>
-            <p className="font-medium">{value}</p>
-            <p className="text-xs text-gray-500">{row.category}</p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "stock",
-      label: "Stock",
-      width: "15%",
-      render: (value) => (
-        <span
-          className={`font-medium ${value < 5 ? "text-red-600" : "text-yellow-600"}`}
-        >
-          {value} units
-        </span>
-      ),
-      sortable: true,
-    },
-    {
-      key: "price",
-      label: "Price",
-      width: "15%",
-      format: "price",
-      sortable: true,
-    },
-    {
-      key: "category",
-      label: "Category",
-      width: "20%",
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      width: "20%",
-      render: (_, row) => (
-        <div className="flex space-x-2">
-          <button
-            onClick={() =>
-              (window.location.href = `/admin/products/edit/${row._id}`)
-            }
-            className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() =>
-              (window.location.href = `/admin/products/restock/${row._id}`)
-            }
-            className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200"
-          >
-            Restock
-          </button>
-        </div>
-      ),
-    },
-  ];
-
-  const newUsersColumns = [
-    {
-      key: "name",
-      label: "Name",
-      width: "30%",
-    },
-    {
-      key: "email",
-      label: "Email",
-      width: "40%",
-    },
-    {
-      key: "createdAt",
-      label: "Joined",
-      width: "20%",
-      format: "date",
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      width: "10%",
-      render: () => (
-        <button className="text-blue-600 hover:text-blue-800 text-sm">
-          View
-        </button>
-      ),
-    },
-  ];
+  // Status badge component
+  const StatusBadge = ({ status }) => {
+    const config = {
+      pending: { color: "bg-yellow-100 text-yellow-800", icon: Clock },
+      confirmed: { color: "bg-blue-100 text-blue-800", icon: CheckCircle },
+      out_for_delivery: { color: "bg-purple-100 text-purple-800", icon: Truck },
+      delivered: { color: "bg-green-100 text-green-800", icon: CheckCircle },
+      cancelled: { color: "bg-red-100 text-red-800", icon: XCircle },
+    };
+    const { color, icon: Icon } = config[status] || {
+      color: "bg-gray-100 text-gray-800",
+      icon: Clock,
+    };
+    return (
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color}`}
+      >
+        <Icon className="w-3 h-3 mr-1" />
+        {status.replace(/_/g, " ")}
+      </span>
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Admin Dashboard
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+              Dashboard
             </h1>
-            <p className="text-gray-600">
-              Comprehensive analytics and insights for your e-commerce platform
+            <p className="text-gray-500 mt-1">
+              Welcome back! Here's what's happening with your store today.
             </p>
           </div>
-
           <div className="flex items-center space-x-3">
             <button
               onClick={refreshData}
               disabled={loading}
-              className="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
             >
               <RefreshCw
                 className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
@@ -351,16 +172,16 @@ const Dashboard = () => {
         </div>
 
         {/* Period Selector */}
-        <div className="flex items-center space-x-2 mt-4">
-          <Filter className="h-4 w-4 text-gray-500" />
+        <div className="flex flex-wrap items-center gap-2 mt-6 p-1 bg-white rounded-xl shadow-sm border border-gray-200">
+          <Filter className="h-4 w-4 text-gray-400 ml-2" />
           {["today", "week", "month", "year", "all"].map((p) => (
             <button
               key={p}
               onClick={() => handlePeriodChange(p)}
-              className={`px-3 py-1 rounded-lg text-sm ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 period === p
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
               }`}
             >
               {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -370,7 +191,7 @@ const Dashboard = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {loading && !analytics
           ? Array(8)
               .fill(0)
@@ -380,202 +201,225 @@ const Dashboard = () => {
             ))}
       </div>
 
-      {/* Charts Section */}
-      {activeTab === "overview" && (
-        <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <RevenueChart
-              data={analytics?.analytics?.revenueOverTime || []}
-              period={period}
-              onPeriodChange={handlePeriodChange}
-            />
+      {/* Charts Row 1 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <RevenueChart
+          data={analytics?.analytics?.revenueOverTime || []}
+          period={period}
+          onPeriodChange={handlePeriodChange}
+          height={320}
+        />
+        <StatusPieChart
+          data={analytics?.analytics?.ordersByStatus || []}
+          height={320}
+        />
+      </div>
 
-            <StatusPieChart data={analytics?.analytics?.ordersByStatus || []} />
+      {/* Charts Row 2 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <TopProductsChart
+          data={analytics?.analytics?.topProducts || []}
+          height={320}
+        />
+        <CategoryChart
+          data={analytics?.analytics?.salesByCategory || []}
+          height={320}
+        />
+      </div>
+
+      {/* Data Tables Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Recent Orders - takes 2 columns on large screens */}
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Recent Orders
+              </h3>
+              <button
+                onClick={() => (window.location.href = "/admin/orders")}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                View All →
+              </button>
+            </div>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <TopProductsChart data={analytics?.analytics?.topProducts || []} />
-
-            <CategoryChart data={analytics?.analytics?.salesByCategory || []} />
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-3 text-left">Order ID</th>
+                  <th className="px-6 py-3 text-left">Customer</th>
+                  <th className="px-6 py-3 text-left">Amount</th>
+                  <th className="px-6 py-3 text-left">Status</th>
+                  <th className="px-6 py-3 text-left">Date</th>
+                  <th className="px-6 py-3 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {recentOrders.slice(0, 5).map((order) => (
+                  <tr
+                    key={order._id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 font-mono text-sm text-gray-900">
+                      #{order._id.substring(0, 8)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {order.user?.name || "Guest"}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {order.user?.email}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      {formatPrice(order.totalPrice)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <StatusBadge status={order.status} />
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {formatDate(order.createdAt)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() =>
+                          (window.location.href = `/admin/orders/${order._id}`)
+                        }
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium inline-flex items-center"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {recentOrders.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-6 py-8 text-center text-gray-500"
+                    >
+                      No recent orders
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        </>
-      )}
+        </div>
 
-      {/* Tables Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Quick Stats Sidebar */}
+        {/* Right Column: Low Stock + Top Customers */}
         <div className="space-y-6">
           {/* Low Stock Products */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4 border-b border-amber-100">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-gray-900">
-                    Low Stock Alert
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-0.5">
-                    Items requiring attention
-                  </p>
-                </div>
-                <div className="bg-amber-100 p-2 rounded-lg">
-                  <AlertTriangle className="h-5 w-5 text-amber-600" />
-                </div>
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <AlertTriangle className="h-5 w-5 text-amber-500 mr-2" />
+                  Low Stock Alert
+                </h3>
+                <button
+                  onClick={() =>
+                    (window.location.href = "/admin/products?filter=low-stock")
+                  }
+                  className="text-sm text-amber-600 hover:text-amber-800 font-medium"
+                >
+                  View All
+                </button>
               </div>
             </div>
-
             <div className="p-4">
-              <div className="space-y-3">
-                {analytics?.tables?.lowStockProducts
-                  ?.slice(0, 5)
-                  .map((product) => (
+              {lowStockProducts.length > 0 ? (
+                <div className="space-y-3">
+                  {lowStockProducts.slice(0, 4).map((product) => (
                     <div
                       key={product._id}
-                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-100"
+                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                     >
                       <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg flex items-center justify-center">
                         <Package className="h-5 w-5 text-amber-700" />
                       </div>
-
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate text-sm">
+                        <p className="font-medium text-gray-900 truncate">
                           {product.name}
                         </p>
                         <p className="text-xs text-gray-500">
                           {product.category}
                         </p>
                       </div>
-
                       <div className="text-right">
-                        <p className="font-semibold text-amber-700 text-sm">
+                        <p className="font-semibold text-amber-700">
                           {product.stock}
                         </p>
                         <p className="text-xs text-gray-500">units</p>
                       </div>
                     </div>
                   ))}
-
-                {analytics?.tables?.lowStockProducts?.length === 0 && (
-                  <div className="text-center py-8">
-                    <div className="bg-green-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Package className="h-6 w-6 text-green-600" />
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      All products in stock
-                    </p>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="bg-green-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <Package className="h-6 w-6 text-green-600" />
                   </div>
-                )}
-              </div>
-
-              {analytics?.tables?.lowStockProducts?.length > 0 && (
-                <button
-                  onClick={() =>
-                    (window.location.href = "/admin/products?filter=low-stock")
-                  }
-                  className="w-full mt-4 py-2.5 text-sm text-amber-700 hover:text-amber-800 font-medium bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors"
-                >
-                  View All ({analytics.tables.lowStockProducts.length}) →
-                </button>
+                  <p className="text-sm text-gray-600">All products in stock</p>
+                </div>
               )}
             </div>
           </div>
+
+          {/* Top Customers */}
+          {topCustomers.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <Users className="h-5 w-5 text-blue-500 mr-2" />
+                  Top Customers
+                </h3>
+              </div>
+              <div className="p-4">
+                <div className="space-y-4">
+                  {topCustomers.slice(0, 3).map((customer, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {customer.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {customer.email}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900">
+                          {formatPrice(customer.totalSpent)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {customer.orderCount} orders
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => (window.location.href = "/admin/users")}
+                  className="mt-4 w-full py-2 text-sm text-blue-600 hover:text-blue-800 font-medium bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                >
+                  View All Customers →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Top Customers Section */}
-      {analytics?.analytics?.topCustomers &&
-        analytics.analytics.topCustomers.length > 0 && (
-          <div className="bg-white rounded-xl border p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Top Customers
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Most valuable customers by total spending
-                </p>
-              </div>
-              <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                View All →
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                      Customer
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                      Orders
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                      Total Spent
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                      Avg Order
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                      Last Order
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {analytics.analytics.topCustomers
-                    .slice(0, 5)
-                    .map((customer, index) => (
-                      <tr key={index} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-4">
-                          <div>
-                            <p className="font-medium">{customer.name}</p>
-                            <p className="text-sm text-gray-500">
-                              {customer.email}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm">
-                            {customer.orderCount}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 font-medium">
-                          {formatPrice(customer.totalSpent)}
-                        </td>
-                        <td className="py-3 px-4">
-                          {formatPrice(
-                            customer.avgOrderValue ||
-                              customer.totalSpent / customer.orderCount,
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-gray-500">
-                          {customer.lastOrder
-                            ? formatDate(customer.lastOrder, "relative")
-                            : "N/A"}
-                        </td>
-                        <td className="py-3 px-4">
-                          <button
-                            onClick={() =>
-                              (window.location.href = `/admin/users/${customer.userId}`)
-                            }
-                            className="text-blue-600 hover:text-blue-800 text-sm"
-                          >
-                            View Profile
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
       {/* Performance Metrics */}
       <div className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-2xl shadow-lg border border-slate-200 p-8 relative overflow-hidden">
-        {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100/30 to-purple-100/30 rounded-full blur-3xl -z-0"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-green-100/30 to-yellow-100/30 rounded-full blur-3xl -z-0"></div>
 

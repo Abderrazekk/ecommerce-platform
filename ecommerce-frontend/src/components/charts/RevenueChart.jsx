@@ -1,12 +1,18 @@
 import React from 'react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, Area, Bar, BarChart 
+  Tooltip, ResponsiveContainer, Area
 } from 'recharts';
 import { formatPrice } from '../../utils/formatPrice';
 import AnalyticsChart from '../admin/AnalyticsChart';
 
-const RevenueChart = ({ data = [], period = 'month', onPeriodChange, title = "Revenue Over Time" }) => {
+const RevenueChart = ({ 
+  data = [], 
+  period = 'month', 
+  onPeriodChange, 
+  title = "Revenue Over Time",
+  height = 300  // new prop with default 300px
+}) => {
   const formatDate = (date) => {
     try {
       const d = new Date(date);
@@ -71,7 +77,8 @@ const RevenueChart = ({ data = [], period = 'month', onPeriodChange, title = "Re
       period={period}
       onPeriodChange={onPeriodChange}
     >
-      <ResponsiveContainer width="100%" height="100%">
+      {/* Use numeric height instead of "100%" */}
+      <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis 
