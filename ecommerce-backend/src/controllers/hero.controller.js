@@ -188,26 +188,16 @@ const updateHero = asyncHandler(async (req, res) => {
         imagesToDeleteArray = imagesToDelete;
       }
     } catch (error) {
-      console.error("Error parsing imagesToDelete:", error);
-      // Continue without deleting images if parsing fails
+      // Silently ignore parsing errors – no images will be deleted
     }
   }
 
   // Handle image deletion if specified
   if (imagesToDeleteArray.length > 0) {
-    console.log("Deleting images from Cloudinary:", imagesToDeleteArray);
-
     // Delete from Cloudinary
     const deletePromises = imagesToDeleteArray.map((publicId) => {
       if (publicId && typeof publicId === "string") {
-        return cloudinary.uploader.destroy(publicId).catch((err) => {
-          console.error(
-            `Failed to delete image ${publicId} from Cloudinary:`,
-            err,
-          );
-          // Don't throw, continue with other deletions
-          return null;
-        });
+        return cloudinary.uploader.destroy(publicId).catch(() => null);
       }
       return Promise.resolve(null);
     });
@@ -218,7 +208,6 @@ const updateHero = asyncHandler(async (req, res) => {
     hero.images = hero.images.filter(
       (img) => !imagesToDeleteArray.includes(img.public_id),
     );
-    console.log(`Removed ${imagesToDeleteArray.length} images from hero`);
   }
 
   // Update basic fields if provided
@@ -262,7 +251,6 @@ const updateHero = asyncHandler(async (req, res) => {
   }
 
   // Handle new image uploads
-  // Handle new image uploads
   if (req.files && req.files.length > 0) {
     const totalImages = hero.images.length + req.files.length;
     if (totalImages > 6) {
@@ -283,14 +271,12 @@ const updateHero = asyncHandler(async (req, res) => {
           },
           (error, result) => {
             if (error) {
-              // Normalize error
               reject(
                 error instanceof Error
                   ? error
                   : new Error(error || "Cloudinary upload callback error"),
               );
             } else {
-              // ✅ Declare overlayIndex here, before it is used
               const overlayIndex = hero.images.length + index;
               resolve({
                 public_id: result.public_id,
@@ -307,7 +293,6 @@ const updateHero = asyncHandler(async (req, res) => {
           },
         );
 
-        // Stream error handler
         uploadStream.on("error", (err) => {
           reject(
             err instanceof Error
