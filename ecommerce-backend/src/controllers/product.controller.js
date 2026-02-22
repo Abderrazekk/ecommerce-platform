@@ -15,7 +15,6 @@ const uploadImagesToCloudinary = async (files) => {
         },
         (error, result) => {
           if (error) {
-            console.error("Cloudinary upload error:", error);
             reject(error);
           } else {
             resolve({
@@ -42,10 +41,8 @@ const uploadVideoToCloudinary = async (file) => {
       },
       (error, result) => {
         if (error) {
-          console.error("Cloudinary video upload error:", error);
           reject(error);
         } else {
-          console.log("Video uploaded successfully:", result.public_id);
           resolve(result.secure_url);
         }
       },
@@ -74,9 +71,8 @@ const deleteVideoFromCloudinary = async (videoUrl) => {
       "ecommerce/products/videos/" + publicIdWithExtension.split(".")[0];
 
     await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
-    console.log("Video deleted from Cloudinary:", publicId);
   } catch (error) {
-    console.error("Error deleting video from Cloudinary:", error);
+    // Ignore deletion errors, continue
   }
 };
 
@@ -245,10 +241,6 @@ const getProductById = asyncHandler(async (req, res) => {
 });
 
 const createProduct = asyncHandler(async (req, res) => {
-  console.log("=== CREATE PRODUCT REQUEST ===");
-  console.log("Request body:", req.body);
-  console.log("Request files:", req.files); // req.files is now an array
-
   const {
     name,
     brand,
@@ -283,10 +275,6 @@ const createProduct = asyncHandler(async (req, res) => {
         if (idx !== null) {
           if (!colorFilesMap[idx]) colorFilesMap[idx] = [];
           colorFilesMap[idx].push(file);
-        } else {
-          console.warn(
-            `Ignored file with unknown fieldname: ${file.fieldname}`,
-          );
         }
       }
     });
@@ -295,7 +283,6 @@ const createProduct = asyncHandler(async (req, res) => {
   // ----- Validation -----
   // 1. Main images are required (at least one)
   if (mainImageFiles.length === 0) {
-    console.log("No main images in request");
     res.status(400);
     throw new Error("Please upload at least one product image");
   }
@@ -327,7 +314,6 @@ const createProduct = asyncHandler(async (req, res) => {
     try {
       colors = JSON.parse(req.body.colors); // expected: [{ name, hex }, ...]
     } catch (err) {
-      console.error("Error parsing colors JSON:", err);
       res.status(400);
       throw new Error("Invalid colors format. Must be a valid JSON array.");
     }
@@ -347,25 +333,16 @@ const createProduct = asyncHandler(async (req, res) => {
         );
       }
     }
-
-    // Check that the number of colors matches the files indices (optional)
-    // The files map may have indices that don't exist in the colors array – we ignore extra files.
   }
 
   try {
     // ----- Upload main images -----
-    console.log(
-      `Uploading ${mainImageFiles.length} main images to Cloudinary...`,
-    );
     const uploadedImages = await uploadImagesToCloudinary(mainImageFiles);
-    console.log("Main images uploaded successfully:", uploadedImages.length);
 
     // ----- Upload video if present -----
     let videoUrl = null;
     if (videoFile) {
-      console.log("Uploading video to Cloudinary...");
       videoUrl = await uploadVideoToCloudinary(videoFile);
-      console.log("Video uploaded successfully:", videoUrl);
     }
 
     // ----- Upload color images -----
@@ -373,9 +350,6 @@ const createProduct = asyncHandler(async (req, res) => {
       for (let i = 0; i < colors.length; i++) {
         const filesForThisColor = colorFilesMap[i] || [];
         if (filesForThisColor.length > 0) {
-          console.log(
-            `Uploading ${filesForThisColor.length} images for color ${colors[i].name}...`,
-          );
           const urls = await uploadColorImages(filesForThisColor);
           colors[i].images = urls; // store URLs in the color object
         } else {
@@ -409,18 +383,15 @@ const createProduct = asyncHandler(async (req, res) => {
       colors: colors,
     });
 
-    console.log("Product created successfully:", product._id);
     res.status(201).json({ success: true, product });
   } catch (error) {
-    console.error("Error in createProduct:", error);
-
     // ----- Cleanup on failure -----
     // Attempt to delete any uploaded files (best effort)
     if (uploadedImages && uploadedImages.length > 0) {
       try {
         await deleteImagesFromCloudinary(uploadedImages);
       } catch (cleanupError) {
-        console.error("Error cleaning up main images:", cleanupError);
+        // Ignore cleanup errors
       }
     }
 
@@ -428,7 +399,7 @@ const createProduct = asyncHandler(async (req, res) => {
       try {
         await deleteVideoFromCloudinary(videoUrl);
       } catch (cleanupError) {
-        console.error("Error cleaning up video:", cleanupError);
+        // Ignore cleanup errors
       }
     }
 
@@ -444,7 +415,7 @@ const createProduct = asyncHandler(async (req, res) => {
           });
           await Promise.all(deletePromises);
         } catch (cleanupError) {
-          console.error("Error cleaning up color images:", cleanupError);
+          // Ignore cleanup errors
         }
       }
     }
@@ -458,11 +429,6 @@ const createProduct = asyncHandler(async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 const updateProduct = asyncHandler(async (req, res) => {
-  console.log("=== UPDATE PRODUCT REQUEST ===");
-  console.log("Product ID:", req.params.id);
-  console.log("Request body:", req.body);
-  console.log("Request files:", req.files); // req.files is now an array from upload.any()
-
   const product = await Product.findById(req.params.id);
 
   if (!product) {
@@ -557,10 +523,6 @@ const updateProduct = asyncHandler(async (req, res) => {
           const idx = parseInt(match[1], 10);
           if (!colorFilesMap[idx]) colorFilesMap[idx] = [];
           colorFilesMap[idx].push(file);
-        } else {
-          console.warn(
-            `Ignored file with unknown fieldname: ${file.fieldname}`,
-          );
         }
       }
     });
@@ -575,9 +537,6 @@ const updateProduct = asyncHandler(async (req, res) => {
   // ----- Upload new main images if provided -----
   if (mainImageFiles.length > 0) {
     try {
-      console.log(
-        `Uploading ${mainImageFiles.length} new main images to Cloudinary...`,
-      );
       const uploadedImages = await uploadImagesToCloudinary(mainImageFiles);
 
       // APPEND new images to existing images
@@ -593,10 +552,7 @@ const updateProduct = asyncHandler(async (req, res) => {
             " images.",
         );
       }
-
-      console.log(`Total images after appending: ${newImages.length}`);
     } catch (uploadError) {
-      console.error("Error uploading new main images:", uploadError);
       throw new Error("Failed to upload new main images");
     }
   }
@@ -604,20 +560,15 @@ const updateProduct = asyncHandler(async (req, res) => {
   // ----- Upload new video if provided -----
   if (videoFile) {
     try {
-      console.log("Uploading new video to Cloudinary...");
       newVideoUrl = await uploadVideoToCloudinary(videoFile);
 
       if (oldVideoUrl) {
-        console.log("Deleting old video from Cloudinary...");
         await deleteVideoFromCloudinary(oldVideoUrl);
       }
     } catch (uploadError) {
-      console.error("Error uploading new video:", uploadError);
       throw new Error("Failed to upload new video");
     }
   } else if (req.body.removeVideo === "true") {
-    console.log("Removing existing video as requested...");
-
     if (oldVideoUrl) {
       await deleteVideoFromCloudinary(oldVideoUrl);
     }
@@ -633,7 +584,6 @@ const updateProduct = asyncHandler(async (req, res) => {
     try {
       updatedColors = JSON.parse(req.body.colors); // client sends full updated array
     } catch (err) {
-      console.error("Error parsing colors JSON:", err);
       res.status(400);
       throw new Error("Invalid colors format. Must be a valid JSON array.");
     }
@@ -663,14 +613,10 @@ const updateProduct = asyncHandler(async (req, res) => {
 
       if (filesForThisColor.length > 0) {
         // Upload new images for this color
-        console.log(
-          `Uploading ${filesForThisColor.length} images for color ${color.name}...`,
-        );
         const newUrls = await uploadColorImages(filesForThisColor);
 
         // If the color previously had images, delete the old ones from Cloudinary
         if (color.images && color.images.length > 0) {
-          console.log(`Deleting old images for color ${color.name}...`);
           await Promise.all(
             color.images.map(async (url) => {
               try {
@@ -679,10 +625,7 @@ const updateProduct = asyncHandler(async (req, res) => {
                   `ecommerce/products/colors/${publicId}`,
                 );
               } catch (delErr) {
-                console.error(
-                  `Failed to delete old color image: ${url}`,
-                  delErr,
-                );
+                // Ignore deletion errors
               }
             }),
           );
@@ -690,10 +633,8 @@ const updateProduct = asyncHandler(async (req, res) => {
 
         // Replace with new URLs
         color.images = newUrls;
-      } else {
-        // Keep existing images – they are already in color.images from the client
-        // (client must send the full array of URLs for unchanged colors)
       }
+      // else keep existing images – they are already in color.images from the client
     }
   }
 
@@ -738,8 +679,6 @@ const updateProduct = asyncHandler(async (req, res) => {
     updateData.isOnSaleSection =
       isOnSaleSection === "true" || isOnSaleSection === true;
   }
-
-  console.log("Updating product with data:", updateData);
 
   const updatedProduct = await Product.findByIdAndUpdate(
     req.params.id,
@@ -898,6 +837,7 @@ const getSimilarProducts = asyncHandler(async (req, res) => {
 
   return res.json({ success: true, products: similarProducts });
 });
+
 // Helper: Upload multiple color images to Cloudinary
 const uploadColorImages = async (files) => {
   if (!files || files.length === 0) return [];
@@ -911,7 +851,6 @@ const uploadColorImages = async (files) => {
           },
           (error, result) => {
             if (error) {
-              console.error("Cloudinary color image upload error:", error);
               reject(error);
             } else {
               resolve(result.secure_url);
