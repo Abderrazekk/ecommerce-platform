@@ -19,8 +19,8 @@ import {
   editComment,
   removeComment,
   fetchProductComments,
-  selectCommentsByProductId,
-  selectRatingSummaryByProductId,
+  makeSelectProductComments,
+  makeSelectProductRatingSummary,
 } from "../../redux/slices/comment.slice";
 
 const ProductComments = ({ productId }) => {
@@ -44,18 +44,19 @@ const ProductComments = ({ productId }) => {
     error,
   } = useSelector((state) => state.comments);
 
-  const currentComments = useSelector(
-    useMemo(
-      () => (state) => selectCommentsByProductId(state, productId),
-      [productId],
-    ),
+  // Create memoized selectors for this productId
+  const selectComments = useMemo(() => makeSelectProductComments(), []);
+  const selectRatingSummary = useMemo(
+    () => makeSelectProductRatingSummary(),
+    [],
   );
 
-  const ratingSummary = useSelector(
-    useMemo(
-      () => (state) => selectRatingSummaryByProductId(state, productId),
-      [productId],
-    ),
+  const currentComments = useSelector((state) =>
+    selectComments(state, productId),
+  );
+
+  const ratingSummary = useSelector((state) =>
+    selectRatingSummary(state, productId),
   );
 
   const displayedComments = useMemo(
@@ -224,7 +225,7 @@ const ProductComments = ({ productId }) => {
         </h2>
       </div>
 
-      {/* Add Review Form – cleaner, with focus states */}
+      {/* Add Review Form */}
       {isAuthenticated ? (
         <div className="bg-gray-50/80 rounded-xl p-5 border border-gray-100">
           <h3 className="text-base font-medium text-gray-900 mb-4">

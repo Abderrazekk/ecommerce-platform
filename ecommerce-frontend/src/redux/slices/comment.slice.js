@@ -6,7 +6,7 @@ import {
 import commentService from "../../services/comment.service";
 import { toast } from "react-hot-toast";
 
-// Async thunks
+// Async thunks (unchanged)
 export const fetchProductComments = createAsyncThunk(
   "comments/fetchByProduct",
   async (
@@ -157,7 +157,7 @@ const commentSlice = createSlice({
           };
         }
       })
-      // Add comment - FIXED: Handle undefined oldSummary
+      // Add comment
       .addCase(addComment.pending, (state) => {
         state.submitting = true;
       })
@@ -167,7 +167,6 @@ const commentSlice = createSlice({
         const { product } = comment;
 
         if (!state.commentsByProduct[product]) {
-          // Create new entry if product doesn't have comments yet
           state.commentsByProduct[product] = {
             comments: [],
             pagination: {
@@ -180,16 +179,13 @@ const commentSlice = createSlice({
           };
         }
 
-        // Add comment to the beginning
         state.commentsByProduct[product].comments.unshift(comment);
         state.commentsByProduct[product].pagination.total += 1;
 
-        // Get old summary (or default if undefined)
         const oldSummary =
           state.commentsByProduct[product].ratingSummary ||
           getDefaultRatingSummary();
 
-        // Calculate new summary
         const totalReviews = oldSummary.count + 1;
         const newAverage = parseFloat(
           (
@@ -198,12 +194,10 @@ const commentSlice = createSlice({
           ).toFixed(1),
         );
 
-        // Update distribution
         const newDistribution = { ...oldSummary.distribution };
         newDistribution[comment.rating] =
           (newDistribution[comment.rating] || 0) + 1;
 
-        // Update state
         state.commentsByProduct[product].ratingSummary = {
           average: newAverage,
           count: totalReviews,
@@ -213,7 +207,7 @@ const commentSlice = createSlice({
       .addCase(addComment.rejected, (state) => {
         state.submitting = false;
       })
-      // Edit comment - FIXED: Handle undefined summary
+      // Edit comment
       .addCase(editComment.pending, (state) => {
         state.submitting = true;
       })
@@ -231,7 +225,6 @@ const commentSlice = createSlice({
               state.commentsByProduct[product].comments[index].rating;
             state.commentsByProduct[product].comments[index] = comment;
 
-            // Update rating summary if rating changed
             if (oldRating !== newRating) {
               const summary =
                 state.commentsByProduct[product].ratingSummary ||
@@ -239,7 +232,6 @@ const commentSlice = createSlice({
               const totalReviews = summary.count;
 
               if (totalReviews > 0) {
-                // Calculate new average
                 const newAverage = parseFloat(
                   (
                     (summary.average * totalReviews - oldRating + newRating) /
@@ -247,7 +239,6 @@ const commentSlice = createSlice({
                   ).toFixed(1),
                 );
 
-                // Update distribution
                 const newDistribution = { ...summary.distribution };
                 newDistribution[oldRating] = Math.max(
                   0,
@@ -269,11 +260,10 @@ const commentSlice = createSlice({
       .addCase(editComment.rejected, (state) => {
         state.submitting = false;
       })
-      // Delete comment - FIXED: Handle undefined summary
+      // Delete comment
       .addCase(removeComment.fulfilled, (state, action) => {
         const commentId = action.payload;
 
-        // Find and remove comment from all products
         Object.keys(state.commentsByProduct).forEach((productId) => {
           const productComments = state.commentsByProduct[productId];
           if (productComments) {
@@ -283,14 +273,11 @@ const commentSlice = createSlice({
             if (index !== -1) {
               const deletedComment = productComments.comments[index];
               productComments.comments.splice(index, 1);
-
-              // Update pagination
               productComments.pagination.total = Math.max(
                 0,
                 productComments.pagination.total - 1,
               );
 
-              // Update rating summary
               const summary =
                 productComments.ratingSummary || getDefaultRatingSummary();
               const totalReviews = Math.max(0, summary.count - 1);
@@ -303,7 +290,6 @@ const commentSlice = createSlice({
                   ).toFixed(1),
                 );
 
-                // Update distribution
                 const newDistribution = { ...summary.distribution };
                 newDistribution[deletedComment.rating] = Math.max(
                   0,
@@ -316,7 +302,6 @@ const commentSlice = createSlice({
                   distribution: newDistribution,
                 };
               } else {
-                // No reviews left
                 productComments.ratingSummary = getDefaultRatingSummary();
               }
             }
@@ -326,19 +311,7 @@ const commentSlice = createSlice({
   },
 });
 
-// Create memoized selectors to prevent unnecessary re-renders
-export const selectCommentsByProductId = (state, productId) => {
-  return state.comments.commentsByProduct[productId]?.comments || [];
-};
-
-export const selectRatingSummaryByProductId = (state, productId) => {
-  return (
-    state.comments.commentsByProduct[productId]?.ratingSummary ||
-    getDefaultRatingSummary()
-  );
-};
-
-// Factory functions for memoized selectors (alternative approach)
+// ✅ Memoized selector factories (use these to avoid warnings)
 export const makeSelectProductComments = () => {
   return createSelector(
     [(state) => state.comments.commentsByProduct, (_, productId) => productId],
@@ -356,6 +329,18 @@ export const makeSelectProductRatingSummary = () => {
         commentsByProduct[productId]?.ratingSummary || getDefaultRatingSummary()
       );
     },
+  );
+};
+
+// Non-memoized selectors (can still be used but may cause warnings)
+export const selectCommentsByProductId = (state, productId) => {
+  return state.comments.commentsByProduct[productId]?.comments || [];
+};
+
+export const selectRatingSummaryByProductId = (state, productId) => {
+  return (
+    state.comments.commentsByProduct[productId]?.ratingSummary ||
+    getDefaultRatingSummary()
   );
 };
 
