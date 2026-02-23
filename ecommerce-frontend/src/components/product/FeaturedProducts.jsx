@@ -30,9 +30,9 @@ const FeaturedProducts = () => {
   }
 
   return (
-    <div className="py-8 md:py-12 lg:py-16 bg-gradient-to-b from-white to-gray-50 min-h-screen w-full">
+    <div className="py-4 md:py-12 lg:py-5 bg-gradient-to-b from-white to-gray-50 min-h-screen w-full">
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="text-left mb-8 md:mb-12 lg:mb-16">
+        <div className="text-left mb-3 md:mb-12 lg:mb-6">
           <div className="space-y-2 md:space-y-3">
             <div className="flex items-center gap-2 md:gap-3">
               <div className="w-1 md:w-1.5 h-8 md:h-10 lg:h-12 bg-green-500 rounded-full"></div>
