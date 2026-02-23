@@ -1,4 +1,4 @@
-// Hero.jsx (Public) – Force slideshow on mobile
+// Hero.jsx (Public) – Full-width, responsive, e‑commerce style
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +14,7 @@ const Hero = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const timerRef = useRef(null);
 
-  // ---------- Mobile detection (added) ----------
+  // Mobile detection (force slideshow on mobile)
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const checkMobile = () => {
@@ -24,7 +24,6 @@ const Hero = () => {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-  // ------------------------------------------------
 
   // Calculate layout variables
   const effectiveLayout = hero
@@ -42,26 +41,23 @@ const Hero = () => {
                 : "slideshow")
     : "slideshow";
 
-  // ----- Force slideshow on mobile -----
+  // Force slideshow on mobile
   const displayLayout =
     isMobile && hero?.images?.length ? "slideshow" : effectiveLayout;
   const isSlideshowMode = displayLayout === "slideshow";
-  // -------------------------------------
 
   useEffect(() => {
     dispatch(fetchActiveHero());
   }, [dispatch]);
 
-  // Timer management effect
+  // Timer management
   useEffect(() => {
     if (hero?.images?.length > 0) {
-      // Clear any existing timer
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
 
-      // Start auto-rotation if enabled or in slideshow mode
       if ((hero.autoRotate && isAutoRotating) || isSlideshowMode) {
         const intervalTime = hero.rotationInterval || 5000;
 
@@ -124,6 +120,7 @@ const Hero = () => {
   }
 
   if (error || !hero) {
+    // Fallback hero (unchanged)
     return (
       <div className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-primary-900/20"></div>
@@ -191,16 +188,15 @@ const Hero = () => {
     large: "text-lg md:text-xl lg:text-2xl",
   };
 
-  // Render image with overlay
+  // Render image with overlay for static layouts (unchanged)
   const renderImageWithOverlay = (image, index) => {
     return (
       <div
         key={`${image.public_id}-${index}`}
         className="absolute inset-0 w-full h-full"
         style={{
-          opacity: isSlideshowMode ? (index === currentIndex ? 1 : 0) : 1,
-          transition: `opacity ${hero.transitionSpeed || 1000}ms ease-in-out`,
-          zIndex: isSlideshowMode ? (index === currentIndex ? 1 : 0) : 1,
+          opacity: 1, // static layouts always visible
+          zIndex: 1,
         }}
       >
         <img
@@ -213,10 +209,10 @@ const Hero = () => {
             e.target.style.backgroundColor = "#f3f4f6";
           }}
         />
-        {/* Gradient Overlay for image - this is only for image enhancement */}
+        {/* Gradient overlay for image enhancement */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none"></div>
 
-        {/* Text Overlay for image (per image overlay) */}
+        {/* Text overlay */}
         {image.overlayText && (
           <div
             className={`absolute ${overlayPositionClasses[image.overlayPosition]} ${textSizeClasses[image.textSize]} font-semibold text-white drop-shadow-xl backdrop-blur-sm bg-black/20 px-4 py-2 rounded-xl pointer-events-none`}
@@ -229,126 +225,175 @@ const Hero = () => {
     );
   };
 
-  // Render slideshow layout
+  // ---------- SLIDESHOW LAYOUT (dual‑layer desktop) ----------
+  // Updated renderSlideshowLayout function – replace in your Hero.jsx
+
+  // Updated renderSlideshowLayout function – replace in your Hero.jsx
+
   const renderSlideshowLayout = () => {
-    return (
-      <div className="relative h-[70vh] md:h-[85vh] overflow-hidden rounded-b-3xl lg:rounded-b-[4rem]">
-        {hero.images.map((image, index) =>
-          renderImageWithOverlay(image, index),
+    // Desktop: full width, fixed height, image covers, rounded bottom corners
+    const renderDesktopSlide = (image, index) => (
+      <div
+        key={`desktop-${image.public_id}-${index}`}
+        className="absolute inset-0 w-full h-full"
+        style={{
+          opacity: index === currentIndex ? 1 : 0,
+          transition: `opacity ${hero.transitionSpeed || 1000}ms ease-in-out`,
+          zIndex: index === currentIndex ? 1 : 0,
+        }}
+      >
+        <img
+          src={image.url}
+          alt={`${hero.title} - ${index + 1}`}
+          className="w-full h-full object-cover rounded-b-3xl lg:rounded-b-[4rem]"
+          loading={index === 0 ? "eager" : "lazy"}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-b-3xl lg:rounded-b-[4rem] pointer-events-none"></div>
+        {image.overlayText && (
+          <div
+            className={`absolute ${overlayPositionClasses[image.overlayPosition]} ${textSizeClasses[image.textSize]} font-semibold text-white drop-shadow-xl z-10`}
+            style={{ color: image.overlayColor || "#FFFFFF" }}
+          >
+            <p className="break-words max-w-xl px-6 py-3 rounded-xl backdrop-blur-sm bg-black/20">
+              {image.overlayText}
+            </p>
+          </div>
         )}
+      </div>
+    );
+
+    // Mobile: tall aspect ratio, full width, image covers, rounded bottom corners
+    const renderMobileSlide = (image, index) => (
+      <div
+        key={`mobile-${image.public_id}-${index}`}
+        className="absolute inset-0 w-full h-full"
+        style={{
+          opacity: index === currentIndex ? 1 : 0,
+          transition: `opacity ${hero.transitionSpeed || 1000}ms ease-in-out`,
+          zIndex: index === currentIndex ? 1 : 0,
+        }}
+      >
+        <img
+          src={image.url}
+          alt={`${hero.title} - ${index + 1}`}
+          className="w-full h-full object-cover rounded-b-3xl"
+          loading={index === 0 ? "eager" : "lazy"}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-b-3xl pointer-events-none"></div>
+        {image.overlayText && (
+          <div
+            className={`absolute ${overlayPositionClasses[image.overlayPosition]} ${textSizeClasses[image.textSize]} font-semibold text-white drop-shadow-xl backdrop-blur-sm bg-black/20 px-4 py-2 rounded-xl pointer-events-none`}
+            style={{ color: image.overlayColor || "#FFFFFF" }}
+          >
+            <p className="break-words">{image.overlayText}</p>
+          </div>
+        )}
+      </div>
+    );
+
+    return (
+      <div className="w-full">
+        {/* Mobile version */}
+        <div className="block md:hidden relative w-full aspect-[4/5] overflow-hidden">
+          {hero.images.map((image, index) => renderMobileSlide(image, index))}
+        </div>
+
+        {/* Desktop version */}
+        <div className="hidden md:block relative w-full h-[600px] lg:h-[700px] overflow-hidden">
+          {hero.images.map((image, index) => renderDesktopSlide(image, index))}
+        </div>
       </div>
     );
   };
 
-  // Render static layouts (uses displayLayout instead of effectiveLayout)
+  // ---------- STATIC LAYOUTS (unchanged, but with responsive image containers) ----------
   const renderStaticLayout = () => {
     const images = hero.images || [];
+
+    // Base image container classes: taller on mobile, 16:9 on desktop
+    const imageContainerClasses =
+      "relative aspect-[4/5] md:aspect-video overflow-hidden";
 
     switch (displayLayout) {
       case "2-modern":
         return (
-          <div className="h-[70vh] md:h-[85vh]">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-              {images.map((image, index) => (
-                <div
-                  key={index}
-                  className="relative h-full overflow-hidden rounded-3xl"
-                >
-                  {renderImageWithOverlay(image, index)}
-                </div>
-              ))}
-            </div>
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-1">
+            {images.map((image, index) => (
+              <div key={index} className={imageContainerClasses}>
+                {renderImageWithOverlay(image, index)}
+              </div>
+            ))}
           </div>
         );
 
       case "3-stacked":
         return (
-          <div className="h-[70vh] md:h-[85vh]">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-              <div className="md:col-span-2 h-full">
-                <div className="relative h-full overflow-hidden rounded-3xl">
-                  {images[0] && renderImageWithOverlay(images[0], 0)}
+          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-1">
+            {/* Left large image */}
+            <div className={`md:col-span-2 ${imageContainerClasses}`}>
+              {images[0] && renderImageWithOverlay(images[0], 0)}
+            </div>
+            {/* Right stacked images */}
+            <div className="grid grid-rows-2 gap-0 md:gap-1">
+              {images.slice(1, 3).map((image, index) => (
+                <div key={index + 1} className={imageContainerClasses}>
+                  {renderImageWithOverlay(image, index + 1)}
                 </div>
-              </div>
-              <div className="grid grid-rows-2 gap-6 h-full">
-                {images.slice(1, 3).map((image, index) => (
-                  <div
-                    key={index + 1}
-                    className="relative overflow-hidden rounded-3xl"
-                  >
-                    {renderImageWithOverlay(image, index + 1)}
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
           </div>
         );
 
       case "4-grid":
         return (
-          <div className="h-[70vh] md:h-[85vh]">
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-6 h-full">
-              {images.map((image, index) => (
-                <div
-                  key={index}
-                  className="relative overflow-hidden rounded-3xl"
-                >
-                  {renderImageWithOverlay(image, index)}
-                </div>
-              ))}
-            </div>
+          <div className="w-full grid grid-cols-2 md:grid-cols-2 gap-0 md:gap-1">
+            {images.map((image, index) => (
+              <div key={index} className={imageContainerClasses}>
+                {renderImageWithOverlay(image, index)}
+              </div>
+            ))}
           </div>
         );
 
       case "5-dynamic":
         return (
-          <div className="h-[70vh] md:h-[85vh]">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 h-full">
-              {images.slice(0, 2).map((image, index) => (
-                <div key={index} className="md:col-span-1 h-full">
-                  <div className="relative h-full overflow-hidden rounded-3xl">
-                    {renderImageWithOverlay(image, index)}
-                  </div>
-                </div>
-              ))}
-              {images[2] && (
-                <div className="md:col-span-1 row-span-2">
-                  <div className="relative h-full overflow-hidden rounded-3xl">
-                    {renderImageWithOverlay(images[2], 2)}
-                  </div>
-                </div>
-              )}
-              {images.slice(3).map((image, index) => (
-                <div key={index + 3} className="md:col-span-1 h-full">
-                  <div className="relative h-full overflow-hidden rounded-3xl">
-                    {renderImageWithOverlay(image, index + 3)}
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-0 md:gap-1">
+            {/* First two images */}
+            {images.slice(0, 2).map((image, index) => (
+              <div key={index} className={imageContainerClasses}>
+                {renderImageWithOverlay(image, index)}
+              </div>
+            ))}
+            {/* Middle large image (spans two rows) */}
+            {images[2] && (
+              <div className={`row-span-2 ${imageContainerClasses}`}>
+                {renderImageWithOverlay(images[2], 2)}
+              </div>
+            )}
+            {/* Remaining images */}
+            {images.slice(3).map((image, index) => (
+              <div key={index + 3} className={imageContainerClasses}>
+                {renderImageWithOverlay(image, index + 3)}
+              </div>
+            ))}
           </div>
         );
 
       case "6-stylish":
         return (
-          <div className="h-[70vh] md:h-[85vh]">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 h-full">
-              {images.map((image, index) => (
-                <div
-                  key={index}
-                  className="relative overflow-hidden rounded-3xl"
-                >
-                  {renderImageWithOverlay(image, index)}
-                </div>
-              ))}
-            </div>
+          <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-0 md:gap-1">
+            {images.map((image, index) => (
+              <div key={index} className={imageContainerClasses}>
+                {renderImageWithOverlay(image, index)}
+              </div>
+            ))}
           </div>
         );
 
       default:
         return (
-          <div className="h-[70vh] md:h-[85vh]">
-            <div className="relative h-full w-full overflow-hidden rounded-3xl">
+          <div className="w-full">
+            <div className={imageContainerClasses}>
               {images[0] && renderImageWithOverlay(images[0], 0)}
             </div>
           </div>
@@ -356,6 +401,7 @@ const Hero = () => {
     }
   };
 
+  // Navigation handlers (optional – can be used if you add controls)
   const handlePrev = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -379,7 +425,38 @@ const Hero = () => {
       <div className="relative">
         {isSlideshowMode ? renderSlideshowLayout() : renderStaticLayout()}
 
-        {/* Hero Content Overlay removed – now clicking anywhere goes to /shop */}
+        {/* Optional slideshow controls – uncomment if needed */}
+        {/* {isSlideshowMode && hero.images.length > 1 && (
+          <div className="absolute inset-x-0 bottom-6 flex justify-center space-x-4 z-20">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                handlePrev();
+              }}
+              className="p-2 bg-white/80 rounded-full shadow-lg hover:bg-white transition"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                handleNext();
+              }}
+              className="p-2 bg-white/80 rounded-full shadow-lg hover:bg-white transition"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                handleAutoRotateToggle();
+              }}
+              className="p-2 bg-white/80 rounded-full shadow-lg hover:bg-white transition"
+            >
+              {isAutoRotating ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+            </button>
+          </div>
+        )} */}
 
         <style>{`
           @keyframes fadeInUp {
