@@ -32,10 +32,10 @@ const OnSaleProducts = ({ limit = 12 }) => {
   if (products.length === 0) return null;
 
   return (
-    <section className="relative py-16 md:py-10 bg-white overflow-hidden min-h-screen flex flex-col justify-center">
+    <section className="relative py-7 md:py-5 bg-white overflow-hidden min-h-screen flex flex-col justify-center">
       <div className="relative w-full px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-left mb-8 md:mb-12 lg:mb-16">
+        <div className="text-left mb-3 md:mb-12 lg:mb-6">
           <div className="space-y-2 md:space-y-3">
             <div className="flex items-center gap-2 md:gap-3">
               <div className="w-1 md:w-1.5 h-8 md:h-10 lg:h-12 bg-green-500 rounded-full"></div>
