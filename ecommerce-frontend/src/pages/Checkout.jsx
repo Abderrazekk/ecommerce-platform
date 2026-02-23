@@ -16,9 +16,7 @@ import {
   Truck,
   AlertCircle,
   CreditCard,
-  Check,
   ChevronRight,
-  Home,
   FileText,
 } from "lucide-react";
 
@@ -37,9 +35,12 @@ const Checkout = () => {
 
   const FREE_SHIPPING_THRESHOLD = 100;
 
-  // Debug effect
+  // ✅ Redirect to cart if cart is empty (side effect, not during render)
   useEffect(() => {
-  }, [cartItems]);
+    if (cartItems.length === 0) {
+      navigate("/cart");
+    }
+  }, [cartItems, navigate]);
 
   // Calculate using discounted price if available
   const subtotal = cartItems.reduce((total, item) => {
@@ -85,7 +86,7 @@ const Checkout = () => {
 
     setLoading(true);
     try {
-      // Save shipping info
+      // Save shipping info to Redux
       dispatch(saveShippingAddress(shippingAddress));
       dispatch(savePhone(phone));
 
@@ -101,6 +102,8 @@ const Checkout = () => {
 
       await dispatch(createOrder(orderData)).unwrap();
       dispatch(clearCart());
+
+      // ✅ Redirect to My Orders page after successful order
       navigate("/my-orders");
     } catch (error) {
       console.error("Order creation failed:", error);
@@ -110,8 +113,8 @@ const Checkout = () => {
     }
   };
 
+  // If cart is empty, return null after hooks (the useEffect will handle navigation)
   if (cartItems.length === 0) {
-    navigate("/cart");
     return null;
   }
 
@@ -126,7 +129,7 @@ const Checkout = () => {
           <p className="text-gray-500 mt-2 text-lg">{t("header.subtitle")}</p>
         </div>
 
-        {/* Debug Warning Banner */}
+        {/* Debug Warning Banner (for missing shipping fees) */}
         {highestShippingFee === 0 && cartItems.length > 0 && (
           <div className="mb-8 p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4 animate-fade-in">
             <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
