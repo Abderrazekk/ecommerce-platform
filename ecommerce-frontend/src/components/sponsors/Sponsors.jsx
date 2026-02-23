@@ -109,19 +109,19 @@ const Sponsors = () => {
 
   return (
     <div className="py-12 lg:py-10 bg-gradient-to-b from-white to-gray-50 w-full overflow-hidden">
-      {/* Header */}
-      <div className="w-full text-center mb-6 lg:mb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-            {t("title")}
-          </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
+      <div className="text-left mb-8 md:mb-12 lg:mb-16 pl-8 lg:pl-12">
+        <div className="space-y-2 md:space-y-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-1 md:w-1.5 h-8 md:h-10 lg:h-12 bg-green-500 rounded-full"></div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight tracking-tight">
+              {t("title")}
+            </h2>
+          </div>
+          <p className="text-sm md:text-base lg:text-lg xl:text-xl text-gray-600 font-medium leading-relaxed pl-3 md:pl-5 lg:pl-6">
             {t("description")}
           </p>
         </div>
       </div>
-
-      {/* Scrolling container */}
       <div className="relative overflow-hidden w-full">
         {/* Gradient fade edges – always visible */}
         <div className="absolute inset-y-0 left-0 w-32 lg:w-64 bg-gradient-to-r from-white via-white to-transparent z-10 pointer-events-none" />
