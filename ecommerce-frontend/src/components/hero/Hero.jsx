@@ -231,7 +231,7 @@ const Hero = () => {
   // Updated renderSlideshowLayout function – replace in your Hero.jsx
 
   const renderSlideshowLayout = () => {
-    // Desktop: full width, fixed height, image covers, rounded bottom corners
+    // Desktop: full width, fixed height (even taller now), image covers, rounded bottom corners
     const renderDesktopSlide = (image, index) => (
       <div
         key={`desktop-${image.public_id}-${index}`}
@@ -298,14 +298,13 @@ const Hero = () => {
           {hero.images.map((image, index) => renderMobileSlide(image, index))}
         </div>
 
-        {/* Desktop version */}
-        <div className="hidden md:block relative w-full h-[600px] lg:h-[700px] overflow-hidden">
+        {/* Desktop version – taller height */}
+        <div className="hidden md:block relative w-full h-[700px] lg:h-[800px] overflow-hidden">
           {hero.images.map((image, index) => renderDesktopSlide(image, index))}
         </div>
       </div>
     );
   };
-
   // ---------- STATIC LAYOUTS (unchanged, but with responsive image containers) ----------
   const renderStaticLayout = () => {
     const images = hero.images || [];
