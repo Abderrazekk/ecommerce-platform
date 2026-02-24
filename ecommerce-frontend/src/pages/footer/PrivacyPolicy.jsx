@@ -3,49 +3,49 @@ const PrivacyPolicy = () => {
     {
       title: "Introduction",
       content:
-        "Nous prenons très au sérieux la protection de la vie privée de nos utilisateurs. La présente politique de confidentialité décrit les types d'informations que nous collectons et comment nous les utilisons. En utilisant notre site, vous acceptez les termes de cette politique.",
+        "Nous attachons une grande importance à la protection de votre vie privée. Cette politique décrit les informations que nous collectons et comment nous les utilisons. En utilisant notre site, vous acceptez ces pratiques.",
       icon: "👁️",
     },
     {
-      title: "Les informations que nous collectons",
+      title: "Informations que nous collectons",
       content:
-        "Nous collectons les informations que vous nous fournissez, telles que votre nom, votre adresse électronique et votre adresse postale. Nous collectons également des informations sur l'utilisation de notre site, telles que les pages que vous consultez et les liens sur lesquels vous cliquez, afin d'améliorer votre expérience.",
+        "Nous collectons les informations que vous nous fournissez lors de la création de votre compte ou de vos commandes, telles que votre nom, email et adresse. Nous recueillons également des données sur l'utilisation du site (pages consultées, clics) pour améliorer votre expérience.",
       icon: "📊",
     },
     {
-      title: "Comment nous utilisons les informations collectées",
+      title: "Utilisation des informations",
       content:
-        "Nous utilisons les informations que nous collectons pour fournir nos services, pour communiquer avec vous et pour améliorer notre site. Nous pouvons également utiliser ces informations pour vous envoyer des offres promotionnelles et des informations sur nos produits et services, uniquement avec votre consentement.",
+        "Les informations collectées sont utilisées pour traiter vos commandes, gérer votre compte, communiquer avec vous et améliorer nos services. Avec votre consentement, nous pouvons aussi vous envoyer des offres promotionnelles et informations sur nos produits.",
       icon: "🔄",
     },
     {
-      title: "Comment nous protégeons les informations collectées",
+      title: "Protection des informations",
       content:
-        "Nous prenons des mesures de sécurité appropriées pour protéger les informations collectées contre la perte, l'utilisation abusive et l'accès non autorisé. Nous ne divulguons pas les informations collectées à des tiers, sauf dans les cas où cela est nécessaire pour fournir nos services ou si nous y sommes légalement obligés.",
+        "Nous mettons en place des mesures de sécurité adaptées pour protéger vos données contre la perte, l’accès non autorisé ou l’utilisation abusive. Nous ne partageons vos informations avec des tiers que lorsque cela est nécessaire pour fournir nos services ou si la loi nous y oblige.",
       icon: "🔒",
     },
     {
-      title: "Les cookies",
+      title: "Cookies",
       content:
-        "Nous utilisons des cookies pour collecter des informations sur l'utilisation de notre site. Les cookies sont des fichiers texte qui sont stockés sur votre ordinateur et qui nous permettent de reconnaître votre ordinateur lorsque vous visitez notre site ultérieurement. Vous pouvez contrôler les cookies via les paramètres de votre navigateur.",
+        "Nous utilisons des cookies pour analyser l’utilisation du site et améliorer votre expérience. Ces fichiers sont stockés sur votre appareil et vous pouvez les gérer via les paramètres de votre navigateur.",
       icon: "🍪",
     },
     {
       title: "Vos droits",
       content:
-        "Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition au traitement de vos données personnelles. Vous pouvez exercer ces droits en nous contactant à l'adresse indiquée ci-dessous.",
+        "Conformément au RGPD, vous pouvez accéder, rectifier, supprimer ou limiter l’utilisation de vos données personnelles, et vous opposer à leur traitement. Pour exercer ces droits, contactez-nous à l'adresse indiquée ci-dessous.",
       icon: "⚖️",
     },
     {
-      title: "Modification de la politique de confidentialité",
+      title: "Modification de la politique",
       content:
-        "Nous nous réservons le droit de modifier cette politique de confidentialité à tout moment. Si nous apportons des modifications importantes à cette politique, nous vous en informerons en publiant une notification sur notre site et, le cas échéant, par email.",
+        "Nous pouvons mettre à jour cette politique à tout moment. Les changements importants seront signalés sur le site et, si nécessaire, par email.",
       icon: "📝",
     },
     {
-      title: "Contactez-nous",
+      title: "Contact",
       content:
-        "Si vous avez des questions ou des préoccupations concernant cette politique de confidentialité, ou si vous souhaitez exercer vos droits relatifs à vos données personnelles, n'hésitez pas à nous contacter à privacy@votresite.com.",
+        "Pour toute question concernant cette politique ou l'exercice de vos droits sur vos données personnelles, contactez-nous à l'adresse : privacy@votresite.com.",
       icon: "📧",
     },
   ];

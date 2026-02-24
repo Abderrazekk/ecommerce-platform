@@ -4,28 +4,28 @@ const ReturnPolicy = () => {
       number: "01",
       title: "Contactez-nous",
       description:
-        "Contactez notre service clientèle dans les 30 jours suivant la réception pour obtenir un numéro de retour.",
+        "Contactez notre service client dans les 7 jours suivant la réception de votre commande pour obtenir un numéro de retour.",
       icon: "📞",
     },
     {
       number: "02",
       title: "Préparez le colis",
       description:
-        "Emballez soigneusement le produit dans son emballage d'origine avec tous les accessoires.",
+        "Emballez soigneusement le produit dans son emballage d'origine avec tous les accessoires inclus.",
       icon: "📦",
     },
     {
       number: "03",
       title: "Incluez les documents",
       description:
-        "Ajoutez une copie de la facture originale et le formulaire de retour complété.",
+        "Ajoutez une copie de la facture originale et le formulaire de retour complété (fourni par notre service client).",
       icon: "📄",
     },
     {
       number: "04",
-      title: "Envoyez-nous le colis",
+      title: "Envoyez le colis",
       description:
-        "Expédiez le colis à l'adresse fournie avec le numéro de retour visible sur l'emballage.",
+        "Expédiez le colis à l'adresse fournie par notre service client. Assurez-vous que le numéro de retour soit visible sur l'emballage.",
       icon: "🚚",
     },
   ];
@@ -35,9 +35,9 @@ const ReturnPolicy = () => {
       title: "Produits éligibles",
       items: [
         "Produits non utilisés",
-        "Dans l'emballage d'origine",
-        "Avec toutes les étiquettes",
-        "Avec tous les accessoires",
+        "Dans leur emballage d'origine",
+        "Avec toutes les étiquettes intactes",
+        "Avec tous les accessoires fournis",
       ],
       icon: "✅",
     },
@@ -47,7 +47,7 @@ const ReturnPolicy = () => {
         "Produits personnalisés",
         "Articles de lingerie",
         "Produits hygiéniques",
-        "Logiciels ouverts",
+        "Logiciels ou contenus numériques ouverts",
       ],
       icon: "❌",
     },

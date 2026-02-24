@@ -3,70 +3,63 @@ const HelpFAQ = () => {
     {
       question: "Quels sont les modes de paiement acceptés ?",
       answer:
-        "Nous acceptons les paiements par carte de crédit (Visa, Mastercard, American Express), PayPal et virement bancaire.",
+        "Nous proposons actuellement le paiement à la livraison (Cash on Delivery). Vous payez votre commande directement au moment de la réception.",
       category: "Paiement",
       icon: "💳",
     },
     {
       question: "Quels sont les délais de livraison ?",
       answer:
-        "Les délais de livraison varient en fonction de la destination et du mode de livraison choisi. Vous pouvez consulter les délais de livraison estimés lors du processus de commande.",
+        "Les délais de livraison varient selon votre localisation. En général, la livraison s’effectue entre 2 et 3 jours ouvrables après la confirmation de la commande.",
       category: "Livraison",
       icon: "🚚",
     },
     {
       question: "Comment suivre ma commande ?",
       answer:
-        "Une fois votre commande expédiée, nous vous enverrons un email de confirmation contenant un lien de suivi. Vous pouvez également suivre l'état de votre commande en vous connectant à votre compte sur notre site.",
+        "Vous pouvez suivre l’état de votre commande en vous connectant à votre compte dans la section “Mes Commandes”. Le statut (En attente, Confirmée, Expédiée, Livrée) est mis à jour en temps réel.",
       category: "Commande",
       icon: "📦",
     },
     {
       question: "Puis-je annuler ma commande ?",
       answer:
-        "Vous pouvez annuler votre commande avant l'expédition de celle-ci. Veuillez nous contacter par email ou téléphone pour annuler votre commande.",
+        "Oui, vous pouvez annuler votre commande tant qu’elle n’a pas encore été expédiée. Veuillez nous contacter rapidement via la page Contact ou par email.",
       category: "Commande",
       icon: "❌",
     },
     {
       question: "Comment retourner un produit ?",
       answer:
-        "Veuillez consulter notre politique de retour pour connaître les conditions et la procédure de retour. Vous avez 30 jours pour retourner un article non utilisé.",
+        "Si vous n’êtes pas satisfait, vous pouvez demander un retour dans un délai de 7 jours après réception. Le produit doit être non utilisé et dans son emballage d’origine. Consultez notre politique de retour pour plus de détails.",
       category: "Retour",
       icon: "🔄",
     },
     {
       question: "Comment contacter le service client ?",
       answer:
-        "Vous pouvez nous contacter par email, téléphone ou via le formulaire de contact sur notre site. Nous nous efforçons de répondre à toutes les demandes dans les plus brefs délais.",
+        "Vous pouvez nous contacter via : Le formulaire disponible sur la page Contact Email Notre équipe vous répondra dans les plus brefs délais.",
       category: "Support",
       icon: "📞",
     },
     {
       question: "Les produits sont-ils garantis ?",
       answer:
-        "Tous nos produits sont garantis contre les défauts de fabrication pendant une année à compter de la date d'achat. Veuillez consulter notre politique de garantie pour plus d'informations.",
+        "Nos produits sont garantis contre tout défaut de fabrication. Pour toute réclamation, veuillez contacter le service client avec votre numéro de commande.",
       category: "Garantie",
       icon: "🛡️",
     },
     {
-      question: "Comment utiliser un code promo ?",
-      answer:
-        "Lors du processus de commande, vous pouvez entrer votre code promo dans la case prévue à cet effet. Le montant de la réduction sera automatiquement appliqué à votre commande.",
-      category: "Promotions",
-      icon: "🎁",
-    },
-    {
       question: "Comment créer un compte sur le site ?",
       answer:
-        "Pour créer un compte, cliquez sur le bouton 'Créer un compte' en haut de la page d'accueil. Vous devrez fournir votre nom, votre adresse email et un mot de passe.",
+        "Cliquez sur “S’inscrire” en haut de la page. Vous devrez renseigner votre nom, votre email et créer un mot de passe. Une fois inscrit, vous pourrez gérer vos commandes, votre profil et votre liste de souhaits.",
       category: "Compte",
       icon: "👤",
     },
     {
       question: "Est-il possible de modifier une commande déjà passée ?",
       answer:
-        "Si votre commande n'a pas encore été expédiée, vous pouvez nous contacter pour modifier votre commande. Si votre commande a déjà été expédiée, veuillez consulter notre politique de retour.",
+        "Si votre commande n’a pas encore été traitée, vous pouvez nous contacter pour effectuer une modification. Une fois expédiée, la modification ne sera plus possible, mais vous pourrez effectuer un retour selon notre politique.",
       category: "Commande",
       icon: "✏️",
     },

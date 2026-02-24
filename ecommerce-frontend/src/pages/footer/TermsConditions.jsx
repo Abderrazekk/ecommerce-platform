@@ -3,49 +3,49 @@ const TermsConditions = () => {
     {
       title: "Introduction",
       content:
-        "Les présentes conditions d'utilisation régissent l'accès et l'utilisation de notre site ecommerce. En utilisant notre site, vous acceptez ces conditions dans leur intégrité. Si vous n'êtes pas d'accord avec ces conditions, vous ne devez pas utiliser notre site.",
+        "Les présentes conditions régissent l'accès et l'utilisation de notre site e-commerce. En utilisant notre site, vous acceptez ces conditions. Si vous n'êtes pas d'accord, merci de ne pas utiliser le site.",
       icon: "📋",
     },
     {
       title: "Utilisation du site",
       content:
-        "Vous êtes autorisé à utiliser notre site pour votre usage personnel et non commercial. Vous ne pouvez pas utiliser notre site à des fins illégales ou pour causer un préjudice à une personne ou une entreprise. Vous ne pouvez pas copier, modifier ou distribuer le contenu de notre site sans notre autorisation écrite.",
+        "Vous pouvez utiliser notre site pour votre usage personnel et non commercial. Toute utilisation illégale ou nuisible est interdite. La copie, la modification ou la distribution du contenu sans autorisation écrite est interdite.",
       icon: "💻",
     },
     {
       title: "Contenu du site",
       content:
-        "Nous nous réservons le droit de modifier ou de supprimer tout contenu de notre site à tout moment, sans préavis. Nous ne garantissons pas l'exactitude, l'exhaustivité ou la pertinence de tout contenu présent sur notre site. Nous déclinons toute responsabilité pour toute perte ou tout dommage subi en raison de l'utilisation de notre site.",
+        "Nous pouvons modifier ou supprimer tout contenu à tout moment sans préavis. Nous ne garantissons pas l'exactitude ou l'exhaustivité du contenu et déclinons toute responsabilité pour toute perte ou dommage lié à l'utilisation du site.",
       icon: "📄",
     },
     {
       title: "Propriété intellectuelle",
       content:
-        "Notre site et son contenu sont protégés par les lois sur la propriété intellectuelle et les marques de commerce. Toute reproduction, distribution ou modification du contenu de notre site sans notre autorisation écrite est interdite.",
+        "Le site et son contenu sont protégés par les lois sur la propriété intellectuelle et les marques. Toute reproduction, distribution ou modification sans autorisation écrite est interdite.",
       icon: "⚖️",
     },
     {
-      title: "Liens vers d'autres sites",
+      title: "Liens externes",
       content:
-        "Notre site peut contenir des liens vers d'autres sites web. Nous ne sommes pas responsables du contenu de ces sites ou des dommages qui pourraient résulter de leur utilisation. L'accès à ces sites se fait à vos propres risques.",
+        "Notre site peut contenir des liens vers d'autres sites. Nous ne sommes pas responsables du contenu de ces sites ni des dommages liés à leur utilisation. L'accès se fait à vos risques et périls.",
       icon: "🔗",
     },
     {
       title: "Limitation de responsabilité",
       content:
-        "Nous déclinons toute responsabilité pour toute perte ou tout dommage résultant de l'utilisation de notre site ou de son contenu. Nous ne sommes pas responsables des erreurs ou des omissions dans le contenu de notre site. Nous ne garantissons pas que notre site sera exempt d'interruptions, d'erreurs ou de virus.",
+        "Nous déclinons toute responsabilité pour les pertes ou dommages liés à l'utilisation du site ou de son contenu. Nous ne garantissons pas que le site sera exempt d'interruptions, d'erreurs ou de virus.",
       icon: "⚠️",
     },
     {
       title: "Modification des conditions",
       content:
-        "Nous nous réservons le droit de modifier ces conditions d'utilisation à tout moment. Votre utilisation continue de notre site après la modification de ces conditions constitue votre acceptation de ces modifications. Nous vous encourageons à consulter régulièrement cette page.",
+        "Nous pouvons modifier ces conditions à tout moment. L'utilisation continue du site après modification constitue acceptation des nouvelles conditions. Nous recommandons de consulter cette page régulièrement.",
       icon: "🔄",
     },
     {
       title: "Loi applicable",
       content:
-        "Les présentes conditions d'utilisation sont régies par les lois de la Tunisie. Tout litige découlant de l'utilisation de notre site sera soumis à la juridiction exclusive des tribunaux compétents de la Tunisie.",
+        "Ces conditions sont régies par les lois de la Tunisie. Tout litige lié à l'utilisation du site sera soumis aux tribunaux compétents de Tunisie.",
       icon: "🌍",
     },
   ];

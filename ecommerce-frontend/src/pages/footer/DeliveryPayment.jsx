@@ -5,34 +5,24 @@ const DeliveryPayment = () => {
       icon: "🚚",
       items: [
         {
-          question: "Comment sont calculés les frais de livraison ?",
+          question: "Quels sont les délais de livraison ?",
           answer:
-            "Les frais de livraison dépendent de la destination, du poids et de la taille de votre commande, ainsi que du mode de livraison choisi. Vous pouvez voir les frais de livraison exacts lors du processus de commande, avant de finaliser votre achat.",
+            "Les délais de livraison varient selon votre localisation. En général, la livraison s’effectue entre 2 et 5 jours ouvrables après la confirmation de la commande.",
         },
         {
-          question: "Quels sont les modes de livraison proposés ?",
+          question: "Livrez-vous à l'international ?",
           answer:
-            "Nous proposons plusieurs options de livraison, y compris la livraison standard, express et en point relais. Le choix des options de livraison dépend de la destination et du poids de votre commande.",
+            "Oui, nous livrons à l'international. Les frais et délais dépendent de la destination et du mode de livraison choisi.",
+        },
+        {
+          question: "Puis-je suivre ma livraison ?",
+          answer:
+            "Une fois votre commande expédiée, vous recevrez un email de confirmation avec un lien de suivi. Vous pouvez également suivre votre commande dans la section **Mes Commandes** de votre compte.",
         },
         {
           question: "Les frais de livraison sont-ils remboursables ?",
           answer:
             "Les frais de livraison ne sont pas remboursables sauf en cas d'erreur de notre part ou de produit défectueux.",
-        },
-        {
-          question: "Puis-je suivre ma livraison ?",
-          answer:
-            "Une fois votre commande expédiée, nous vous enverrons un email de confirmation contenant un lien de suivi. Vous pouvez également suivre l'état de votre commande en vous connectant à votre compte sur notre site.",
-        },
-        {
-          question: "Livrez-vous à l'international ?",
-          answer:
-            "Oui, nous livrons à l'international. Les frais de livraison et les délais de livraison varient en fonction de la destination et du mode de livraison choisi.",
-        },
-        {
-          question: "Est-ce que les frais de livraison sont offerts ?",
-          answer:
-            "Nous offrons la livraison gratuite pour les commandes dépassant 100€. Les détails et les conditions de l'offre de livraison gratuite sont disponibles sur notre site.",
         },
       ],
     },
@@ -43,17 +33,17 @@ const DeliveryPayment = () => {
         {
           question: "Comment suivre ma commande ?",
           answer:
-            "Pour suivre votre commande, veuillez vous connecter à votre compte sur notre site et accéder à la page de suivi de commande. Vous y trouverez les informations de suivi de votre commande.",
+            "Connectez-vous à votre compte et accédez à **Mes Commandes** pour suivre l'état de votre commande en temps réel.",
         },
         {
           question: "Quand ma commande sera-t-elle expédiée ?",
           answer:
-            "Nous expédions généralement les commandes dans un délai de 24 à 48 heures suivant la confirmation de la commande. Si vous avez des questions sur le délai d'expédition de votre commande, veuillez nous contacter.",
+            "Les commandes sont généralement expédiées dans les 24 à 48 heures suivant la confirmation. Pour toute question sur l'expédition, contactez notre support.",
         },
         {
-          question: "Comment suivre l'expédition de ma commande ?",
+          question: "Puis-je annuler ou modifier ma commande ?",
           answer:
-            "Nous vous enverrons un email de confirmation d'expédition avec les informations de suivi de votre commande dès que celle-ci aura été expédiée.",
+            "Vous pouvez annuler ou modifier votre commande tant qu'elle n’a pas été expédiée. Une fois expédiée, veuillez consulter notre politique de retour.",
         },
       ],
     },
@@ -62,24 +52,19 @@ const DeliveryPayment = () => {
       icon: "💳",
       items: [
         {
-          question: "Quels modes de paiement acceptez-vous ?",
+          question: "Quels sont les modes de paiement acceptés ?",
           answer:
-            "Nous acceptons les cartes de crédit (Visa, Mastercard, American Express), PayPal, Apple Pay et les virements bancaires.",
+            "Nous proposons le paiement à la livraison (Cash on Delivery). Le paiement se fait directement lors de la réception de la commande.",
         },
         {
           question: "Mes informations de paiement sont-elles sécurisées ?",
           answer:
-            "Oui, toutes les transactions sont cryptées avec la technologie SSL et nous ne stockons jamais vos informations de carte bancaire.",
+            "Oui, vos informations personnelles et de paiement sont protégées. Nous ne stockons jamais vos informations bancaires.",
         },
         {
-          question: "Puis-je payer en plusieurs fois ?",
+          question: "Puis-je utiliser un code promo ?",
           answer:
-            "Oui, nous proposons le paiement en 3 ou 4 fois sans frais pour les commandes supérieures à 150€.",
-        },
-        {
-          question: "Quand serai-je débité ?",
-          answer:
-            "Le débit est effectué au moment de la validation de votre commande. En cas de paiement en plusieurs fois, les débits suivants sont prélevés automatiquement chaque mois.",
+            "Oui, vous pouvez entrer votre code promo lors du passage à la caisse. La réduction sera appliquée automatiquement avant confirmation.",
         },
       ],
     },

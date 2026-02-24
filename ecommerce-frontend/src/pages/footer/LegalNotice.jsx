@@ -3,43 +3,37 @@ const LegalNotice = () => {
     {
       title: "Identification du site",
       content:
-        "Ce site ecommerce est édité par Monsieur Benhadjmbarek Abderazek, dont le siège social est situé à kalaar el andalous, ariana.",
+        "Ce site e-commerce est édité par Monsieur Benhadjmbarek Abderazek, dont le siège social est situé à Kalaa El Andalous, Ariana, Tunisie.",
       icon: "🏢",
-    },
-    {
-      title: "Numéro d'identification",
-      content:
-        "[RCS/ SIRET/ N° TVA/ NAF] : [numéro d'identification de l'entreprise].",
-      icon: "📋",
     },
     {
       title: "Directeur de la publication",
       content:
-        "[Nom et prénom du directeur de la publication], en qualité de [fonction du directeur de la publication], est responsable du contenu éditorial du site.",
+        "Monsieur Benhadjmbarek Abderazek, en qualité de propriétaire du site, est responsable du contenu éditorial et de la publication sur ce site.",
       icon: "👨‍💼",
     },
     {
       title: "Propriété intellectuelle",
       content:
-        "Le contenu du site (textes, images, vidéos, etc.) est protégé par le droit d'auteur et autres droits de propriété intellectuelle. Toute reproduction, représentation, modification, publication, transmission, dénaturation, totale ou partielle du site ou de son contenu, par quelque procédé que ce soit, et sur quelque support que ce soit, sans l'autorisation expresse et préalable de [nom de l'entreprise] est interdite.",
+        "Tout le contenu du site (textes, images, vidéos, etc.) est protégé par le droit d'auteur et autres droits de propriété intellectuelle. Toute reproduction, modification, distribution ou représentation partielle ou totale du site, par quelque moyen que ce soit, sans autorisation préalable de Monsieur Benhadjmbarek Abderazek est interdite.",
       icon: "⚖️",
     },
     {
       title: "Liens hypertextes",
       content:
-        "Le site peut contenir des liens hypertextes vers d'autres sites web. Nous ne sommes pas responsables du contenu de ces sites ou des dommages qui pourraient résulter de leur utilisation.",
+        "Le site peut contenir des liens vers d'autres sites web. Nous ne sommes pas responsables du contenu de ces sites ni des dommages liés à leur utilisation.",
       icon: "🔗",
     },
     {
       title: "Limitation de responsabilité",
       content:
-        "Nous déclinons toute responsabilité pour toute perte ou tout dommage résultant de l'utilisation de notre site ou de son contenu. Nous ne sommes pas responsables des erreurs ou des omissions dans le contenu de notre site. Nous ne garantissons pas que notre site sera exempt d'interruptions, d'erreurs ou de virus.",
+        "Nous déclinons toute responsabilité pour toute perte ou dommage lié à l'utilisation de ce site ou de son contenu. Nous ne garantissons pas que le site sera exempt d'interruptions, d'erreurs ou de virus.",
       icon: "⚠️",
     },
     {
       title: "Loi applicable",
       content:
-        "Les présentes mentions légales sont régies par les lois de la Tunisie. Tout litige découlant de l'utilisation de notre site sera soumis à la juridiction exclusive des tribunaux compétents de la Tunisie.",
+        "Les présentes mentions légales sont régies par les lois de la Tunisie. Tout litige découlant de l'utilisation du site sera soumis aux tribunaux compétents de Tunisie.",
       icon: "📜",
     },
   ];
