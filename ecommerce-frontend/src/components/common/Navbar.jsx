@@ -458,30 +458,30 @@ const Navbar = () => {
       {/* Premium Top Header Bar */}
       <div className="bg-gradient-to-r from-gray-900 to-black text-white">
         <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center py-2 space-y-2 md:space-y-0">
-            {/* Left side - Contact Info */}
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 text-sm">
-              <div className="flex items-center gap-2 group">
-                <FaPhone className="h-4 w-4 text-primary-300 group-hover:text-primary-200 transition-colors" />
-                <a
-                  href="tel:+21655999444"
-                  className="hover:text-primary-300 transition-colors text-sm font-medium"
-                >
-                  {t("header.phone")}
-                </a>
-              </div>
-              <div className="flex items-center gap-2 group">
-                <FaEnvelope className="h-4 w-4 text-primary-300 group-hover:text-primary-200 transition-colors" />
-                <a
-                  href="mailto:Contact@shoppina.com"
-                  className="hover:text-primary-300 transition-colors text-sm font-medium"
-                >
-                  {t("header.email")}
-                </a>
-              </div>
+          <div className="flex flex-row justify-between items-center py-2">
+            {/* Left - Phone */}
+            <div className="flex items-center gap-1 group">
+              <FaPhone className="h-3 w-3 text-primary-300 group-hover:text-primary-200 transition-colors" />
+              <a
+                href="tel:+21655999444"
+                className="hover:text-primary-300 transition-colors text-xs font-medium"
+              >
+                {t("header.phone")}
+              </a>
             </div>
 
-            {/* Right side - Social Media Only */}
+            {/* Right - Email */}
+            <div className="flex items-center gap-1 group">
+              <FaEnvelope className="h-3 w-3 text-primary-300 group-hover:text-primary-200 transition-colors" />
+              <a
+                href="mailto:Contact@shoppina.com"
+                className="hover:text-primary-300 transition-colors text-xs font-medium"
+              >
+                {t("header.email")}
+              </a>
+            </div>
+
+            {/* Center - Social Icons */}
             <div className="flex items-center space-x-4">
               <a
                 href="https://www.facebook.com/profile.php?id=61585767552922"

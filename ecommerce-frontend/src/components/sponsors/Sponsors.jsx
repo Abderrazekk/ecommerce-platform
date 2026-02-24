@@ -108,8 +108,8 @@ const Sponsors = () => {
   ];
 
   return (
-    <div className="py-12 lg:py-10 bg-gradient-to-b from-white to-gray-50 w-full overflow-hidden">
-      <div className="text-left mb-8 md:mb-12 lg:mb-16 pl-8 lg:pl-12">
+    <div className="lg:py-5 bg-gradient-to-b from-white to-gray-50 w-full overflow-hidden">
+      <div className="text-left md:mb-12 lg:mb-6 pl-8 lg:pl-12">
         <div className="space-y-2 md:space-y-3">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="w-1 md:w-1.5 h-8 md:h-10 lg:h-12 bg-green-500 rounded-full"></div>

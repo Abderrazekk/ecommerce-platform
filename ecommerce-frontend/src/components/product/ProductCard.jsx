@@ -84,42 +84,48 @@ const ProductCard = ({ product }) => {
       )
     : 0;
 
-  const StarRatingDisplay = ({ rating, showCount = true, size = "sm" }) => {
+  const StarRatingDisplay = ({ rating, size = "sm" }) => {
     if (!rating || rating === 0) return null;
 
     const starSize = size === "sm" ? "w-3 h-3" : "w-4 h-4";
 
     return (
-      <div className="flex items-center gap-1">
-        <div className="flex">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <FaStar
-              key={star}
-              className={`${starSize} ${
-                star <= Math.round(rating)
-                  ? "text-yellow-400 fill-yellow-400"
-                  : "text-gray-300"
-              }`}
-            />
-          ))}
-        </div>
-        <span
-          className={`${
-            size === "sm" ? "text-xs" : "text-sm"
-          } text-gray-600 ml-1 font-medium`}
-        >
-          {rating.toFixed(1)}
-        </span>
-        {showCount && product.ratingsCount > 0 && (
+      <>
+        {/* Mobile version: single star + rating */}
+        <div className="flex items-center gap-1 md:hidden">
+          <FaStar className={`${starSize} text-yellow-400 fill-yellow-400`} />
           <span
             className={`${
               size === "sm" ? "text-xs" : "text-sm"
-            } text-gray-400 ml-1`}
+            } text-gray-600 font-medium`}
           >
-            ({product.ratingsCount})
+            {rating.toFixed(1)}
           </span>
-        )}
-      </div>
+        </div>
+
+        {/* Desktop version: five stars + rating */}
+        <div className="hidden md:flex items-center gap-1">
+          <div className="flex">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <FaStar
+                key={star}
+                className={`${starSize} ${
+                  star <= Math.round(rating)
+                    ? "text-yellow-400 fill-yellow-400"
+                    : "text-gray-300"
+                }`}
+              />
+            ))}
+          </div>
+          <span
+            className={`${
+              size === "sm" ? "text-xs" : "text-sm"
+            } text-gray-600 ml-1 font-medium`}
+          >
+            {rating.toFixed(1)}
+          </span>
+        </div>
+      </>
     );
   };
 
@@ -223,7 +229,6 @@ const ProductCard = ({ product }) => {
             {product.averageRating > 0 ? (
               <StarRatingDisplay
                 rating={product.averageRating}
-                showCount={true}
                 size="sm"
               />
             ) : (
@@ -238,13 +243,13 @@ const ProductCard = ({ product }) => {
             </h3>
           </Link>
 
-          {/* Price */}
-          <div className="flex items-baseline gap-2 min-h-[32px]">
+          {/* Price – updated layout */}
+          <div className="flex flex-col items-start min-h-[48px]">
             <span className="text-lg font-bold text-gray-900">
               {formatPrice(product.discountPrice || product.price)}
             </span>
             {product.discountPrice && (
-              <span className="text-sm text-gray-400 line-through">
+              <span className="text-sm text-gray-400 line-through self-end">
                 {formatPrice(product.price)}
               </span>
             )}
