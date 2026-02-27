@@ -32,6 +32,7 @@ export default {
         float: "float 3s ease-in-out infinite",
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "fade-in": "fadeIn 0.2s ease-in-out",
+        slideIn: "slideIn 0.3s ease-out",
       },
       keyframes: {
         float: {
@@ -41,6 +42,10 @@ export default {
         fadeIn: {
           "0%": { opacity: 0, transform: "translateY(5px)" },
           "100%": { opacity: 1, transform: "translateY(0)" },
+        },
+        slideIn: {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(0)" },
         },
       },
       backdropBlur: {

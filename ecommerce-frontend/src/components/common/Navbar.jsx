@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import ReactDOM from "react-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { logout } from "../../redux/slices/auth.slice";
@@ -474,7 +475,7 @@ const Navbar = () => {
             <div className="flex items-center gap-1 group">
               <FaEnvelope className="h-3 w-3 text-primary-300 group-hover:text-primary-200 transition-colors" />
               <a
-                href="mailto:Contact@shoppina.com"
+                href="mailto:Contact@shopina.com"
                 className="hover:text-primary-300 transition-colors text-xs font-medium"
               >
                 {t("header.email")}
@@ -1112,282 +1113,214 @@ const Navbar = () => {
           )}
 
           {/* Premium Mobile Menu Dropdown - COMPACT & GRID LAYOUT */}
-          {isOpen && (
-            <div
-              ref={mobileMenuRef}
-              className="md:hidden fixed inset-0 top-20 bg-white z-40 flex flex-col h-[calc(100vh-5rem)] overflow-hidden shadow-2xl"
-            >
-              {/* Language Switcher - compact */}
-              <div className="shrink-0 border-b border-gray-100">
-                <div className="px-3 py-1.5 bg-gradient-to-r from-primary-50 to-primary-100/50">
-                  <p className="text-xs font-bold text-gray-900">
-                    Language / Langue / اللغة
-                  </p>
-                </div>
-                <div className="px-3 py-1.5">
-                  <div className="grid grid-cols-3 gap-1">
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => {
-                          changeLanguage(lang.code);
-                          setIsOpen(false);
-                        }}
-                        className={`flex flex-col items-center justify-center py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${
-                          i18n.language === lang.code
-                            ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow"
-                            : "bg-gray-50 text-gray-700 hover:bg-gradient-to-r from-gray-100 to-white border border-gray-200"
-                        }`}
-                      >
-                        <span className="text-lg mb-0.5">{lang.flag}</span>
-                        <span className="text-[10px]">{lang.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+          {isOpen &&
+            ReactDOM.createPortal(
+              <div
+                ref={mobileMenuRef}
+                className="md:hidden fixed inset-0 z-[9999]"
+              >
+                {/* BACKDROP + BLUR */}
+                <div
+                  onClick={() => setIsOpen(false)}
+                  className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity duration-300"
+                />
 
-              {/* Main content - flex column */}
-              <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Fixed items */}
-                <div className="shrink-0">
-                  {/* Home */}
-                  <Link
-                    to="/"
-                    className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 transition-all duration-300 border-b border-gray-100"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <div className="w-7 h-7 bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg flex items-center justify-center">
-                      <FaHome className="h-3.5 w-3.5 text-primary-600" />
-                    </div>
-                    <span className="font-medium text-xs">
-                      {t("menu.home")}
-                    </span>
-                  </Link>
+                {/* SLIDE PANEL */}
+                <div className="absolute right-0 top-0 h-dvh w-[88%] max-w-sm bg-white shadow-2xl flex flex-col animate-slideIn">
+                  {/* HEADER */}
+                  <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      {t("menumenu.menu")}
+                    </h2>
 
-                  {/* Shop button with toggle */}
-                  <div className="border-b border-gray-100">
                     <button
-                      onClick={() => setIsMobileShopOpen(!isMobileShopOpen)}
-                      className="flex items-center justify-between w-full px-4 py-2 text-gray-700 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 transition-all duration-300"
+                      onClick={() => setIsOpen(false)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
                     >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-7 h-7 bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg flex items-center justify-center">
-                          <FaStore className="h-3.5 w-3.5 text-primary-600" />
-                        </div>
-                        <span className="font-medium text-xs">
-                          {t("menu.shop")}
-                        </span>
-                      </div>
-                      <FaChevronDown
-                        className={`h-3.5 w-3.5 text-gray-500 transition-transform duration-300 ${
-                          isMobileShopOpen ? "rotate-180" : ""
-                        }`}
-                      />
+                      ✕
                     </button>
                   </div>
-                </div>
 
-                {/* Categories grid - appears only when open */}
-                {isMobileShopOpen && (
-                  <div className="shrink-0 bg-gray-50 border-b border-gray-100 p-2">
-                    <div className="grid grid-cols-2 gap-1">
-                      {mobileShopCategories.map((category) => (
-                        <Link
-                          key={category.name}
-                          to={category.path}
-                          className={`flex items-center px-2 py-1.5 text-xs rounded-md transition-all duration-300 ${
-                            category.isAliExpress
-                              ? "text-orange-600 hover:bg-orange-50 font-medium border border-orange-100"
-                              : "text-gray-600 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 border border-transparent hover:border-primary-100"
-                          }`}
-                          onClick={() => setIsOpen(false)}
-                        >
-                          <FaChevronRight
-                            className={`h-2.5 w-2.5 mr-1.5 ${
-                              category.isAliExpress
-                                ? "text-orange-400"
-                                : "text-gray-400"
-                            }`}
-                          />
-                          <span className="truncate">{category.name}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Remaining fixed items */}
-                <div className="shrink-0">
-                  {/* Cart */}
-                  <Link
-                    to="/cart"
-                    className="flex items-center justify-between px-4 py-2 text-gray-700 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 transition-all duration-300 border-b border-gray-100"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-7 h-7 bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg flex items-center justify-center">
-                        <FaShoppingCart className="h-3.5 w-3.5 text-primary-600" />
-                      </div>
-                      <span className="font-medium text-xs">
-                        {t("cart.shoppingCart")}
-                      </span>
-                    </div>
-                    {cartItemCount > 0 && (
-                      <span className="bg-gradient-to-r from-primary-500 to-primary-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow">
-                        {cartItemCount > 9 ? "9+" : cartItemCount}
-                      </span>
-                    )}
-                  </Link>
-
-                  {/* User Section */}
-                  {isAuthenticated ? (
-                    <>
-                      {/* User Info */}
-                      <div className="px-4 py-1.5 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-primary-100/50">
-                        <div className="flex items-center space-x-3">
-                          <FaUser className="h-3.5 w-3.5 text-primary-600" />
-                          <div>
-                            <p className="font-medium text-xs text-gray-900">
-                              {user?.name}
-                            </p>
-                            <p className="text-[10px] text-primary-600 truncate">
-                              {user?.email}
-                            </p>
-                          </div>
+                  {/* SCROLLABLE CONTENT */}
+                  <div className="flex-1 min-h-0 overflow-y-auto">
+                    {/* USER SECTION - Only show for non-authenticated users */}
+                    {!isAuthenticated && (
+                      <div className="px-5 py-5 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-white">
+                        <div className="flex flex-col space-y-3">
+                          <Link
+                            to="/login"
+                            className="w-full py-2 text-center text-sm font-medium text-primary-600 border border-primary-200 rounded-lg"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {t("user.login")}
+                          </Link>
+                          <Link
+                            to="/register"
+                            className="w-full py-2 text-center text-sm font-semibold bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg shadow"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {t("user.createAccount")}
+                          </Link>
                         </div>
                       </div>
+                    )}
 
-                      {/* Wishlist */}
-                      <Link
-                        to="/wishlist"
-                        className="flex items-center justify-between px-4 py-2 text-gray-700 hover:text-red-500 hover:bg-gradient-to-r from-red-50 to-red-100/50 transition-all duration-300 border-b border-gray-100"
-                        onClick={() => {
-                          setIsOpen(false);
-                          dispatch(fetchWishlist());
-                        }}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <FaHeart className="h-3.5 w-3.5 text-red-500" />
+                    {/* QUICK ACTIONS */}
+                    <div className="px-5 py-4 border-b border-gray-100">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                        {t("menumenu.quickAccess")}
+                      </p>
+
+                      <div className="grid grid-cols-4 gap-4 text-center">
+                        <Link
+                          to="/cart"
+                          onClick={() => setIsOpen(false)}
+                          className="relative group flex flex-col items-center"
+                        >
+                          <FaShoppingCart className="text-primary-600 text-2xl mb-2 group-hover:scale-110 transition-transform" />
+                          {cartItemCount > 0 && (
+                            <span className="absolute -top-2 right-4 bg-primary-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                              {cartItemCount > 9 ? "9+" : cartItemCount}
+                            </span>
+                          )}
+                          <span className="text-xs font-medium">
+                            {t("cart.shoppingCart")}
+                          </span>
+                        </Link>
+
+                        <Link
+                          to="/wishlist"
+                          onClick={() => setIsOpen(false)}
+                          className="relative group flex flex-col items-center"
+                        >
+                          <FaHeart className="text-red-500 text-2xl mb-2 group-hover:scale-110 transition-transform" />
+                          {wishlistCount > 0 && (
+                            <span className="absolute -top-2 right-4 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                              {wishlistCount}
+                            </span>
+                          )}
                           <span className="text-xs font-medium">
                             {t("user.myWishlist")}
                           </span>
-                        </div>
-                        {wishlistCount > 0 && (
-                          <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                            {wishlistCount}
+                        </Link>
+
+                        <Link
+                          to="/my-orders"
+                          onClick={() => setIsOpen(false)}
+                          className="group flex flex-col items-center"
+                        >
+                          <FaBox className="text-primary-600 text-2xl mb-2 group-hover:scale-110 transition-transform" />
+                          <span className="text-xs font-medium">
+                            {t("user.myOrders")}
                           </span>
-                        )}
-                      </Link>
+                        </Link>
 
-                      {/* Orders */}
-                      <Link
-                        to="/my-orders"
-                        className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 transition-all duration-300 border-b border-gray-100"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <FaBox className="h-3.5 w-3.5 text-primary-600" />
-                        <span className="text-xs font-medium">
-                          {t("user.myOrders")}
-                        </span>
-                      </Link>
+                        <Link
+                          to="/profile"
+                          onClick={() => setIsOpen(false)}
+                          className="group flex flex-col items-center"
+                        >
+                          <FaUser className="text-primary-600 text-2xl mb-2 group-hover:scale-110 transition-transform" />
+                          <span className="text-xs font-medium">
+                            {t("user.myProfile")}
+                          </span>
+                        </Link>
+                      </div>
+                    </div>
 
-                      {/* Profile */}
-                      <Link
-                        to="/profile"
-                        className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 transition-all duration-300 border-b border-gray-100"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <FaUser className="h-3.5 w-3.5 text-primary-600" />
-                        <span className="text-xs font-medium">
-                          {t("user.myProfile")}
-                        </span>
-                      </Link>
+                    {/* CATEGORIES */}
+                    <div className="px-5 py-4 border-b border-gray-100">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                        {t("menu.shop")}
+                      </p>
 
-                      {/* Admin Panel */}
-                      {user?.role === "admin" && (
-                        <>
-                          <div className="px-4 py-1.5 bg-gradient-to-r from-gray-900 to-black">
-                            <p className="text-[10px] font-bold text-white uppercase tracking-wider">
-                              {t("admin.panel")}
-                            </p>
-                          </div>
-                          <div className="max-h-24 overflow-y-auto">
-                            {adminMenuItems.map((item) => (
-                              <Link
-                                key={item.name}
-                                to={item.path}
-                                className="flex items-center space-x-3 px-4 py-1.5 text-gray-700 hover:text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 transition-all duration-300 border-b border-gray-50 pl-8"
-                                onClick={() => setIsOpen(false)}
-                              >
-                                <FaChevronRight className="h-2.5 w-2.5 text-gray-400" />
-                                <span className="text-xs font-medium">
-                                  {item.name}
-                                </span>
-                              </Link>
-                            ))}
-                          </div>
-                        </>
-                      )}
+                      <div className="space-y-2">
+                        {mobileShopCategories.map((category) => (
+                          <Link
+                            key={category.name}
+                            to={category.path}
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center justify-between px-3 py-3 rounded-lg hover:bg-gray-50 transition"
+                          >
+                            <span className="text-sm text-gray-700">
+                              {category.name}
+                            </span>
+                            <FaChevronRight className="text-gray-400 text-xs" />
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
 
-                      {/* Logout */}
+                    {/* ADMIN SECTION */}
+                    {user?.role === "admin" && (
+                      <div className="px-5 py-4 border-b border-gray-100">
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                          {t("admin.panel")}
+                        </p>
+
+                        <div className="space-y-2">
+                          {adminMenuItems.map((item) => (
+                            <Link
+                              key={item.name}
+                              to={item.path}
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center justify-between px-3 py-3 rounded-lg hover:bg-gray-50 transition"
+                            >
+                              <span className="text-sm text-gray-700">
+                                {item.name}
+                              </span>
+                              <FaChevronRight className="text-gray-400 text-xs" />
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* LANGUAGE */}
+                    <div className="px-5 py-4 border-b border-gray-100">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                        Language
+                      </p>
+
+                      <div className="flex space-x-4">
+                        {languages.map((lang) => (
+                          <button
+                            key={lang.code}
+                            onClick={() => {
+                              changeLanguage(lang.code);
+                              setIsOpen(false);
+                            }}
+                            className={`text-2xl transition ${
+                              i18n.language === lang.code
+                                ? "scale-110"
+                                : "opacity-60 hover:opacity-100"
+                            }`}
+                          >
+                            {lang.flag}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* FIXED LOGOUT AT BOTTOM */}
+                  {isAuthenticated && (
+                    <div className="shrink-0 border-t border-gray-100 p-4 bg-white">
                       <button
                         onClick={() => {
                           handleLogout();
                           setIsOpen(false);
                         }}
-                        className="flex items-center space-x-3 w-full text-left px-4 py-2 text-red-600 hover:bg-gradient-to-r from-red-50 to-red-100/50 transition-all duration-300 border-b border-gray-100"
+                        className="w-full py-2 rounded-lg bg-red-50 text-red-600 font-medium hover:bg-red-100 transition"
                       >
-                        <FaSignOutAlt className="h-3.5 w-3.5" />
-                        <span className="text-xs font-medium">
-                          {t("user.logout")}
-                        </span>
+                        {t("user.logout")}
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <div className="px-4 py-1.5 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-primary-100/50">
-                        <p className="font-medium text-xs text-gray-900">
-                          {t("user.welcome")}
-                        </p>
-                        <p className="text-[10px] text-gray-600">
-                          {t("user.pleaseLogin")}
-                        </p>
-                      </div>
-
-                      <Link
-                        to="/login"
-                        className="flex items-center justify-center space-x-3 px-4 py-2 text-primary-600 hover:bg-gradient-to-r from-primary-50 to-primary-100/50 transition-all duration-300 border-b border-gray-100"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <FaUser className="h-3.5 w-3.5" />
-                        <span className="text-xs font-bold">
-                          {t("user.loginToAccount")}
-                        </span>
-                      </Link>
-
-                      <Link
-                        to="/register"
-                        className="flex items-center justify-center px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 transition-all duration-300"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        <span className="text-xs font-bold">
-                          {t("user.createAccount")}
-                        </span>
-                      </Link>
-                    </>
+                    </div>
                   )}
                 </div>
-              </div>
-
-              {/* Footer - fixed at bottom */}
-              <div className="shrink-0 px-4 py-1.5 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 text-center">
-                <p className="text-[10px] text-gray-500">
-                  {t("footer.copyright", { year: new Date().getFullYear() })}
-                </p>
-              </div>
-            </div>
-          )}
+              </div>,
+              document.body,
+            )}
         </div>
       </nav>
     </>

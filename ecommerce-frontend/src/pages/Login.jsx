@@ -505,11 +505,11 @@ const Login = () => {
             <div className="text-center text-xs text-gray-500 pt-4">
               <p>
                 {t("agreeTerms")}{" "}
-                <Link to="/terms" className="underline hover:text-gray-700">
+                <Link to="/terms-conditions" className="underline hover:text-gray-700">
                   {t("termsOfService")}
                 </Link>{" "}
                 {t("and")}{" "}
-                <Link to="/privacy" className="underline hover:text-gray-700">
+                <Link to="/privacy-policy" className="underline hover:text-gray-700">
                   {t("privacyPolicy")}
                 </Link>
                 .

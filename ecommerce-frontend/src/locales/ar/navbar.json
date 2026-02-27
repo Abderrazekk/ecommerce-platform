@@ -2,7 +2,7 @@
   "header": {
     "address": "أريانة، تونس",
     "phone": "+216 55999444",
-    "email": "Contact@shoppina.com",
+    "email": "Contact@shopina.com",
     "social": {
       "facebook": "فيسبوك",
       "instagram": "إنستغرام",
@@ -113,9 +113,14 @@
     "products": "المنتجات",
     "orders": "الطلبات",
     "users": "المستخدمين",
-    "sponsors": "الرعاة"
+    "sponsors": "الرعاة",
+    "promo": "العروض الترويجية"
   },
   "footer": {
     "copyright": "© {{year}} شوبينا. جميع الحقوق محفوظة."
+  },
+    "menumenu": {
+    "menu": "القائمة",
+    "quickAccess": "الوصول السريع"
   }
 }

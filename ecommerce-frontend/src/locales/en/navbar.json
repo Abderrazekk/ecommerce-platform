@@ -2,7 +2,7 @@
   "header": {
     "address": "Ariana, Tunisia",
     "phone": "+216 55999444",
-    "email": "Contact@shoppina.com",
+    "email": "Contact@shopina.com",
     "social": {
       "facebook": "Facebook",
       "instagram": "Instagram",
@@ -109,9 +109,14 @@
     "products": "Products",
     "orders": "Orders",
     "users": "Users",
-    "sponsors": "Sponsors"
+    "sponsors": "Sponsors",
+    "promo": "Promotions"
   },
   "footer": {
     "copyright": "© {{year}} Shoppina. All rights reserved."
+  },
+  "menumenu": {
+    "menu": "Menu",
+    "quickAccess": "Quick Access"
   }
 }

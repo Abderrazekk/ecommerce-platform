@@ -93,7 +93,7 @@ const Contact = () => {
                     <h3 className="font-semibold text-gray-900">
                       Email Address
                     </h3>
-                    <p className="text-gray-600">support@shoppina.com</p>
+                    <p className="text-gray-600">Contact@shopina.com</p>
                     <p className="text-gray-600">
                       We'll respond within 24 hours
                     </p>

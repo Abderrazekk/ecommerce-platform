@@ -142,7 +142,7 @@ const Footer = () => {
                 </div>
                 <div className="space-y-6 text-base text-gray-300">
                   <a
-                    href="mailto:Contact@shoppina.com"
+                    href="mailto:Contact@shopina.com"
                     className="flex items-start group hover:text-white transition-all duration-300 hover:translate-x-2"
                   >
                     <span className="text-primary-400 mr-4 mt-1 text-xl">
