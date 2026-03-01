@@ -428,20 +428,6 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Admin Credentials Button */}
-              {process.env.NODE_ENV === "development" && (
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={handleAdminLogin}
-                    className="text-sm text-primary-600 hover:text-primary-500 font-medium border border-primary-200 px-4 py-2 rounded-xl hover:bg-primary-50 transition-colors"
-                    disabled={loading || isGoogleLoading}
-                  >
-                    {t("loadAdminCredentials")}
-                  </button>
-                </div>
-              )}
-
               {/* Submit Button */}
               <div>
                 <button
@@ -474,21 +460,6 @@ const Login = () => {
               </p>
             </div>
 
-            {/* Development Info Banner */}
-            {process.env.NODE_ENV === "development" && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6">
-                <p className="text-sm text-blue-800">
-                  <strong className="font-semibold">{t("devMode")}</strong>
-                  <br />
-                  {t("devAdmin")}
-                  <br />
-                  {t("devGoogle")}
-                  <br />
-                  {t("devTest")}
-                </p>
-              </div>
-            )}
-
             {/* Ban Warning */}
             {isBanned && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4">
@@ -505,11 +476,17 @@ const Login = () => {
             <div className="text-center text-xs text-gray-500 pt-4">
               <p>
                 {t("agreeTerms")}{" "}
-                <Link to="/terms-conditions" className="underline hover:text-gray-700">
+                <Link
+                  to="/terms-conditions"
+                  className="underline hover:text-gray-700"
+                >
                   {t("termsOfService")}
                 </Link>{" "}
                 {t("and")}{" "}
-                <Link to="/privacy-policy" className="underline hover:text-gray-700">
+                <Link
+                  to="/privacy-policy"
+                  className="underline hover:text-gray-700"
+                >
                   {t("privacyPolicy")}
                 </Link>
                 .
