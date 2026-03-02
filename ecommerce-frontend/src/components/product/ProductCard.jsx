@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../redux/slices/cart.slice";
 import {
@@ -12,11 +12,13 @@ import {
   FaHeart,
   FaGlobe,
   FaStar,
+  FaBolt,
 } from "react-icons/fa";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 const ProductCard = ({ product }) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const { wishlistChecked, loading: wishlistLoading } = useSelector(
@@ -24,6 +26,7 @@ const ProductCard = ({ product }) => {
   );
   const [isHovered, setIsHovered] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isBuyNowLoading, setIsBuyNowLoading] = useState(false);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -38,6 +41,31 @@ const ProductCard = ({ product }) => {
         quantity: 1,
       }),
     );
+    toast.success("Added to cart");
+  };
+
+  const handleBuyNow = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!product || product.stock === 0) return;
+
+    setIsBuyNowLoading(true);
+    dispatch(
+      addToCart({
+        product: product._id,
+        name: product.name,
+        price: product.discountPrice || product.price,
+        shippingFee: product.shippingFee || 0,
+        image: product.images?.[0]?.url || "",
+        quantity: 1,
+      }),
+    );
+    toast.success("Redirecting to checkout...");
+
+    setTimeout(() => {
+      navigate("/checkout");
+      setIsBuyNowLoading(false);
+    }, 1000);
   };
 
   const toggleWishlist = (e) => {
@@ -227,10 +255,7 @@ const ProductCard = ({ product }) => {
               <span className="invisible text-xs">Placeholder</span>
             )}
             {product.averageRating > 0 ? (
-              <StarRatingDisplay
-                rating={product.averageRating}
-                size="sm"
-              />
+              <StarRatingDisplay rating={product.averageRating} size="sm" />
             ) : (
               <span className="invisible text-xs">Rating</span>
             )}
@@ -243,7 +268,7 @@ const ProductCard = ({ product }) => {
             </h3>
           </Link>
 
-          {/* Price – updated layout */}
+          {/* Price */}
           <div className="flex flex-col items-start min-h-[48px]">
             <span className="text-lg font-bold text-gray-900">
               {formatPrice(product.discountPrice || product.price)}
@@ -276,19 +301,40 @@ const ProductCard = ({ product }) => {
           </div>
         </div>
 
-        {/* Add to Cart Button */}
-        <button
-          onClick={handleAddToCart}
-          disabled={product.stock === 0}
-          className={`mt-3 w-full py-2.5 sm:py-3 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-            product.stock === 0
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-gray-900 to-black text-white hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
-          }`}
-        >
-          <FaShoppingCart className="w-4 h-4" />
-          {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-        </button>
+        {/* Action Buttons Grid */}
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <button
+            onClick={handleAddToCart}
+            disabled={product.stock === 0}
+            className={`w-full py-2 sm:py-2.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 ${
+              product.stock === 0
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-gray-900 text-white hover:bg-black hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]"
+            }`}
+          >
+            <FaShoppingCart className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+            <span className="truncate">Add to Cart</span>
+          </button>
+
+          <button
+            onClick={handleBuyNow}
+            disabled={product.stock === 0 || isBuyNowLoading}
+            className={`w-full py-2 sm:py-2.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 ${
+              product.stock === 0
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-primary-600 text-white hover:bg-primary-700 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]"
+            }`}
+          >
+            {isBuyNowLoading ? (
+              <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin flex-shrink-0" />
+            ) : (
+              <FaBolt className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+            )}
+            <span className="truncate">
+              {isBuyNowLoading ? "Wait..." : "Buy Now"}
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );

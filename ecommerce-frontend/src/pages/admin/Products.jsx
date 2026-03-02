@@ -30,6 +30,7 @@ import {
   ChevronRight,
   Package,
   DollarSign,
+  Loader2, // Added for the submitting spinner
 } from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -55,6 +56,8 @@ const Products = () => {
   // Existing states
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Added submitting state
+
   const [formData, setFormData] = useState({
     name: "",
     brand: "",
@@ -492,6 +495,8 @@ const Products = () => {
       }
     }
 
+    setIsSubmitting(true); // Start loading state
+
     const productData = new FormData();
     productData.append("name", formData.name);
     productData.append("brand", formData.brand);
@@ -552,6 +557,11 @@ const Products = () => {
       handleCloseModal();
     } catch (error) {
       console.error("Error saving product:", error);
+      toast.error(
+        error.message || "An error occurred while saving the product",
+      );
+    } finally {
+      setIsSubmitting(false); // End loading state
     }
   };
 
@@ -947,24 +957,32 @@ const Products = () => {
         </div>
       )}
 
-      {/* Add/Edit Product Modal - enhanced layout but all fields/handlers preserved */}
+      {/* Add/Edit Product Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            {/* Loading Overlay mapped directly inside the modal */}
+            {isSubmitting && (
+              <div className="absolute inset-0 z-10 bg-white/50 backdrop-blur-sm flex items-center justify-center rounded-xl">
+                <Loader2 className="h-10 w-10 text-primary-600 animate-spin" />
+              </div>
+            )}
+
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-900">
                 {editingProduct ? "Edit Product" : "Add New Product"}
               </h2>
               <button
                 onClick={handleCloseModal}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                disabled={isSubmitting}
+                className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* Images & Video section - unchanged but better spacing */}
+              {/* Images & Video section */}
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1001,7 +1019,8 @@ const Products = () => {
                             <button
                               type="button"
                               onClick={() => removeImage(index)}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                              disabled={isSubmitting}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50"
                             >
                               <X className="h-3 w-3" />
                             </button>
@@ -1021,7 +1040,8 @@ const Products = () => {
                     accept="image/*"
                     multiple
                     onChange={handleImageChange}
-                    className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                    disabled={isSubmitting}
+                    className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Max 6 images, 10MB each
@@ -1048,7 +1068,8 @@ const Products = () => {
                       <button
                         type="button"
                         onClick={removeVideo}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                        disabled={isSubmitting}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -1059,14 +1080,15 @@ const Products = () => {
                       type="file"
                       accept="video/*"
                       onChange={handleVideoChange}
-                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                      disabled={isSubmitting}
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50"
                     />
                   )}
                   <p className="text-xs text-gray-500 mt-1">Max 50MB</p>
                 </div>
               </div>
 
-              {/* Basic fields - grid layout preserved, enhanced spacing */}
+              {/* Basic fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1078,7 +1100,8 @@ const Products = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                    disabled={isSubmitting}
+                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50"
                   />
                 </div>
                 <div>
@@ -1091,13 +1114,16 @@ const Products = () => {
                     value={formData.brand}
                     onChange={handleInputChange}
                     required
-                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                    disabled={isSubmitting}
+                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50"
                   />
                 </div>
               </div>
 
               {/* Rich text description */}
-              <div>
+              <div
+                className={isSubmitting ? "opacity-60 pointer-events-none" : ""}
+              >
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description *
                 </label>
@@ -1105,6 +1131,7 @@ const Products = () => {
                   theme="snow"
                   value={formData.description}
                   onChange={handleDescriptionChange}
+                  readOnly={isSubmitting}
                   modules={{
                     toolbar: [
                       [{ header: [1, 2, 3, false] }],
@@ -1132,7 +1159,8 @@ const Products = () => {
                     required
                     min="0"
                     step="0.01"
-                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                    disabled={isSubmitting}
+                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50"
                   />
                 </div>
                 <div>
@@ -1146,7 +1174,8 @@ const Products = () => {
                     onChange={handleInputChange}
                     min="0"
                     step="0.01"
-                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                    disabled={isSubmitting}
+                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50"
                   />
                 </div>
                 <div>
@@ -1161,7 +1190,8 @@ const Products = () => {
                     min="0"
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                    disabled={isSubmitting}
+                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50"
                   />
                 </div>
               </div>
@@ -1177,7 +1207,8 @@ const Products = () => {
                     value={formData.category}
                     onChange={handleInputChange}
                     required
-                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                    disabled={isSubmitting}
+                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50"
                   >
                     <option value="">Select a category</option>
                     {categories.map((category) => (
@@ -1197,7 +1228,8 @@ const Products = () => {
                     value={formData.tags}
                     onChange={handleInputChange}
                     placeholder="tag1, tag2, tag3"
-                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                    disabled={isSubmitting}
+                    className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50"
                   />
                 </div>
               </div>
@@ -1214,11 +1246,12 @@ const Products = () => {
                   onChange={handleInputChange}
                   required
                   min="0"
-                  className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                  disabled={isSubmitting}
+                  className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-50"
                 />
               </div>
 
-              {/* Color Variants (unchanged) */}
+              {/* Color Variants */}
               <div className="border-t pt-4">
                 <h3 className="text-lg font-medium mb-2">
                   Color Variants (Optional)
@@ -1226,7 +1259,7 @@ const Products = () => {
                 {colors.map((color, idx) => (
                   <div
                     key={idx}
-                    className="mb-4 p-4 border rounded-lg bg-gray-50"
+                    className={`mb-4 p-4 border rounded-lg bg-gray-50 ${isSubmitting ? "opacity-60" : ""}`}
                   >
                     <div className="grid grid-cols-2 gap-2 mb-2">
                       <input
@@ -1236,7 +1269,8 @@ const Products = () => {
                         onChange={(e) =>
                           handleColorChange(idx, "name", e.target.value)
                         }
-                        className="border border-gray-200 p-2 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                        disabled={isSubmitting}
+                        className="border border-gray-200 p-2 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-100"
                       />
                       <div className="flex items-center gap-2">
                         <input
@@ -1245,7 +1279,8 @@ const Products = () => {
                           onChange={(e) =>
                             handleColorChange(idx, "hex", e.target.value)
                           }
-                          className="w-10 h-10 p-1 border rounded"
+                          disabled={isSubmitting}
+                          className="w-10 h-10 p-1 border rounded disabled:opacity-50"
                         />
                         <input
                           type="text"
@@ -1253,7 +1288,8 @@ const Products = () => {
                           onChange={(e) =>
                             handleColorChange(idx, "hex", e.target.value)
                           }
-                          className="flex-1 border border-gray-200 p-2 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                          disabled={isSubmitting}
+                          className="flex-1 border border-gray-200 p-2 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 disabled:bg-gray-100"
                           placeholder="#000000"
                         />
                       </div>
@@ -1267,7 +1303,8 @@ const Products = () => {
                         accept="image/*"
                         multiple
                         onChange={(e) => handleColorImages(idx, e)}
-                        className="w-full border border-gray-200 p-2 rounded-lg text-sm"
+                        disabled={isSubmitting}
+                        className="w-full border border-gray-200 p-2 rounded-lg text-sm disabled:bg-gray-100"
                       />
                       {color.previews && color.previews.length > 0 && (
                         <div className="flex gap-2 mt-2 flex-wrap">
@@ -1285,7 +1322,8 @@ const Products = () => {
                     <button
                       type="button"
                       onClick={() => removeColor(idx)}
-                      className="mt-2 text-red-600 text-sm hover:underline"
+                      disabled={isSubmitting}
+                      className="mt-2 text-red-600 text-sm hover:underline disabled:opacity-50 disabled:no-underline"
                     >
                       Remove Color
                     </button>
@@ -1294,13 +1332,14 @@ const Products = () => {
                 <button
                   type="button"
                   onClick={addColor}
-                  className="bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                  disabled={isSubmitting}
+                  className="bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm disabled:opacity-50"
                 >
                   + Add Color
                 </button>
               </div>
 
-              {/* Checkboxes - enhanced styling */}
+              {/* Checkboxes */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-4">
                   {/* AliExpress */}
@@ -1309,7 +1348,7 @@ const Products = () => {
                       formData.isAliExpress
                         ? "border-orange-300 bg-orange-50"
                         : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    } ${isSubmitting ? "opacity-60" : ""}`}
                   >
                     <input
                       type="checkbox"
@@ -1317,9 +1356,13 @@ const Products = () => {
                       name="isAliExpress"
                       checked={formData.isAliExpress}
                       onChange={handleInputChange}
-                      className="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-2 focus:ring-orange-500/20 focus:ring-offset-1 mt-1"
+                      disabled={isSubmitting}
+                      className="h-5 w-5 text-orange-600 border-gray-300 rounded focus:ring-2 focus:ring-orange-500/20 focus:ring-offset-1 mt-1 disabled:opacity-50"
                     />
-                    <label htmlFor="isAliExpress" className="text-gray-700">
+                    <label
+                      htmlFor="isAliExpress"
+                      className={`text-gray-700 ${isSubmitting ? "cursor-not-allowed" : "cursor-pointer"}`}
+                    >
                       <span className="font-medium flex items-center gap-2">
                         <Globe className="h-4 w-4 text-orange-500" />
                         AliExpress Product
@@ -1343,16 +1386,22 @@ const Products = () => {
                   </div>
 
                   {/* Featured */}
-                  <div className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition-colors">
+                  <div
+                    className={`flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition-colors ${isSubmitting ? "opacity-60" : ""}`}
+                  >
                     <input
                       type="checkbox"
                       id="isFeatured"
                       name="isFeatured"
                       checked={formData.isFeatured}
                       onChange={handleInputChange}
-                      className="h-5 w-5 text-primary-600 border-gray-300 rounded focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-1"
+                      disabled={isSubmitting}
+                      className="h-5 w-5 text-primary-600 border-gray-300 rounded focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-1 disabled:opacity-50"
                     />
-                    <label htmlFor="isFeatured" className="text-gray-700">
+                    <label
+                      htmlFor="isFeatured"
+                      className={`text-gray-700 ${isSubmitting ? "cursor-not-allowed" : "cursor-pointer"}`}
+                    >
                       <span className="font-medium">Featured Product</span>
                       <p className="text-sm text-gray-500 mt-1">
                         Show this product on the homepage
@@ -1361,16 +1410,22 @@ const Products = () => {
                   </div>
 
                   {/* On Sale Section */}
-                  <div className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition-colors">
+                  <div
+                    className={`flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition-colors ${isSubmitting ? "opacity-60" : ""}`}
+                  >
                     <input
                       type="checkbox"
                       id="isOnSaleSection"
                       name="isOnSaleSection"
                       checked={formData.isOnSaleSection}
                       onChange={handleInputChange}
-                      className="h-5 w-5 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500/20 focus:ring-offset-1"
+                      disabled={isSubmitting}
+                      className="h-5 w-5 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500/20 focus:ring-offset-1 disabled:opacity-50"
                     />
-                    <label htmlFor="isOnSaleSection" className="text-gray-700">
+                    <label
+                      htmlFor="isOnSaleSection"
+                      className={`text-gray-700 ${isSubmitting ? "cursor-not-allowed" : "cursor-pointer"}`}
+                    >
                       <span className="font-medium">
                         Show in On Sale section
                       </span>
@@ -1383,16 +1438,22 @@ const Products = () => {
                 </div>
 
                 {/* Visible in Store */}
-                <div className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition-colors h-fit">
+                <div
+                  className={`flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition-colors h-fit ${isSubmitting ? "opacity-60" : ""}`}
+                >
                   <input
                     type="checkbox"
                     id="isVisible"
                     name="isVisible"
                     checked={formData.isVisible}
                     onChange={handleInputChange}
-                    className="h-5 w-5 text-primary-600 border-gray-300 rounded focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-1"
+                    disabled={isSubmitting}
+                    className="h-5 w-5 text-primary-600 border-gray-300 rounded focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-1 disabled:opacity-50"
                   />
-                  <label htmlFor="isVisible" className="text-gray-700">
+                  <label
+                    htmlFor="isVisible"
+                    className={`text-gray-700 ${isSubmitting ? "cursor-not-allowed" : "cursor-pointer"}`}
+                  >
                     <span className="font-medium">Visible in Store</span>
                     <p className="text-sm text-gray-500 mt-1">
                       Show this product to customers
@@ -1406,15 +1467,26 @@ const Products = () => {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-button"
+                  disabled={isSubmitting}
+                  className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-button disabled:opacity-70 disabled:cursor-not-allowed min-w-[140px]"
                 >
-                  {editingProduct ? "Update Product" : "Create Product"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                      {editingProduct ? "Updating..." : "Creating..."}
+                    </>
+                  ) : editingProduct ? (
+                    "Update Product"
+                  ) : (
+                    "Create Product"
+                  )}
                 </button>
               </div>
             </form>
