@@ -46,6 +46,9 @@ const UsersPage = () => {
     address: "",
   });
   const [showUserDetails, setShowUserDetails] = useState(null);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 18;
 
   const { user: currentUser } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -78,6 +81,8 @@ const UsersPage = () => {
     }
 
     setFilteredUsers(result);
+    // Reset to first page when filters change
+    setCurrentPage(1);
   }, [users, searchQuery, banFilter]);
 
   const fetchUsers = async () => {
@@ -342,6 +347,15 @@ const UsersPage = () => {
     setShowUserDetails(showUserDetails === userId ? null : userId);
   };
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = useMemo(() => {
+    return filteredUsers.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage,
+    );
+  }, [filteredUsers, currentPage]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -352,7 +366,7 @@ const UsersPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 space-y-4 lg:space-y-0">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
@@ -531,8 +545,8 @@ const UsersPage = () => {
           </button>
         </div>
 
-        {/* Users Grid */}
-        {filteredUsers.length === 0 ? (
+        {/* Users Grid - 5 columns on large screens */}
+        {paginatedUsers.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -555,213 +569,242 @@ const UsersPage = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredUsers.map((user) => (
-              <div
-                key={user._id}
-                className={`bg-white rounded-lg shadow-lg p-6 transition-all duration-200 ${
-                  user.isBanned
-                    ? "border-l-4 border-red-500 bg-red-50"
-                    : "hover:shadow-xl"
-                }`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <div
-                      className={`p-3 rounded-full ${
-                        user.role === "admin"
-                          ? user.isBanned
-                            ? "bg-red-100 text-red-600"
-                            : "bg-purple-100 text-purple-600"
-                          : user.isBanned
-                            ? "bg-red-100 text-red-600"
-                            : "bg-blue-100 text-blue-600"
-                      }`}
-                    >
-                      {user.isBanned ? (
-                        <Ban className="h-6 w-6" />
-                      ) : user.role === "admin" ? (
-                        <Shield className="h-6 w-6" />
-                      ) : (
-                        <Users className="h-6 w-6" />
-                      )}
-                    </div>
-                    <div className="ml-4">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-bold text-lg">{user.name}</h3>
-                        {user.isBanned && (
-                          <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-semibold">
-                            BANNED
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${
-                            user.role === "admin"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-blue-100 text-blue-800"
-                          }`}
-                        >
-                          {user.role.toUpperCase()}
-                        </span>
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${
-                            user.isBanned
-                              ? "bg-red-100 text-red-800"
-                              : "bg-green-100 text-green-800"
-                          }`}
-                        >
-                          {user.isBanned ? "BANNED" : "ACTIVE"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => toggleUserDetails(user._id)}
-                    className="p-1 text-gray-400 hover:text-gray-600"
-                    title="View details"
-                  >
-                    <Eye className="h-5 w-5" />
-                  </button>
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center text-gray-600">
-                    <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="text-sm truncate">{user.email}</span>
-                  </div>
-
-                  {user.phone && (
-                    <div className="flex items-center text-gray-600">
-                      <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
-                      <span className="text-sm">{user.phone}</span>
-                    </div>
-                  )}
-
-                  {user.address && (
-                    <div className="flex items-start text-gray-600">
-                      <MapPin className="h-4 w-4 mr-2 mt-1 flex-shrink-0" />
-                      <span className="text-sm line-clamp-2">
-                        {user.address}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Expanded Details */}
-                  {showUserDetails === user._id && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="space-y-2">
-                        <div className="flex items-center text-sm">
-                          <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                          <span>
-                            Joined:{" "}
-                            {new Date(user.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        {user.isBanned && user.bannedAt && (
-                          <div className="flex items-center text-sm">
-                            <Ban className="h-4 w-4 mr-2 text-red-400" />
-                            <span>
-                              Banned:{" "}
-                              {new Date(user.bannedAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                        )}
-                        {user.bannedBy && (
-                          <div className="text-sm">
-                            <span className="font-medium">Banned by: </span>
-                            <span>
-                              {user.bannedBy.name || user.bannedBy.email}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {user.isBanned && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-3">
-                      <div className="flex items-start">
-                        <AlertTriangle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
-                        <div className="flex-1">
-                          <div className="font-medium text-red-800">
-                            Account Banned
-                          </div>
-                          {user.banReason && (
-                            <div className="text-sm text-red-700 mt-1">
-                              <span className="font-semibold">Reason:</span>{" "}
-                              {user.banReason}
-                            </div>
-                          )}
-                          {user.bannedAt && (
-                            <div className="text-xs text-red-600 mt-2">
-                              Banned on:{" "}
-                              {new Date(user.bannedAt).toLocaleDateString()}
-                              {user.bannedBy && user.bannedBy.name && (
-                                <span> by {user.bannedBy.name}</span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-6 flex justify-between items-center pt-4 border-t border-gray-100">
-                  <div className="text-xs text-gray-500">
-                    Joined {new Date(user.createdAt).toLocaleDateString()}
-                  </div>
-
-                  <div className="flex space-x-2">
-                    {user.isBanned ? (
-                      <button
-                        onClick={() => handleUnbanUser(user._id)}
-                        disabled={
-                          banningUserId === user._id ||
-                          user._id === currentUser?._id
-                        }
-                        className="flex items-center px-3 py-2 rounded-md text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200 disabled:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Unban user"
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {paginatedUsers.map((user) => (
+                <div
+                  key={user._id}
+                  className={`bg-white rounded-lg shadow-lg p-6 transition-all duration-200 ${
+                    user.isBanned
+                      ? "border-l-4 border-red-500 bg-red-50"
+                      : "hover:shadow-xl"
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center">
+                      <div
+                        className={`p-3 rounded-full ${
+                          user.role === "admin"
+                            ? user.isBanned
+                              ? "bg-red-100 text-red-600"
+                              : "bg-purple-100 text-purple-600"
+                            : user.isBanned
+                              ? "bg-red-100 text-red-600"
+                              : "bg-blue-100 text-blue-600"
+                        }`}
                       >
-                        {banningUserId === user._id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                        {user.isBanned ? (
+                          <Ban className="h-6 w-6" />
+                        ) : user.role === "admin" ? (
+                          <Shield className="h-6 w-6" />
                         ) : (
-                          <CheckCircle className="h-4 w-4" />
+                          <Users className="h-6 w-6" />
                         )}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleBanUser(user)}
-                        disabled={
-                          banningUserId === user._id ||
-                          user._id === currentUser?._id
-                        }
-                        className="flex items-center px-3 py-2 rounded-md text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200 disabled:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Ban user"
-                      >
-                        <Ban className="h-4 w-4" />
-                      </button>
-                    )}
-
+                      </div>
+                      <div className="ml-4">
+                        <div className="flex items-center space-x-2">
+                          <h3 className="font-bold text-lg">{user.name}</h3>
+                          {user.isBanned && (
+                            <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full font-semibold">
+                              BANNED
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              user.role === "admin"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-blue-100 text-blue-800"
+                            }`}
+                          >
+                            {user.role.toUpperCase()}
+                          </span>
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              user.isBanned
+                                ? "bg-red-100 text-red-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {user.isBanned ? "BANNED" : "ACTIVE"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                     <button
-                      onClick={() => handleDeleteUser(user)}
-                      disabled={user._id === currentUser?._id}
-                      className="flex items-center px-3 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title={
-                        user._id === currentUser?._id
-                          ? "Cannot delete your own account"
-                          : "Delete user permanently"
-                      }
+                      onClick={() => toggleUserDetails(user._id)}
+                      className="p-1 text-gray-400 hover:text-gray-600"
+                      title="View details"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     </button>
                   </div>
+
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center text-gray-600">
+                      <Mail className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="text-sm truncate">{user.email}</span>
+                    </div>
+
+                    {user.phone && (
+                      <div className="flex items-center text-gray-600">
+                        <Phone className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span className="text-sm">{user.phone}</span>
+                      </div>
+                    )}
+
+                    {user.address && (
+                      <div className="flex items-start text-gray-600">
+                        <MapPin className="h-4 w-4 mr-2 mt-1 flex-shrink-0" />
+                        <span className="text-sm line-clamp-2">
+                          {user.address}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Expanded Details */}
+                    {showUserDetails === user._id && (
+                      <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="space-y-2">
+                          <div className="flex items-center text-sm">
+                            <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                            <span>
+                              Joined:{" "}
+                              {new Date(user.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          {user.isBanned && user.bannedAt && (
+                            <div className="flex items-center text-sm">
+                              <Ban className="h-4 w-4 mr-2 text-red-400" />
+                              <span>
+                                Banned:{" "}
+                                {new Date(user.bannedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          )}
+                          {user.bannedBy && (
+                            <div className="text-sm">
+                              <span className="font-medium">Banned by: </span>
+                              <span>
+                                {user.bannedBy.name || user.bannedBy.email}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {user.isBanned && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-3">
+                        <div className="flex items-start">
+                          <AlertTriangle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <div className="font-medium text-red-800">
+                              Account Banned
+                            </div>
+                            {user.banReason && (
+                              <div className="text-sm text-red-700 mt-1">
+                                <span className="font-semibold">Reason:</span>{" "}
+                                {user.banReason}
+                              </div>
+                            )}
+                            {user.bannedAt && (
+                              <div className="text-xs text-red-600 mt-2">
+                                Banned on:{" "}
+                                {new Date(user.bannedAt).toLocaleDateString()}
+                                {user.bannedBy && user.bannedBy.name && (
+                                  <span> by {user.bannedBy.name}</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-6 flex justify-between items-center pt-4 border-t border-gray-100">
+                    <div className="text-xs text-gray-500">
+                      Joined {new Date(user.createdAt).toLocaleDateString()}
+                    </div>
+
+                    <div className="flex space-x-2">
+                      {user.isBanned ? (
+                        <button
+                          onClick={() => handleUnbanUser(user._id)}
+                          disabled={
+                            banningUserId === user._id ||
+                            user._id === currentUser?._id
+                          }
+                          className="flex items-center px-3 py-2 rounded-md text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200 disabled:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Unban user"
+                        >
+                          {banningUserId === user._id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4" />
+                          )}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleBanUser(user)}
+                          disabled={
+                            banningUserId === user._id ||
+                            user._id === currentUser?._id
+                          }
+                          className="flex items-center px-3 py-2 rounded-md text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200 disabled:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Ban user"
+                        >
+                          <Ban className="h-4 w-4" />
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => handleDeleteUser(user)}
+                        disabled={user._id === currentUser?._id}
+                        className="flex items-center px-3 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={
+                          user._id === currentUser?._id
+                            ? "Cannot delete your own account"
+                            : "Delete user permanently"
+                        }
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center space-x-4 mt-8">
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
 
         {/* Pagination or Results Count */}

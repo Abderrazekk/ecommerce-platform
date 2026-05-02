@@ -14,6 +14,7 @@ const wishlistRoutes = require("./routes/wishlist.routes");
 const sponsorRoutes = require("./routes/sponsor.routes");
 const promoRoutes = require("./routes/promo.routes");
 const contactRoutes = require('./routes/contact.routes');
+const sitemapRoutes = require("./routes/sitemap.routes");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/sponsors", sponsorRoutes);
 app.use("/api/promo", promoRoutes);
 app.use('/api/contact', contactRoutes);
+app.use("/", sitemapRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {

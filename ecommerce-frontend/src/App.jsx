@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -67,6 +68,19 @@ function App() {
 
   return (
     <BrowserRouter>
+      {/* 2. Set up your default SEO template */}
+      <Helmet
+        titleTemplate="%s | Shoppina"
+        defaultTitle="Shoppina - Vente en ligne Tunisie"
+      >
+        <html lang="fr" /> {/* Or dynamically set this based on i18n */}
+        <meta
+          name="description"
+          content="Découvrez Shoppina. Vente en ligne en Tunisie des milliers de produits au meilleur prix : électroménager, beauté, mode, et plus."
+        />
+        <meta property="og:site_name" content="Shoppina" />
+      </Helmet>
+
       <div className="flex flex-col min-h-screen">
         <Navbar />
 
