@@ -6,7 +6,7 @@ const asyncHandler = require("express-async-handler");
 // @access  Public
 const generateSitemap = asyncHandler(async (req, res) => {
   // 1. Define your base URL (Frontend URL)
-  const BASE_URL = "https://www.shoppina.tn";
+  const BASE_URL = "https://www.shopina.tn";
 
   // 2. Fetch all visible products from database
   const products = await Product.find({ isVisible: true }).select("_id updatedAt");
