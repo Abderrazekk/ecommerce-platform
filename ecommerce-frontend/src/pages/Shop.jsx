@@ -529,13 +529,13 @@ const Shop = () => {
   return (
     <>
       <Helmet>
-        {/* Thanks to App.jsx titleTemplate, this renders as "Boutique | Shoppina" */}
+        {/* Thanks to App.jsx titleTemplate, this renders as "Boutique | Shop ina" */}
         <title>Boutique</title>
         <meta
           name="description"
           content="Parcourez notre catalogue complet. Filtrez par catégories : Cuisine, Maquillage, Meubles et plus pour trouver les meilleures offres."
         />
-        <link rel="canonical" href="https://www.yourdomain.com/shop" />
+        <link rel="canonical" href="https://www.shopina.tn/shop" />
       </Helmet>
       <div className="min-h-screen bg-gray-50">
         {/* Full-width container for desktop */}

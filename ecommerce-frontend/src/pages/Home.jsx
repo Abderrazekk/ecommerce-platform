@@ -14,13 +14,13 @@ const Home = () => {
     <>
       <Helmet>
         {/* Overrides the default title to exactly what you want Google to see */}
-        <title>Shoppina Vente en ligne Tunisie | Les meilleures offres</title>
+        <title>Shopina Vente en ligne Tunisie</title>
         <meta
           name="description"
-          content="Bienvenue sur Shoppina. Vente en ligne Tunisie des milliers de produits au meilleur prix électroménager, cuisine, décoration. Livraison Rapide."
+          content="Bienvenue sur Shopina. Vente en ligne Tunisie des milliers de produits au meilleur prix électroménager, cuisine, décoration. Livraison Rapide."
         />
         {/* Canonical link tells Google this is the master copy of the homepage */}
-        <link rel="canonical" href="https://www.yourdomain.com/" />
+        <link rel="canonical" href="https://www.shopina.tn/" />
       </Helmet>
       <div className="min-h-screen">
         <Hero />
